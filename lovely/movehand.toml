@@ -1,0 +1,113 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# adjust hand box
+[[patches]]
+[patches.pattern]
+target = "cardarea.lua"
+position = "at"
+pattern = "config = { align = 'cm', offset = {x=0,y=0}, major = self, parent = self}"
+payload = """
+config = { align = 'cm', offset = {x= self == G.hand and 9 or 0,y=self == G.hand and -3.5 or 0}, major = self , parent = self}
+"""
+match_indent = true
+overwrite = false
+
+# adjust hand box's fraction
+[[patches]]
+[patches.pattern]
+target = "cardarea.lua"
+position = "at"
+pattern = "local card_count = self ~= G.shop_vouchers and {n=G.UIT.R, config={align = self == G.jokers and 'cl' or self == G.hand and 'cm' or 'cr', padding = 0.03, no_fill = true}, nodes={"
+payload = """
+local card_count = self ~= G.shop_vouchers and {n=G.UIT.R, config={align = self == G.jokers and 'cl' or self == G.hand and 'cl' or 'cr', padding = 0.03, no_fill = true}, nodes={
+"""
+match_indent = true
+overwrite = false
+
+
+# adjust hand cards (x)
+[[patches]]
+[patches.pattern]
+target = "cardarea.lua"
+position = "at"
+pattern = "card.T.x = self.T.x + (self.T.w-self.card_w)*((k-1)/math.max(max_cards-1, 1) - 0.5*(#self.cards-max_cards)/math.max(max_cards-1, 1)) + 0.5*(self.card_w - card.T.w)"
+payload = """
+card.T.x = 9 + self.T.x + 0.5*(self.T.w-self.card_w)*((k-1)/math.max(max_cards-1, 1) - 0.25*(#self.cards-max_cards)/math.max(max_cards-1, 1)) + 0.5*(self.card_w - card.T.w)
+"""
+match_indent = true
+overwrite = false
+
+# adjust hand cards (y)
+[[patches]]
+[patches.pattern]
+target = "cardarea.lua"
+position = "after"
+pattern = "card.T.y = self.T.y + self.T.h/2 - card.T.h/2 - highlight_height + (G.SETTINGS.reduced_motion and 0 or 1)*0.03*math.sin(0.666*G.TIMERS.REAL+card.T.x) + math.abs(0.5*(-#self.cards/2 + k-0.5)/(#self.cards))-0.2"
+payload = """
+card.T.y = card.T.y - 3.5
+"""
+match_indent = true
+overwrite = false
+
+# remove card sorting (start comment)
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+position = "at"
+pattern = '''{n=G.UIT.C, config={align = "cm", padding = 0.1, r = 0.1, colour =G.C.UI.TRANSPARENT_DARK, outline = 1.5, outline_colour = mix_colours(G.C.WHITE,G.C.JOKER_GREY, 0.7), line_emboss = 1}, nodes={'''
+payload = """
+--[[{n=G.UIT.C, config={align = "cm", padding = 0.1, r = 0.1, colour =G.C.UI.TRANSPARENT_DARK, outline = 1.5, outline_colour = mix_colours(G.C.WHITE,G.C.JOKER_GREY, 0.7), line_emboss = 1}, nodes={
+"""
+match_indent = true
+overwrite = true
+
+# remove card sorting buttons (end comment)
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+position = "before"
+pattern = '''G.SETTINGS.play_button_pos == 1 and play_button or discard_button,'''
+payload = """
+]]
+"""
+match_indent = true
+overwrite = false
+
+# move play & discard buttons
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "at"
+pattern = '''config = {align="bm", offset = {x=0,y=0.3},major = G.hand, bond = 'Weak'}'''
+payload = """
+config = {align="bm", offset = {x=6.5,y=-3.2},major = G.hand, bond = 'Weak'}
+"""
+match_indent = true
+overwrite = false
+
+# move play & discard buttons 2
+[[patches]]
+[patches.pattern]
+target = "functions/button_callbacks.lua"
+position = "at"
+pattern = '''config = {align="bm", offset = {x=0,y=0.3},major = G.hand, bond = 'Weak'}'''
+payload = """
+config = {align="bm", offset = {x=6.5,y=-3.2},major = G.hand, bond = 'Weak'}
+"""
+match_indent = true
+overwrite = false
+
+# change play button behaviour
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+position = "at"
+pattern = '''local play_button = {n=G.UIT.C, config={id = 'play_button', align = "tm", minw = 2.5, padding = 0.3, r = 0.1, hover = true, colour = G.C.BLUE, button = "play_cards_from_highlighted", one_press = true, shadow = true, func = 'can_play'}, nodes={'''
+payload = """
+local play_button = {n=G.UIT.C, config={id = 'play_button', align = "tm", minw = 2.5, padding = 0.3, r = 0.1, hover = true, colour = G.C.GREEN, button = "suika_play", one_press = true, shadow = true, func = 'suika_can_play'}, nodes={
+"""
+match_indent = true
+overwrite = true

@@ -1,0 +1,29 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+G.FUNCS.draw_from_hand_to_discard()
+'''
+position = "before"
+payload = '''
+SuikaLatro.f.disable_suika()
+SuikaLatro.f.reset_suika()
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+SMODS.calculate_context({setting_blind = true, blind = G.GAME.round_resets.blind})
+'''
+position = "after"
+payload = '''
+SuikaLatro.f.enable_suika()
+'''
+match_indent = true

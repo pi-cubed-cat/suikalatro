@@ -1,0 +1,44 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# Game:update
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "before"
+pattern = "if self.STATE == self.STATES.PLAY_TAROT then"
+payload = """
+if show_suika then
+  SuikaLatro.f.update(dt)
+end
+"""
+match_indent = true
+overwrite = false
+
+# Game:draw
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "before"
+pattern = "timer_checkpoint('uiboxes', 'draw')"
+payload = """
+if show_suika then
+  SuikaLatro.f.draw()
+end
+"""
+match_indent = true
+overwrite = false
+
+# set default hand size (ball queue) to 3
+[[patches]]
+[patches.pattern]
+target = "functions/misc_functions.lua"
+position = "at"
+pattern = "hand_size = 8,"
+payload = """
+hand_size = 3,
+"""
+match_indent = true
+overwrite = false

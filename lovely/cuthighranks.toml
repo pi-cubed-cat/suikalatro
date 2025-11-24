@@ -1,0 +1,38 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "before"
+pattern = "if self.GAME.starting_params.no_faces and SMODS.Ranks[v.value].face then keep = false end"
+payload = """
+if SuikaLatro.cut_high_ranks and (v.value == '7' or v.value == '8' or v.value == '9' or v.value == '10' or v.value == 'Jack' or v.value == 'Queen' or v.value == 'King' or v.value == 'Ace') then keep = false end
+"""
+match_indent = true
+overwrite = false
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "before"
+pattern = "self.GAME.starting_deck_size = #G.playing_cards"
+payload = """
+local cards_to_copy = {}
+for k, v in ipairs(G.deck.cards) do
+    cards_to_copy[#cards_to_copy+1] = v
+end
+for i=1,2 do
+    for k,v in ipairs(cards_to_copy) do
+        local _card = copy_card(v)
+        _card:add_to_deck()
+        table.insert(G.playing_cards, _card)
+        G.deck:emplace(_card)
+    end
+end
+
+"""
+match_indent = true
+overwrite = false

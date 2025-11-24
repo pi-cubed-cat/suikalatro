@@ -1,0 +1,15 @@
+{
+    "id": "suikalatro",
+    "name": "Suikalatro",
+    "author": ["pi_cubed"],
+    "description": "suika",
+    "prefix": "suika",
+    "main_file": "suikalatro.lua",
+    "badge_colour": "00AA00",
+    "display_name": "Suikalatro",
+    "dependencies": [
+        "Steamodded (>=1.0.0~BETA-0711a)"
+    ],
+    "version": "0.0.0",
+    "allow_redistribution": true
+}
