@@ -107,7 +107,7 @@ target = "functions/UI_definitions.lua"
 position = "at"
 pattern = '''local play_button = {n=G.UIT.C, config={id = 'play_button', align = "tm", minw = 2.5, padding = 0.3, r = 0.1, hover = true, colour = G.C.BLUE, button = "play_cards_from_highlighted", one_press = true, shadow = true, func = 'can_play'}, nodes={'''
 payload = """
-local play_button = {n=G.UIT.C, config={id = 'play_button', align = "tm", minw = 2.5, padding = 0.3, r = 0.1, hover = true, colour = G.C.GREEN, button = "suika_play", one_press = true, shadow = true, func = 'suika_can_play'}, nodes={
+local play_button = {n=G.UIT.C, config={id = 'play_button', align = "tm", minw = 2.5, padding = 0.3, r = 0.1, hover = true, colour = G.C.BLUE, button = "suika_play", one_press = true, shadow = true, func = 'suika_can_play'}, nodes={
 """
 match_indent = true
 overwrite = true

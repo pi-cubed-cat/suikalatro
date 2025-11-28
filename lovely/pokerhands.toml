@@ -1,0 +1,28 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]] 
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''
+{n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = darken(G.C.JOKER_GREY, 0.1), emboss = 0.05, hover = true, force_focus = true, on_demand_tooltip = {text = localize(handname, 'poker_hand_descriptions'), filler = {func = create_UIBox_hand_tip, args = handname}}}, nodes={
+'''
+position = "at"
+payload = '''
+{n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = darken(string.find(handname, 'flush') and G.C.PURPLE or string.find(handname, 'combo') and G.C.ORANGE or string.find(handname, 'merge') and G.C.ORANGE or G.C.JOKER_GREY, 0.1), emboss = 0.05, hover = true, force_focus = true, on_demand_tooltip = {text = localize(handname, 'poker_hand_descriptions')}}, nodes={
+'''
+match_indent = true
+
+[[patches]] 
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''
+or {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = darken(G.C.JOKER_GREY, 0.1), force_focus = true, emboss = 0.05, hover = true, on_demand_tooltip = {text = localize(handname, 'poker_hand_descriptions'), filler = {func = create_UIBox_hand_tip, args = handname}}, focus_args = {snap_to = (simple and handname == 'Straight Flush')}}, nodes={
+'''
+position = "at"
+payload = '''
+or {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = darken(string.find(handname, 'flush') and G.C.PURPLE or string.find(handname, 'combo') and G.C.ORANGE or string.find(handname, 'merge') and G.C.ORANGE or G.C.JOKER_GREY, 0.1), force_focus = true, emboss = 0.05, hover = true, on_demand_tooltip = {text = localize(handname, 'poker_hand_descriptions')}, focus_args = {snap_to = (simple and handname == 'Straight Flush')}}, nodes={
+'''
+match_indent = true

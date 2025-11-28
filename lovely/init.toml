@@ -10,7 +10,7 @@ target = "game.lua"
 position = "before"
 pattern = "if self.STATE == self.STATES.PLAY_TAROT then"
 payload = """
-if show_suika then
+if SuikaLatro.show_suika then
   SuikaLatro.f.update(dt)
 end
 """
@@ -24,7 +24,7 @@ target = "game.lua"
 position = "before"
 pattern = "timer_checkpoint('uiboxes', 'draw')"
 payload = """
-if show_suika then
+if SuikaLatro.show_suika then
   SuikaLatro.f.draw()
 end
 """

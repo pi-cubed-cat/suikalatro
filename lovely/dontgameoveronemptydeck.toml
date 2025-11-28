@@ -1,0 +1,26 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "at"
+pattern = "if #G.hand.cards < 1 and #G.deck.cards < 1 and #G.play.cards < 1 then"
+payload = """
+if #G.hand.cards < 1 and #G.deck.cards < 1 and #G.play.cards < 1 and G.GAME.current_round.hands_left < 1 then
+"""
+match_indent = true
+overwrite = false
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "at"
+pattern = "if #G.hand.cards < 1 and #G.deck.cards < 1 then"
+payload = """
+if #G.hand.cards < 1 and #G.deck.cards < 1 and G.GAME.current_round.hands_left < 1 then
+"""
+match_indent = true
+overwrite = false

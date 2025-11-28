@@ -3,13 +3,29 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
+[[patches]] 
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+for _,v in ipairs(SMODS.get_card_areas('playing_cards', 'end_of_round')) do
+'''
+position = "before"
+payload = '''
+for k,v in ipairs(SuikaLatro.balls) do
+    if v.enhancement == 'm_gold' then
+        SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+    end
+end
+'''
+match_indent = true
+
 [[patches]]
 [patches.pattern]
 target = "functions/state_events.lua"
 pattern = '''
-G.FUNCS.draw_from_hand_to_discard()
+G.STATE = G.STATES.ROUND_EVAL
 '''
-position = "before"
+position = "after"
 payload = '''
 SuikaLatro.f.disable_suika()
 SuikaLatro.f.reset_suika()
