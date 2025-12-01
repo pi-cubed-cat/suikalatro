@@ -592,7 +592,7 @@ function SuikaLatro.f.update(dt)
                             fixed_enhancement = v.edition or v.merge_target.edition
                         end
                         if (not v.seal or not v.merge_target.seal) and (v.seal or v.merge_target.seal) then
-                            fixed_enhancement = v.seal or v.merge_target.seal
+                            fixed_seal = v.seal or v.merge_target.seal
                         end
                         if not ((v.enhancement == 'm_glass' and pseudorandom('suika_glass') < G.GAME.probabilities.normal / 2) or (v.merge_target.enhancement == 'm_glass' and pseudorandom('suika_glass2') < G.GAME.probabilities.normal / 2)) then
                             table.insert(SuikaLatro.balls, Ball(v.body:getX(), v.body:getY(), selected_ball > 0.5 and v.merge_target or v, 1, merge_count, fixed_enhancement, fixed_edition, fixed_seal))
@@ -1142,4 +1142,5 @@ G.FUNCS.suika_play = function(e)
             return true
         end)
     }))
+
 end
