@@ -1,6 +1,39 @@
 local filesystem = NFS or love.filesystem
 local suika_mod_path = SMODS.current_mod
 
+local gameMainMenuRef = Game.main_menu --code from aikoyori's shenanigans
+function Game:main_menu(change_context)
+    gameMainMenuRef(self, change_context)
+    UIBox({
+        definition = {
+            n = G.UIT.ROOT,
+            config = {
+                align = "cm",
+                colour = G.C.UI.TRANSPARENT_DARK
+            },
+            nodes = {
+                {
+                    n = G.UIT.T,
+                    config = {
+                        scale = 0.3,
+                        text = "Suikalatro v0.2.0 (DEMO)",
+                        colour = G.C.UI.TEXT_LIGHT
+                    }
+                }
+            }
+        },
+        config = {
+            align = "tli",
+            bond = "Weak",
+            offset = {
+                x = 0,
+                y = 0
+            },
+            major = G.ROOM_ATTACH
+        }
+    })
+end
+
 local function load_the_suika(img)
     local full_path = (suika_mod_path.path..'assets/'..img)
     local file_data = assert(NFS.newFileData(full_path))
@@ -73,8 +106,11 @@ SuikaLatro = {
         ground = {},
         leftwall = {},
         rightwall = {},
+        highleftwall = { invisible = true },
+        highrightwall = { invisible = true },
     },
     balls = {}, --dynamic objects
+    ball_sizefactor = 15,
     next_ball = nil,
     indicator = {
         x = 0,
@@ -90,20 +126,35 @@ SuikaLatro = {
     show_flushes = true,
     lowball = true,
     poker_combos = {
-        five_flush = {chips = 20, mult = 2, chips_mod = 15, mult_mod = 2},
-        ten_flush = {chips = 70, mult = 7, chips_mod = 20, mult_mod = 4},
+        five_flush = {chips = 40, mult = 2, chips_mod = 20, mult_mod = 2},
+        ten_flush = {chips = 80, mult = 7, chips_mod = 20, mult_mod = 4},
         mega_flush = {chips = 150, mult = 15, chips_mod = 50, mult_mod = 5},
         merge_1 = {chips = 5, mult = 1, chips_mod = 10, mult_mod = 1},
         merge_2 = {chips = 5, mult = 2, chips_mod = 10, mult_mod = 2},
         merge_3 = {chips = 10, mult = 2, chips_mod = 15, mult_mod = 2},
         merge_4 = {chips = 10, mult = 3, chips_mod = 15, mult_mod = 3},
-        combo_breaker = {chips = 20, mult = 5, chips_mod = 20, mult_mod = 3},
+        combo_breaker = {chips = 20, mult = 5, chips_mod = 25, mult_mod = 3},
         lowball = {chips = 2, mult = 1, chips_mod = 10, mult_mod = 1},
+    },
+    triggered_combos = {},
+    scoring_suits = {
+        ['Hearts'] = 0,
+        ['Diamonds'] = 0,
+        ['Spades'] = 0,
+        ['Clubs'] = 0
     },
 }
 
+local get_blind_amount_ref = get_blind_amount
+function get_blind_amount(ante)
+    return get_blind_amount_ref(ante) * 10
+end
+
 assert(SMODS.load_file("content/pokercombos.lua"))()
 assert(SMODS.load_file("content/rankoverrides.lua"))()
+assert(SMODS.load_file("content/jokers.lua"))()
+assert(SMODS.load_file("content/tarots_spectrals_seals.lua"))()
+assert(SMODS.load_file("content/blinds.lua"))()
 
 local screen_w, screen_h = love.window.getMode()
 
@@ -117,15 +168,29 @@ suikaleft.body = love.physics.newBody(SuikaLatro.world, -1 * SuikaLatro.box.widt
 suikaleft.shape = love.physics.newRectangleShape(20, SuikaLatro.box.height)
 suikaleft.fixture = love.physics.newFixture(suikaleft.body, suikaleft.shape)
 
+local highsuikaleft = SuikaLatro.walls.highleftwall
+highsuikaleft.body = love.physics.newBody(SuikaLatro.world, -1 * SuikaLatro.box.width/2, 0, "static")
+highsuikaleft.shape = love.physics.newRectangleShape(20, SuikaLatro.box.height*10)
+highsuikaleft.fixture = love.physics.newFixture(highsuikaleft.body, highsuikaleft.shape)
+
 local suikaright = SuikaLatro.walls.rightwall
 suikaright.body = love.physics.newBody(SuikaLatro.world, SuikaLatro.box.width/2, 0, "static")
 suikaright.shape = love.physics.newRectangleShape(20, SuikaLatro.box.height)
 suikaright.fixture = love.physics.newFixture(suikaright.body, suikaright.shape)
 
+local highsuikaright = SuikaLatro.walls.highrightwall
+highsuikaright.body = love.physics.newBody(SuikaLatro.world, SuikaLatro.box.width/2, 0, "static")
+highsuikaright.shape = love.physics.newRectangleShape(20, SuikaLatro.box.height*10)
+highsuikaright.fixture = love.physics.newFixture(highsuikaright.body, highsuikaright.shape)
+
 boundary = {}
 local boundary_width = 5
 boundary.body = love.physics.newBody(SuikaLatro.world, 0, -1*SuikaLatro.box.height/2 + boundary_width/2, "static")
 boundary.shape = love.physics.newRectangleShape(SuikaLatro.box.width, boundary_width)
+
+half_boundary = {}
+half_boundary.body = love.physics.newBody(SuikaLatro.world, 0, 0 + boundary_width/2, "static")
+half_boundary.shape = love.physics.newRectangleShape(SuikaLatro.box.width, boundary_width)
 
 -- Transform pixels into game units (code from the Hot Potato mod's Plinko minigame) 
 local function to_game_units(val)
@@ -168,13 +233,13 @@ Ball = Object:extend()
 
 function get_size(input, stone)
     if stone then
-        return 20
+        return 2 * SuikaLatro.ball_sizefactor
     elseif input <= 10 then --number ranked balls
-        return input * 10
+        return input * SuikaLatro.ball_sizefactor
     elseif input > 10 and input < 14 then --face ranked balls
-        return 100
+        return 10 * SuikaLatro.ball_sizefactor
     elseif input >= 14 then --aces+
-        return 110
+        return 11 * SuikaLatro.ball_sizefactor
     end
 end
 
@@ -316,15 +381,33 @@ function beginContact(a, b, coll)
         local speed = math.sqrt(a_x^2 + a_y^2)
         play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9,1/speed + 0.01), speed/200)
     end
-    if objA and objB and objA.id and objB.id and (objA.id == objB.id or objA.enhancement == 'm_stone' or objB.enhancement == 'm_stone') then
-        if not objA.merge_target and not objB.merge_target and not objB.dont_prod then
-            objA.merge_target = objB
-            objB.merge_target = objA
-            objB.dont_prod = true
-        end --put gameover function here
+    if objA and objB and objA.id and objB.id then
+        if (#SMODS.find_card('j_shortcut') > 0 and ((objA.id == 2 and objB.id == 14 or objA.id == 14 and objB.id == 2) or math.abs(objA.id - objB.id) <= 1))
+        or ((objA.id == objB.id or objA.enhancement == 'm_stone' or objB.enhancement == 'm_stone')) then
+            if not objA.merge_target and not objB.merge_target and not objB.dont_prod then
+                objA.merge_target = objB
+                objB.merge_target = objA
+                objB.dont_prod = true
+            end
+        elseif SuikaLatro.drop_wait_time < 0.8 and not SuikaLatro.do_merging and
+        (objA and objA == SuikaLatro.balls[#SuikaLatro.balls] and objA.body:getY() + objA.size < boundary.body:getY()
+        or objB and objB == SuikaLatro.balls[#SuikaLatro.balls] and objB.body:getY() + objB.size < boundary.body:getY()) then
+            G.E_MANAGER:add_event(Event({
+                trigger = "immediate",
+                func = function()
+                    G.STATE = G.STATES.HAND_PLAYED
+                    G.STATE_COMPLETE = true
+                    end_round()
+                    return true
+                end,
+            }))
+        end
     end
 end
 
+--SuikaLatro.balls[#SuikaLatro.balls].body:getY()
+--SuikaLatro.balls[#SuikaLatro.balls].size
+--boundary.body:getY()
 function endContact(a, b, coll)
 	local x, y = coll:getNormal()
 	local objA = a:getUserData()
@@ -521,24 +604,54 @@ function SuikaLatro.f.update(dt)
                         local combo_mult = 0
                         if merge_count == 1 then
                             G.GAME.hands.suika_merge_1.played = G.GAME.hands.suika_merge_1.played + 1
+                            SuikaLatro.triggered_combos['suika_merge_1'] = SuikaLatro.triggered_combos['suika_merge_1'] and SuikaLatro.triggered_combos['suika_merge_1'] + 1 or 1
                             combo_chips = G.GAME.hands.suika_merge_1.chips
                             combo_mult = G.GAME.hands.suika_merge_1.mult
                         elseif merge_count == 2 then
                             G.GAME.hands.suika_merge_2.played = G.GAME.hands.suika_merge_2.played + 1
+                            SuikaLatro.triggered_combos['suika_merge_2'] = SuikaLatro.triggered_combos['suika_merge_2'] and SuikaLatro.triggered_combos['suika_merge_2'] + 1 or 1
                             combo_chips = G.GAME.hands.suika_merge_2.chips
                             combo_mult = G.GAME.hands.suika_merge_2.mult
                         elseif merge_count == 3 then
                             G.GAME.hands.suika_merge_3.played = G.GAME.hands.suika_merge_3.played + 1
+                            SuikaLatro.triggered_combos['suika_merge_3'] = SuikaLatro.triggered_combos['suika_merge_3'] and SuikaLatro.triggered_combos['suika_merge_3'] + 1 or 1
                             combo_chips = G.GAME.hands.suika_merge_3.chips
                             combo_mult = G.GAME.hands.suika_merge_3.mult
                         elseif merge_count == 4 then
                             G.GAME.hands.suika_merge_4.played = G.GAME.hands.suika_merge_4.played + 1
+                            SuikaLatro.triggered_combos['suika_merge_4'] = SuikaLatro.triggered_combos['suika_merge_4'] and SuikaLatro.triggered_combos['suika_merge_4'] + 1 or 1
                             combo_chips = G.GAME.hands.suika_merge_4.chips
                             combo_mult = G.GAME.hands.suika_merge_4.mult
                         elseif merge_count >= 5 then
                             G.GAME.hands.suika_combo_breaker.played = G.GAME.hands.suika_combo_breaker.played + 1
+                            SuikaLatro.triggered_combos['suika_combo_breaker'] = SuikaLatro.triggered_combos['suika_combo_breaker'] and SuikaLatro.triggered_combos['suika_combo_breaker'] + 1 or 1
                             combo_chips = G.GAME.hands.suika_combo_breaker.chips
                             combo_mult = G.GAME.hands.suika_combo_breaker.mult
+                        end
+                        
+                        if v.enhancement == 'm_wild' then
+                            if SuikaLatro.f.is_suit(v, 'Hearts') then SuikaLatro.scoring_suits["Hearts"] = SuikaLatro.scoring_suits["Hearts"] + 1
+                            elseif SuikaLatro.f.is_suit(v, 'Diamonds') then SuikaLatro.scoring_suits["Diamonds"] = SuikaLatro.scoring_suits["Diamonds"] + 1
+                            elseif SuikaLatro.f.is_suit(v, 'Spades') then SuikaLatro.scoring_suits["Spades"] = SuikaLatro.scoring_suits["Spades"] + 1
+                            elseif SuikaLatro.f.is_suit(v, 'Clubs') then SuikaLatro.scoring_suits["Clubs"] = SuikaLatro.scoring_suits["Clubs"] + 1 end
+                        end
+                        if v.merge_target.enhancement == 'm_wild' then
+                            if SuikaLatro.f.is_suit(v.merge_target, 'Hearts') then SuikaLatro.scoring_suits["Hearts"] = SuikaLatro.scoring_suits["Hearts"] + 1
+                            elseif SuikaLatro.f.is_suit(v.merge_target, 'Diamonds') then SuikaLatro.scoring_suits["Diamonds"] = SuikaLatro.scoring_suits["Diamonds"] + 1
+                            elseif SuikaLatro.f.is_suit(v.merge_target, 'Spades') then SuikaLatro.scoring_suits["Spades"] = SuikaLatro.scoring_suits["Spades"] + 1
+                            elseif SuikaLatro.f.is_suit(v.merge_target, 'Clubs') then SuikaLatro.scoring_suits["Clubs"] = SuikaLatro.scoring_suits["Clubs"] + 1 end
+                        end
+                        if v.enhancement ~= 'm_wild' then
+                            if SuikaLatro.f.is_suit(v, 'Hearts') then SuikaLatro.scoring_suits["Hearts"] = SuikaLatro.scoring_suits["Hearts"] + 1
+                            elseif SuikaLatro.f.is_suit(v, 'Diamonds') then SuikaLatro.scoring_suits["Diamonds"] = SuikaLatro.scoring_suits["Diamonds"] + 1
+                            elseif SuikaLatro.f.is_suit(v, 'Spades') then SuikaLatro.scoring_suits["Spades"] = SuikaLatro.scoring_suits["Spades"] + 1
+                            elseif SuikaLatro.f.is_suit(v, 'Clubs') then SuikaLatro.scoring_suits["Clubs"] = SuikaLatro.scoring_suits["Clubs"] + 1 end
+                        end
+                        if v.merge_target.enhancement ~= 'm_wild' then
+                            if SuikaLatro.f.is_suit(v.merge_target, 'Hearts') then SuikaLatro.scoring_suits["Hearts"] = SuikaLatro.scoring_suits["Hearts"] + 1
+                            elseif SuikaLatro.f.is_suit(v.merge_target, 'Diamonds') then SuikaLatro.scoring_suits["Diamonds"] = SuikaLatro.scoring_suits["Diamonds"] + 1
+                            elseif SuikaLatro.f.is_suit(v.merge_target, 'Spades') then SuikaLatro.scoring_suits["Spades"] = SuikaLatro.scoring_suits["Spades"] + 1
+                            elseif SuikaLatro.f.is_suit(v.merge_target, 'Clubs') then SuikaLatro.scoring_suits["Clubs"] = SuikaLatro.scoring_suits["Clubs"] + 1 end
                         end
                         local x_pos = v.body:getX()
                         local y_pos = v.body:getY()
@@ -562,7 +675,7 @@ function SuikaLatro.f.update(dt)
                                 })
                                 play_sound('multhit1', math.random()*0.2 + 0.7 + 0.1*merge_count, 0.6 + merge_count/20)
 
-                                G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + combo_chips + 2^(get_size(id_)/10)/2 + 2^(get_size(id2_)/10)/2
+                                G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + combo_chips + 2^(get_size(id_)/SuikaLatro.ball_sizefactor)/2 + 2^(get_size(id2_)/SuikaLatro.ball_sizefactor)/2
                                 G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
                                 G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + combo_mult
                                 G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
@@ -669,7 +782,7 @@ function SuikaLatro.f.draw_ball(ball, x_pos, y_pos, size, id, suit, front)
         love.graphics.setColor(color)
         love.graphics.circle("fill", x, y, t_r(size + 1))
         if ball.flush_size then
-            love.graphics.setColor(lighten(G.C.SUITS[suit], ball.flush_size >= 5 and 0.70 or 1))
+            love.graphics.setColor(lighten(G.C.SUITS[suit], ball.flush_size >= 5 - SuikaLatro.ff_count and 0.70 or 1))
         else --indicator (won't be in a flush, and can be trans)
             love.graphics.setColor(1, 1, 1, SuikaLatro.drop_wait_time > 0.8 and 1 or 0.5)
         end
@@ -709,9 +822,14 @@ function SuikaLatro.f.draw()
     love.graphics.setColor(G.C.RED) --boundary line
     love.graphics.polygon("fill", poly_to_pixels(boundary.body:getWorldPoints(boundary.shape:getPoints())))
 
+    love.graphics.setColor(G.C.GREY, 0.5) --half-boundary line
+    love.graphics.polygon("fill", poly_to_pixels(half_boundary.body:getWorldPoints(half_boundary.shape:getPoints())))
+
     love.graphics.setColor(G.C.BLACK) --grounds
     for k,v in pairs(SuikaLatro.walls) do
-        love.graphics.polygon("fill", poly_to_pixels(v.body:getWorldPoints(v.shape:getPoints())))
+        if not v.invisible then
+            love.graphics.polygon("fill", poly_to_pixels(v.body:getWorldPoints(v.shape:getPoints())))
+        end
     end
 
     if not SuikaLatro.next_ball then --blank indicator
@@ -724,6 +842,7 @@ function SuikaLatro.f.draw()
         SuikaLatro.f.draw_ball(SuikaLatro.next_ball, SuikaLatro.indicator.x, SuikaLatro.indicator.y, get_size(SuikaLatro.next_ball.base.id, next_is_stone), SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.base.suit, SuikaLatro.next_ball.config.center.key)
     end
     
+    SuikaLatro.ff_count = #SMODS.find_card('j_four_fingers') or 0
     for k, v in ipairs(SuikaLatro.balls) do --fallen balls
         SuikaLatro.f.draw_ball(v, v.body:getX(), v.body:getY(), v.size, v.id, v.suit, v.enhancement)
     end
@@ -766,7 +885,13 @@ G.FUNCS.suika_play = function(e)
     G.hand:unhighlight_all()
     G.GAME.blind.triggered = false
     G.CONTROLLER.interrupt.focus = true
-
+    SuikaLatro.triggered_combos = {}
+    SuikaLatro.scoring_suits = {
+        ['Hearts'] = 0,
+        ['Diamonds'] = 0,
+        ['Spades'] = 0,
+        ['Clubs'] = 0
+    }
     for k, v in ipairs(G.playing_cards) do
         v.ability.forced_selection = nil
     end
@@ -809,10 +934,12 @@ G.FUNCS.suika_play = function(e)
 
     SuikaLatro.lowball = true
     -- evaluate flushes
+    local has_ff = #SMODS.find_card('j_four_fingers') or 0
     for k,v in pairs(SuikaLatro.flush_groups) do
 
-        if #v >= 5 and #v < 10 then
+        if #v >= 5 - has_ff and #v < 10 - has_ff then
             delay(1)
+            SuikaLatro.triggered_combos['suika_five_flush'] = SuikaLatro.triggered_combos['suika_five_flush'] and SuikaLatro.triggered_combos['suika_five_flush'] + 1 or 1
             lowball = false
             G.E_MANAGER:add_event(Event({
                 func = function()
@@ -838,8 +965,10 @@ G.FUNCS.suika_play = function(e)
                     return true
                 end
             }))
-        elseif #v >= 10 and #v < 15 then
+        elseif #v >= 10 - has_ff and #v < 15 - has_ff then
             delay(1)
+            SuikaLatro.triggered_combos['suika_ten_flush'] = SuikaLatro.triggered_combos['suika_ten_flush'] and SuikaLatro.triggered_combos['suika_ten_flush'] + 1 or 1
+            SuikaLatro.triggered_combos['suika_five_flush'] = SuikaLatro.triggered_combos['suika_five_flush'] and SuikaLatro.triggered_combos['suika_five_flush'] + 1 or 1
             lowball = false
             G.E_MANAGER:add_event(Event({
                 func = function()
@@ -865,7 +994,12 @@ G.FUNCS.suika_play = function(e)
                     return true
                 end
             }))
-        elseif #v >= 15 then
+        elseif #v >= 15 - has_ff then
+            delay(1)
+            SuikaLatro.triggered_combos['suika_mega_flush'] = SuikaLatro.triggered_combos['suika_mega_flush'] and SuikaLatro.triggered_combos['suika_mega_flush'] + 1 or 1
+            SuikaLatro.triggered_combos['suika_ten_flush'] = SuikaLatro.triggered_combos['suika_ten_flush'] and SuikaLatro.triggered_combos['suika_ten_flush'] + 1 or 1
+            SuikaLatro.triggered_combos['suika_five_flush'] = SuikaLatro.triggered_combos['suika_five_flush'] and SuikaLatro.triggered_combos['suika_five_flush'] + 1 or 1
+            lowball = false
             G.E_MANAGER:add_event(Event({
                 func = function()
                     attention_text({
@@ -933,6 +1067,7 @@ G.FUNCS.suika_play = function(e)
             end
             if SuikaLatro.lowball then
                 play_sound('chips1', math.random()*0.2 + 0.9, 1)
+                SuikaLatro.triggered_combos['suika_lowball'] = SuikaLatro.triggered_combos['suika_lowball'] and SuikaLatro.triggered_combos['suika_lowball'] + 1 or 1
                 G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + G.GAME.hands.suika_lowball.chips
                 G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
                 G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + G.GAME.hands.suika_lowball.mult
@@ -947,7 +1082,13 @@ G.FUNCS.suika_play = function(e)
         func = function()
             for k,v in ipairs(SuikaLatro.balls) do
                 if v.enhancement == 'm_steel' then
-                    SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+                    delay(1)
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+                        return true
+                        end
+                    }))
                 end
             end
             return true
@@ -956,16 +1097,16 @@ G.FUNCS.suika_play = function(e)
     delay(2)
     G.E_MANAGER:add_event(Event({
         func = function()
-            G.GAME.current_round.current_hand.chip_total = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
-            G.GAME.current_round.current_hand.chip_total_text = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+            --G.GAME.current_round.current_hand.chip_total = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+            --G.GAME.current_round.current_hand.chip_total_text = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
             return true
         end
     }))
     delay(1)
     G.E_MANAGER:add_event(Event({
         func = function()
-            play_sound('chips2')
-            G.GAME.chips = G.GAME.chips + G.GAME.current_round.current_hand.chip_total
+            --play_sound('chips2')
+            --G.GAME.chips = G.GAME.chips + G.GAME.current_round.current_hand.chip_total
             return true
         end
     }))
@@ -976,7 +1117,7 @@ G.FUNCS.suika_play = function(e)
             G.E_MANAGER:add_event(Event({
                 trigger = 'immediate',
                 func = function()
-                    --G.FUNCS.evaluate_play()
+                    G.FUNCS.evaluate_play()
                     return true
                 end
             }))
@@ -995,12 +1136,6 @@ G.FUNCS.suika_play = function(e)
                 func = function()
                     G.STATE_COMPLETE = false
                     SuikaLatro.show_flushes = true
-                    G.FUNCS.chip_UI_set()
-                    G.GAME.current_round.current_hand.chip_total = 0
-                    G.GAME.current_round.current_hand.chips = 0
-                    G.GAME.current_round.current_hand.chip_text = 0
-                    G.GAME.current_round.current_hand.mult = 0
-                    G.GAME.current_round.current_hand.mult_text = 0
                     return true
                 end
             }))

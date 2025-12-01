@@ -13,7 +13,13 @@ position = "before"
 payload = '''
 for k,v in ipairs(SuikaLatro.balls) do
     if v.enhancement == 'm_gold' then
-        SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+        delay(1)
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+            return true
+            end
+        }))
     end
 end
 '''
@@ -41,5 +47,6 @@ SMODS.calculate_context({setting_blind = true, blind = G.GAME.round_resets.blind
 position = "after"
 payload = '''
 SuikaLatro.f.enable_suika()
+SuikaLatro.f.reset_suika()
 '''
 match_indent = true

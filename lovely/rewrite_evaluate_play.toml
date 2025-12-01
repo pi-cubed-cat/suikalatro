@@ -1,0 +1,504 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# Fix a crash with Cerlulean bell if there are no cards in hand 1/2
+[[patches]]
+[patches.pattern]
+target = "blind.lua"
+pattern = '''
+forced_card.ability.forced_selection = true
+'''
+position = "before"
+payload = '''
+if forced_card then
+'''
+match_indent = true
+
+# Fix a crash with Cerlulean bell if there are no cards in hand 2/2
+[[patches]]
+[patches.pattern]
+target = "blind.lua"
+pattern = '''
+G.hand:add_to_highlighted(forced_card)
+'''
+position = "after"
+payload = '''
+end
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+    local text,disp_text,poker_hands,scoring_hand,non_loc_disp_text = G.FUNCS.get_poker_hand_info(G.play.cards)
+    
+    G.GAME.hands[text].played = G.GAME.hands[text].played + 1
+    G.GAME.hands[text].played_this_round = G.GAME.hands[text].played_this_round + 1
+    G.GAME.last_hand_played = text
+    set_hand_usage(text)
+    G.GAME.hands[text].visible = true
+
+    local final_scoring_hand = {}
+    for i=1, #G.play.cards do
+        local splashed = SMODS.always_scores(G.play.cards[i]) or next(find_joker('Splash'))
+        local unsplashed = SMODS.never_scores(G.play.cards[i])
+        if not splashed then
+            for _, card in pairs(scoring_hand) do
+                if card == G.play.cards[i] then splashed = true end
+            end
+        end
+        local effects = {}
+        SMODS.calculate_context({modify_scoring_hand = true, other_card =  G.play.cards[i], full_hand = G.play.cards, scoring_hand = scoring_hand, in_scoring = true}, effects)
+        local flags = SMODS.trigger_effects(effects, G.play.cards[i])
+        if flags.add_to_hand then splashed = true end
+    	if flags.remove_from_hand then unsplashed = true end
+        if splashed and not unsplashed then table.insert(final_scoring_hand, G.play.cards[i]) end
+    end
+    -- TARGET: adding to hand effects
+    scoring_hand = final_scoring_hand
+    delay(0.2)
+    for i=1, #scoring_hand do
+        --Highlight all the cards used in scoring and play a sound indicating highlight
+        highlight_card(scoring_hand[i],(i-0.999)/5,'up')
+    end
+'''
+position = "at"
+payload = '''
+    --[[local text,disp_text,poker_hands,scoring_hand,non_loc_disp_text = G.FUNCS.get_poker_hand_info(G.play.cards)
+    
+    G.GAME.hands[text].played = G.GAME.hands[text].played + 1
+    G.GAME.hands[text].played_this_round = G.GAME.hands[text].played_this_round + 1
+    G.GAME.last_hand_played = text
+    set_hand_usage(text)
+    G.GAME.hands[text].visible = true
+
+    local final_scoring_hand = {}
+    for i=1, #G.play.cards do
+        local splashed = SMODS.always_scores(G.play.cards[i]) or next(find_joker('Splash'))
+        local unsplashed = SMODS.never_scores(G.play.cards[i])
+        if not splashed then
+            for _, card in pairs(scoring_hand) do
+                if card == G.play.cards[i] then splashed = true end
+            end
+        end
+        local effects = {}
+        SMODS.calculate_context({modify_scoring_hand = true, other_card =  G.play.cards[i], full_hand = G.play.cards, scoring_hand = scoring_hand, in_scoring = true}, effects)
+        local flags = SMODS.trigger_effects(effects, G.play.cards[i])
+        if flags.add_to_hand then splashed = true end
+    	if flags.remove_from_hand then unsplashed = true end
+        if splashed and not unsplashed then table.insert(final_scoring_hand, G.play.cards[i]) end
+    end
+    -- TARGET: adding to hand effects
+    scoring_hand = final_scoring_hand
+    delay(0.2)
+    for i=1, #scoring_hand do
+        --Highlight all the cards used in scoring and play a sound indicating highlight
+        highlight_card(scoring_hand[i],(i-0.999)/5,'up')
+    end]]
+'''
+match_indent = true
+
+# disable poker hand info
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+G.FUNCS.get_poker_hand_info = function(_cards)
+'''
+position = "after"
+payload = '''
+    local poker_hands = evaluate_poker_hand(_cards)
+    if true then return '', '', nil, nil, '' end
+'''
+match_indent = true
+
+# STOP SWITCHING!!!!!
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''
+function update_hand_text(config, vals)
+    if true then return end
+    G.E_MANAGER:add_event(Event({--This is the Hand name text for the poker hand
+    trigger = 'before',
+    blockable = not config.immediate,
+    delay = config.delay or 0.8,
+    func = function()
+        local col = G.C.GREEN
+        for name, parameter in pairs(SMODS.Scoring_Parameters) do
+            if vals[name] and G.GAME.current_round.current_hand[name] ~= vals[name] then
+                local delta = (type(vals[name]) == 'number' and type(G.GAME.current_round.current_hand[name]) == 'number') and (vals[name] - G.GAME.current_round.current_hand[name]) or 0
+                if delta < 0 then delta = ''..delta; col = G.C.RED
+                elseif delta > 0 then delta = '+'..delta
+                else delta = ''..delta
+                end
+                if type(vals[name]) == 'string' then delta = vals[name] end
+                G.GAME.current_round.current_hand[name] = vals[name]
+                G.hand_text_area[name] = G.hand_text_area[name] or G.HUD:get_UIE_by_ID('hand_'..name) or nil
+                if G.hand_text_area[name] then
+                    G.hand_text_area[name]:update(0)
+                    if vals.StatusText then 
+                        attention_text({
+                            text =delta,
+                            scale = 0.8, 
+                            hold = 1,
+                            cover = G.hand_text_area[name].parent,
+                            cover_colour = mix_colours(parameter.colour, col, 0.1),
+                            emboss = 0.05,
+                            align = 'cm',
+                            cover_align = G.hand_text_area[name].parent.config.align
+                        })
+                    end
+                    if (vals[name.."_juice"] or parameter.juice_on_update) and not G.TAROT_INTERRUPT then G.hand_text_area[name]:juice_up() end
+                end
+            end
+        end
+
+        if vals.handname and G.GAME.current_round.current_hand.handname ~= vals.handname then
+            G.GAME.current_round.current_hand.handname = vals.handname
+            if not config.nopulse then 
+                G.hand_text_area.handname.config.object:pulse(0.2)
+            end
+        end
+        if vals.chip_total then G.GAME.current_round.current_hand.chip_total = vals.chip_total;G.hand_text_area.chip_total.config.object:pulse(0.5) end
+        if vals.level and G.GAME.current_round.current_hand.hand_level ~= ' '..localize('k_lvl')..tostring(vals.level) then
+            if vals.level == '' then
+                G.GAME.current_round.current_hand.hand_level = vals.level
+            else
+                G.GAME.current_round.current_hand.hand_level = ' '..localize('k_lvl')..tostring(vals.level)
+                if type(vals.level) == 'number' then 
+                    G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[math.min(vals.level, 7)]
+                else
+                    G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[1]
+                end
+                G.hand_text_area.hand_level:juice_up()
+            end
+        end
+        if config.sound and not config.modded then play_sound(config.sound, config.pitch or 1, config.volume or 1) end
+        if config.modded then 
+            SMODS.juice_up_blind()
+            G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+                play_sound('tarot2', 0.76, 0.4);return true end}))
+            play_sound('tarot2', 1, 0.4)
+        end
+        return true
+    end}))
+end
+'''
+position = "after"
+payload = '''
+function update_hand_text(config, vals)
+    if true then return end
+    G.E_MANAGER:add_event(Event({--This is the Hand name text for the poker hand
+    trigger = 'before',
+    blockable = not config.immediate,
+    delay = config.delay or 0.8,
+    func = function()
+        local col = G.C.GREEN
+        for name, parameter in pairs(SMODS.Scoring_Parameters) do
+            if vals[name] and G.GAME.current_round.current_hand[name] ~= vals[name] then
+                local delta = (type(vals[name]) == 'number' and type(G.GAME.current_round.current_hand[name]) == 'number') and (vals[name] - G.GAME.current_round.current_hand[name]) or 0
+                if delta < 0 then delta = ''..delta; col = G.C.RED
+                elseif delta > 0 then delta = '+'..delta
+                else delta = ''..delta
+                end
+                if type(vals[name]) == 'string' then delta = vals[name] end
+                G.GAME.current_round.current_hand[name] = vals[name]
+                G.hand_text_area[name] = G.hand_text_area[name] or G.HUD:get_UIE_by_ID('hand_'..name) or nil
+                if G.hand_text_area[name] then
+                    G.hand_text_area[name]:update(0)
+                    if vals.StatusText then 
+                        attention_text({
+                            text =delta,
+                            scale = 0.8, 
+                            hold = 1,
+                            cover = G.hand_text_area[name].parent,
+                            cover_colour = mix_colours(parameter.colour, col, 0.1),
+                            emboss = 0.05,
+                            align = 'cm',
+                            cover_align = G.hand_text_area[name].parent.config.align
+                        })
+                    end
+                    if (vals[name.."_juice"] or parameter.juice_on_update) and not G.TAROT_INTERRUPT then G.hand_text_area[name]:juice_up() end
+                end
+            end
+        end
+        --[[if vals.handname and G.GAME.current_round.current_hand.handname ~= vals.handname then
+            G.GAME.current_round.current_hand.handname = vals.handname
+            if not config.nopulse then 
+                G.hand_text_area.handname.config.object:pulse(0.2)
+            end
+        end]]
+        if vals.chip_total then G.GAME.current_round.current_hand.chip_total = vals.chip_total;G.hand_text_area.chip_total.config.object:pulse(0.5) end
+        if vals.level and G.GAME.current_round.current_hand.hand_level ~= ' '..localize('k_lvl')..tostring(vals.level) then
+            if vals.level == '' then
+                G.GAME.current_round.current_hand.hand_level = vals.level
+            else
+                G.GAME.current_round.current_hand.hand_level = ' '..localize('k_lvl')..tostring(vals.level)
+                if type(vals.level) == 'number' then 
+                    G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[math.min(vals.level, 7)]
+                else
+                    G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[1]
+                end
+                G.hand_text_area.hand_level:juice_up()
+            end
+        end
+        if config.sound and not config.modded then play_sound(config.sound, config.pitch or 1, config.volume or 1) end
+        if config.modded then 
+            SMODS.juice_up_blind()
+            G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+                play_sound('tarot2', 0.76, 0.4);return true end}))
+            play_sound('tarot2', 1, 0.4)
+        end
+        return true
+    end}))
+end
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+G.E_MANAGER:add_event(Event({
+        trigger = 'after',delay = 0.4,
+        func = (function()  update_hand_text({delay = 0, immediate = true}, {mult = 0, chips = 0, chip_total = math.floor( SMODS.calculate_round_score() ), level = '', handname = ''});play_sound('button', 0.9, 0.6);return true end)
+      }))
+      for name, parameter in pairs(SMODS.Scoring_Parameters) do
+          update_hand_text({delay = 0}, {[name] = parameter.default_value})
+      end
+      check_and_set_high_score('hand',  SMODS.calculate_round_score() )
+
+      check_for_unlock({type = 'chip_score', chips = math.floor( SMODS.calculate_round_score() )})
+   
+    if  SMODS.calculate_round_score()  > 0 then 
+        delay(0.8)
+        G.E_MANAGER:add_event(Event({
+        trigger = 'immediate',
+        func = (function() play_sound('chips2');return true end)
+        }))
+    end
+    G.E_MANAGER:add_event(Event({
+      trigger = 'ease',
+      blocking = false,
+      ref_table = G.GAME,
+      ref_value = 'chips',
+      ease_to = G.GAME.chips + math.floor( SMODS.calculate_round_score() ),
+      delay =  0.5,
+      func = (function(t) return math.floor(t) end)
+    }))
+    G.E_MANAGER:add_event(Event({
+      trigger = 'ease',
+      blocking = true,
+      ref_table = G.GAME.current_round.current_hand,
+      ref_value = 'chip_total',
+      ease_to = 0,
+      delay =  0.5,
+      func = (function(t) return math.floor(t) end)
+    }))
+    G.E_MANAGER:add_event(Event({
+      trigger = 'immediate',
+      func = (function() G.GAME.current_round.current_hand.handname = '';return true end)
+    }))
+    delay(0.3)
+    SMODS.last_hand_oneshot = SMODS.calculate_round_score() > G.GAME.blind.chips
+    G.E_MANAGER:add_event(Event({
+      trigger = 'immediate',
+      func = (function() 
+        for name, parameter in pairs(SMODS.Scoring_Parameters) do
+            parameter.current = parameter.default_value
+        end
+        return true 
+      end)
+    }))
+    
+    SMODS.displaying_scoring = nil
+'''
+position = "at"
+payload = '''
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            G.GAME.current_round.current_hand.chip_total = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+            G.GAME.current_round.current_hand.chip_total_text = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+            return true
+        end
+    }))
+    delay(1)
+
+--[[G.E_MANAGER:add_event(Event({
+        trigger = 'after',delay = 0.4,
+        func = (function()  update_hand_text({delay = 0, immediate = true}, {mult = 0, chips = 0, chip_total = math.floor( SMODS.calculate_round_score() ), level = '', handname = ''});play_sound('button', 0.9, 0.6);return true end)
+      }))]]
+      for name, parameter in pairs(SMODS.Scoring_Parameters) do    
+        update_hand_text({delay = 0}, {[name] = parameter.default_value })
+      end
+      --[[check_and_set_high_score('hand',  SMODS.calculate_round_score() )
+
+      check_for_unlock({type = 'chip_score', chips = math.floor( SMODS.calculate_round_score() )})]]
+   
+    --[[if  SMODS.calculate_round_score()  > 0 then 
+        delay(0.8)
+        G.E_MANAGER:add_event(Event({
+        trigger = 'immediate',
+        func = (function() play_sound('chips2');return true end)
+        }))
+    end]]
+    --[[G.E_MANAGER:add_event(Event({
+      trigger = 'ease',
+      blocking = false,
+      ref_table = G.GAME,
+      ref_value = 'chips',
+      ease_to = G.GAME.chips + math.floor( SMODS.calculate_round_score() ),
+      delay =  0.5,
+      func = (function(t) return math.floor(t) end)
+    }))]]
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            play_sound('chips2')
+            G.GAME.chips = G.GAME.chips + G.GAME.current_round.current_hand.chip_total
+            return true
+        end
+    }))
+    delay(1)
+    G.E_MANAGER:add_event(Event({
+        trigger = 'immediate',
+        func = function()
+            G.FUNCS.chip_UI_set()
+            return true
+        end
+    }))
+    G.E_MANAGER:add_event(Event({
+      trigger = 'ease',
+      blocking = true,
+      ref_table = G.GAME.current_round.current_hand,
+      ref_value = 'chip_total',
+      ease_to = 0,
+      delay =  0.5,
+      func = (function(t) return math.floor(t) end)
+    }))
+    --[[G.E_MANAGER:add_event(Event({
+      trigger = 'immediate',
+      func = (function() G.GAME.current_round.current_hand.handname = '';return true end)
+    }))
+    delay(0.3)
+    SMODS.last_hand_oneshot = SMODS.calculate_round_score() > G.GAME.blind.chips
+    G.E_MANAGER:add_event(Event({
+      trigger = 'immediate',
+      func = (function() 
+        for name, parameter in pairs(SMODS.Scoring_Parameters) do
+            parameter.current = parameter.default_value
+        end
+        return true 
+      end)
+    }))
+    
+    SMODS.displaying_scoring = nil]]
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+if G.GAME.current_round.current_hand.handname ~= disp_text then delay(0.3) end
+    update_hand_text({sound = G.GAME.current_round.current_hand.handname ~= disp_text and 'button' or nil, volume = 0.4, immediate = true, nopulse = nil,
+                delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips})
+    SMODS.displayed_hand = text; SMODS.displaying_scoring = true
+
+    if not G.GAME.blind:debuff_hand(G.play.cards, poker_hands, text) then
+        mult = mod_mult(G.GAME.hands[text].mult)
+        hand_chips = mod_chips(G.GAME.hands[text].chips)
+
+        check_for_unlock({type = 'hand', handname = text, disp_text = non_loc_disp_text, scoring_hand = scoring_hand, full_hand = G.play.cards})
+
+        delay(0.4)
+
+        if G.GAME.first_used_hand_level and G.GAME.first_used_hand_level > 0 then
+            level_up_hand(G.deck.cards[1], text, nil, G.GAME.first_used_hand_level)
+            G.GAME.first_used_hand_level = nil
+        end
+
+        local hand_text_set = false
+        -- context.before calculations
+        SMODS.calculate_context({full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, before = true})
+        
+        -- TARGET: effects before scoring starts
+        
+        SMODS.displayed_hand = nil
+
+        mult = mod_mult(G.GAME.hands[text].mult)
+        hand_chips = mod_chips(G.GAME.hands[text].chips)
+
+        local modded = false
+
+        mult, hand_chips, modded = G.GAME.blind:modify_hand(G.play.cards, poker_hands, text, mult, hand_chips, scoring_hand)
+        mult, hand_chips = mod_mult(mult), mod_chips(hand_chips)
+        if modded then update_hand_text({sound = 'chips2', modded = modded}, {chips = hand_chips, mult = mult}) end
+        delay(0.3)
+        SMODS.calculate_context({initial_scoring_step = true, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands})
+        for _, v in ipairs(SMODS.get_card_areas('playing_cards')) do
+            SMODS.calculate_main_scoring({cardarea = v, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands}, v == G.play and scoring_hand or nil)
+            delay(0.3)
+        end
+'''
+position = "at"
+payload = '''
+--[[if G.GAME.current_round.current_hand.handname ~= disp_text then delay(0.3) end
+    update_hand_text({sound = G.GAME.current_round.current_hand.handname ~= disp_text and 'button' or nil, volume = 0.4, immediate = true, nopulse = nil,
+                delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips})
+    SMODS.displayed_hand = text; SMODS.displaying_scoring = true]]
+
+    if not G.GAME.blind:debuff_hand(G.play.cards, poker_hands, text) then
+        --[[mult = mod_mult(G.GAME.hands[text].mult)
+        hand_chips = mod_chips(G.GAME.hands[text].chips)
+
+        check_for_unlock({type = 'hand', handname = text, disp_text = non_loc_disp_text, scoring_hand = scoring_hand, full_hand = G.play.cards})
+
+        delay(0.4)
+
+        if G.GAME.first_used_hand_level and G.GAME.first_used_hand_level > 0 then
+            level_up_hand(G.deck.cards[1], text, nil, G.GAME.first_used_hand_level)
+            G.GAME.first_used_hand_level = nil
+        end
+
+        local hand_text_set = false
+        -- context.before calculations
+        SMODS.calculate_context({full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, before = true})
+        
+        -- TARGET: effects before scoring starts
+        
+        SMODS.displayed_hand = nil]]
+
+        mult = mod_mult(G.GAME.current_round.current_hand.mult)
+        hand_chips = mod_chips(G.GAME.current_round.current_hand.chips)
+
+        local modded = false
+
+        mult, hand_chips, modded = G.GAME.blind:modify_hand(G.play.cards, poker_hands, text, mult, hand_chips, scoring_hand)
+        mult, hand_chips = mod_mult(mult), mod_chips(hand_chips)
+        if modded then update_hand_text({sound = 'chips2', modded = modded}, {chips = hand_chips, mult = mult}) end
+        delay(0.3)
+        --[[SMODS.calculate_context({initial_scoring_step = true, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands})
+        for _, v in ipairs(SMODS.get_card_areas('playing_cards')) do
+            SMODS.calculate_main_scoring({cardarea = v, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands}, v == G.play and scoring_hand or nil)
+            delay(0.3)
+        end]]
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = '''
+mult = mod_mult(nu_mult or mult)
+hand_chips = mod_chips(nu_chip or hand_chips)
+'''
+position = "at"
+payload = '''
+--mult = mod_mult(nu_mult or mult)
+--hand_chips = mod_chips(nu_chip or hand_chips)
+'''
+match_indent = true

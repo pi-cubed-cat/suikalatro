@@ -1,0 +1,18 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# adjust hand box
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+position = "at"
+pattern = '''
+if next(context.poker_hands[self.ability.extra.poker_hand]) then
+'''
+payload = '''
+if SuikaLatro.triggered_combos[self.ability.extra.poker_hand] then
+'''
+match_indent = true
+overwrite = false
