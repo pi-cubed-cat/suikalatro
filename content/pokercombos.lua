@@ -2,7 +2,7 @@ function CardArea:parse_highlighted()
 
 end
 
-function SMODS.current_mod.reset_game_globals(run_start) --hide vanilla poker hands
+function SMODS.current_mod.reset_game_globals(run_start) --hide vanilla poker hands (start of run)
     if run_start then 
         for k,v in pairs(G.GAME.hands) do 
             if not string.find(k, 'suika') then
@@ -15,7 +15,7 @@ function SMODS.current_mod.reset_game_globals(run_start) --hide vanilla poker ha
             end
         end
     end
-end
+end -- see thesereallyshouldbehooksbuticba.toml for continue run
 
 SMODS.PokerHand { -- Mega Flush
     key = 'mega_flush',

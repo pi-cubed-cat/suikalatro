@@ -210,6 +210,15 @@ return {
                     "and {C:attention}1 below{}",
                 },
             },
+            j_lucky_cat = {
+                name = "Lucky Cat",
+                text = {
+                    "This Joker gains {X:mult,C:white} X#1# {} Mult",
+                    "every time a {C:attention}Lucky{} ball",
+                    "{C:green}successfully{} triggers",
+                    "{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)",
+                },
+            },
             j_flower_pot={
                 name="Flower Pot",
                 text={

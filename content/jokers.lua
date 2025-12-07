@@ -494,8 +494,33 @@ SMODS.Joker:take_ownership('reserved_parking',
 
 SMODS.Joker:take_ownership('lucky_cat',
     {
-        in_pool = function(self, args) return false end,
-        no_collection = true
+        config = { extra = { Xmult_gain = 0.25, Xmult = 1 } },
+        loc_vars = function(self, info_queue, card)
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_lucky
+            return { vars = { card.ability.extra.Xmult_gain, card.ability.extra.Xmult } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_lucky_trigger and not context.blueprint then
+                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_gain
+                card:juice_up()
+                attention_text({
+                    text = localize('k_upgrade_ex'),
+                    scale = 0.7,
+                    hold = 1,
+                    major = card,
+                    backdrop_colour = G.C.MULT,
+                    align = 'cm',
+                    offset = {x = -0.5/2 + 0.5*math.random(), y = 0.6*card.T.h - 0.5/2 + 0.5*math.random()},
+                    silent = true
+                })
+                play_sound('generic1')
+            end
+            if context.joker_main then
+                return {
+                    xmult = card.ability.extra.Xmult
+                }
+            end
+        end,
     }, true
 )
 

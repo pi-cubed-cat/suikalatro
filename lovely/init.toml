@@ -10,7 +10,12 @@ target = "game.lua"
 position = "before"
 pattern = "if self.STATE == self.STATES.PLAY_TAROT then"
 payload = """
-if SuikaLatro.show_suika then
+if G.STATE == G.STATES.DRAW_TO_HAND
+or G.STATE == G.STATES.HAND_PLAYED
+or G.STATE == G.STATES.ROUND_EVAL
+or G.STATE == G.STATES.PLAY_TAROT
+or G.STATE == G.STATES.BLIND_SELECT
+or G.STATE == G.STATES.SELECTING_HAND then
   SuikaLatro.f.update(dt)
 end
 """
@@ -24,7 +29,14 @@ target = "game.lua"
 position = "before"
 pattern = "timer_checkpoint('uiboxes', 'draw')"
 payload = """
-if SuikaLatro.show_suika then
+--[[if G.STATE == G.STATES.DRAW_TO_HAND
+or G.STATE == G.STATES.HAND_PLAYED
+or G.STATE == G.STATES.ROUND_EVAL
+or G.STATE == G.STATES.GAME_OVER
+or G.STATE == G.STATES.PLAY_TAROT
+or G.STATE == G.STATES.BLIND_SELECT
+or G.STATE == G.STATES.SELECTING_HAND then]]
+if SuikaLatro.world_T.y < 15 and G.STATE ~= G.STATES.MENU then
   SuikaLatro.f.draw()
 end
 """

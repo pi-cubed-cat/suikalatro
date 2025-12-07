@@ -34,7 +34,6 @@ G.STATE = G.STATES.ROUND_EVAL
 position = "after"
 payload = '''
 SuikaLatro.f.disable_suika()
-SuikaLatro.f.reset_suika()
 '''
 match_indent = true
 
@@ -48,5 +47,43 @@ position = "after"
 payload = '''
 SuikaLatro.f.enable_suika()
 SuikaLatro.f.reset_suika()
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = '''
+self.HUD:recalculate()
+
+G.E_MANAGER:add_event(Event({
+    trigger = 'immediate',
+    func = (function()
+        unlock_notify()
+        return true
+    end)
+  }))
+'''
+position = "after"
+payload = '''
+SuikaLatro.f.reset_suika()
+if G.STATE == G.STATES.SELECTING_HAND then
+    SuikaLatro.world_T.y = 2.5
+end
+if G.GAME.SuikaLatro_balls then
+    for k,v in ipairs(G.GAME.SuikaLatro_balls) do
+        table.insert(SuikaLatro.balls, Ball(v.x, v.y, v, 0, 0, nil, nil, nil, v.size))
+    end
+end
+for k,v in pairs(G.GAME.hands) do 
+    if not string.find(k, 'suika') then
+        SMODS.PokerHand:take_ownership(k,
+            {
+            visible = function(self) return false end
+            },
+            true
+        )
+    end
+end
 '''
 match_indent = true

@@ -16,7 +16,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.3,
-                        text = "Suikalatro v0.2.0 (DEMO)",
+                        text = "Suikalatro v0.3.0 (DEMO)",
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -96,6 +96,7 @@ suika_fronts = {
 love.physics.setMeter(64)
 SuikaLatro = {
     world = love.physics.newWorld(0, 9.81*64, true),
+    world_T = {x = 0, y = 15, w = 7.000, h = 6.195},
     world_width = 660, --x
     world_height = 590, --y
     box = {
@@ -119,7 +120,6 @@ SuikaLatro = {
     drop_wait_time = 0,
     do_physics = true,
     do_merging = false,
-    show_suika = false,
     cut_high_ranks = true,
     f = {}, --functions
     flush_groups = {},
@@ -203,22 +203,20 @@ end
 
 local screen_w, screen_h
 
-local world_T = {x = 0, y = 2.5, w = 7.000, h = 6.195}
-
 local function t_x(x)
     return to_pixels(
         -- offset 0,0 to be relative to the center of the screen, then transform x from pixels to screen units
-        to_game_units(screen_w/2) + world_T.x + x / SuikaLatro.world_width * world_T.w
+        to_game_units(screen_w/2) + SuikaLatro.world_T.x + x / SuikaLatro.world_width * SuikaLatro.world_T.w
     )
 end
 
 local function t_y(y)
     -- same as above
-    return to_pixels(to_game_units(screen_h/2) + world_T.y + y / SuikaLatro.world_height * world_T.h)
+    return to_pixels(to_game_units(screen_h/2) + SuikaLatro.world_T.y + y / SuikaLatro.world_height * SuikaLatro.world_T.h)
 end
 
 local function t_r(r)
-    return to_pixels(r / SuikaLatro.world_height * world_T.h)
+    return to_pixels(r / SuikaLatro.world_height * SuikaLatro.world_T.h)
 end
 
 local function p_to_pixels(x, y)
@@ -243,7 +241,7 @@ function get_size(input, stone)
     end
 end
 
-function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix_edition, fix_seal)
+function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix_edition, fix_seal, fix_size)
     self.body = love.physics.newBody(SuikaLatro.world, x, y, "dynamic")
     self.flush_size = 0
     if not fixed_properties then
@@ -280,12 +278,31 @@ function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix
 end
 
 function SuikaLatro.f.enable_suika()
-    SuikaLatro.f.drawBG()
-    SuikaLatro.show_suika = true
+    SuikaLatro.world_T.y = 15
+    --SuikaLatro.f.drawBG()
+    --SuikaLatro.show_suika = true
+    G.E_MANAGER:add_event(Event({
+        trigger = "ease",
+        ease = 'quad',
+        delay = 1,
+        ref_table = SuikaLatro.world_T,
+        ref_value = "y",
+        ease_to = 2.5,
+    }))
 end
 
 function SuikaLatro.f.disable_suika()
-    SuikaLatro.show_suika = false
+    --if not G.STATE == G.STATES.BLIND_SELECT and not G.STATE == G.STATES.ROUND_EVAL then
+        SuikaLatro.world_T.y = 2.5
+        G.E_MANAGER:add_event(Event({
+            trigger = "ease",
+            ease = 'quad',
+            delay = 1,
+            ref_table = SuikaLatro.world_T,
+            ref_value = "y",
+            ease_to = 15,
+        }))
+    --end
 end
 
 function SuikaLatro.f.reset_suika()
@@ -293,6 +310,23 @@ function SuikaLatro.f.reset_suika()
         SuikaLatro.balls[i].body:destroy()
         table.remove(SuikaLatro.balls, i)
     end
+end
+
+local save_run_ref = save_run --save balls too!
+function save_run()
+    G.GAME.SuikaLatro_balls = {}
+    for k, ball in ipairs(SuikaLatro.balls) do
+        G.GAME.SuikaLatro_balls[k] = {}
+        G.GAME.SuikaLatro_balls[k].x = ball.body:getX()
+        G.GAME.SuikaLatro_balls[k].y = ball.body:getY()
+        G.GAME.SuikaLatro_balls[k].id = ball.id
+        G.GAME.SuikaLatro_balls[k].suit = ball.suit
+        G.GAME.SuikaLatro_balls[k].enhancement = ball.enhancement
+        G.GAME.SuikaLatro_balls[k].edition = ball.edition
+        G.GAME.SuikaLatro_balls[k].seal = ball.seal
+        G.GAME.SuikaLatro_balls[k].size = ball.size
+    end
+    save_run_ref()
 end
 
 function SuikaLatro.f.is_suit(ball, suit)
@@ -366,22 +400,24 @@ function beginContact(a, b, coll)
     local x, y = coll:getNormal()
     local objA = a:getUserData()
     local objB = b:getUserData()
-    if objA and objA.id and objB and objB.id then
-        local a_x, a_y = objA.body:getLinearVelocity()
-        local b_x, b_y = objB.body:getLinearVelocity()
-        local a_speed = math.sqrt(a_x^2 + a_y^2)
-        local b_speed = math.sqrt(b_x^2 + b_y^2)
-        play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9, 1/(math.max(a_speed, b_speed) + 0.01)), math.max(a_speed, b_speed)/200)
-    elseif objA and objA.id then
-        local a_x, a_y = objA.body:getLinearVelocity()
-        local speed = math.sqrt(a_x^2 + a_y^2)
-        play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9,1/speed + 0.01), speed/200)
-    elseif objB and objB.id then
-        local a_x, a_y = objB.body:getLinearVelocity()
-        local speed = math.sqrt(a_x^2 + a_y^2)
-        play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9,1/speed + 0.01), speed/200)
+    if G.STATE == G.STATES.SELECTING_HAND or G.STATE == G.STATES.HAND_PLAYED or G.STATE == G.STATES.DRAW_TO_HAND then -- collision sounds
+        if objA and objA.id and objB and objB.id then
+            local a_x, a_y = objA.body:getLinearVelocity()
+            local b_x, b_y = objB.body:getLinearVelocity()
+            local a_speed = math.sqrt(a_x^2 + a_y^2)
+            local b_speed = math.sqrt(b_x^2 + b_y^2)
+            play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9, 1/(math.max(a_speed, b_speed) + 0.01)), math.max(a_speed, b_speed)/200)
+        elseif objA and objA.id then
+            local a_x, a_y = objA.body:getLinearVelocity()
+            local speed = math.sqrt(a_x^2 + a_y^2)
+            play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9,1/speed + 0.01), speed/200)
+        elseif objB and objB.id then
+            local a_x, a_y = objB.body:getLinearVelocity()
+            local speed = math.sqrt(a_x^2 + a_y^2)
+            play_sound('tarot2', math.random()*0.2 + 0.9 - math.min(0.9,1/speed + 0.01), speed/200)
+        end
     end
-    if objA and objB and objA.id and objB.id then
+    if objA and objB and objA.id and objB.id then -- merging / game over
         if (#SMODS.find_card('j_shortcut') > 0 and ((objA.id == 2 and objB.id == 14 or objA.id == 14 and objB.id == 2) or math.abs(objA.id - objB.id) <= 1))
         or ((objA.id == objB.id or objA.enhancement == 'm_stone' or objB.enhancement == 'm_stone')) then
             if not objA.merge_target and not objB.merge_target and not objB.dont_prod then
@@ -389,7 +425,8 @@ function beginContact(a, b, coll)
                 objB.merge_target = objA
                 objB.dont_prod = true
             end
-        elseif SuikaLatro.drop_wait_time < 0.8 and not SuikaLatro.do_merging and
+        end
+        if SuikaLatro.drop_wait_time < 0.8 and not SuikaLatro.do_merging and
         (objA and objA == SuikaLatro.balls[#SuikaLatro.balls] and objA.body:getY() + objA.size < boundary.body:getY()
         or objB and objB == SuikaLatro.balls[#SuikaLatro.balls] and objB.body:getY() + objB.size < boundary.body:getY()) then
             G.E_MANAGER:add_event(Event({
@@ -472,6 +509,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
         G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
     elseif mtype == 'm_lucky' then
         if pseudorandom('suika_lucky_mult') < G.GAME.probabilities.normal / 5 then
+            SMODS.calculate_context({suika_lucky_trigger = true})
             attention_text({
                 text = "+"..20,
                 scale = 0.5,
@@ -487,6 +525,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
             G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
         end
         if pseudorandom('suika_lucky_money') < G.GAME.probabilities.normal / 15 then
+            SMODS.calculate_context({suika_lucky_trigger = true})
             attention_text({
                 text = "$"..20,
                 scale = 0.5,
@@ -533,8 +572,11 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
 end
 
 function SuikaLatro.f.update(dt)
+    if SuikaLatro.BG then SuikaLatro.BG:remove() end
+    SuikaLatro.f.drawBG()
+
     SuikaLatro.drop_wait_time = SuikaLatro.drop_wait_time + dt
-    
+
     if SuikaLatro.do_physics then
         SuikaLatro.world:update(dt)
         SuikaLatro.f.find_flush_groups()
@@ -552,10 +594,6 @@ function SuikaLatro.f.update(dt)
         if SuikaLatro.walls.rightwall.body:getX() - size_offset - 12 < SuikaLatro.indicator.x then
             SuikaLatro.indicator.x = SuikaLatro.walls.rightwall.body:getX() - size_offset - 12
         end
-    end
-    if G.GAME then
-        G.GAME.SuikaLatro = G.GAME.SuikaLatro or {}
-        G.GAME.SuikaLatro.balls = G.GAME.SuikaLatro.balls or {}
     end
 
     if G.hand and G.hand.highlighted and #G.hand.highlighted == 1 then
@@ -734,10 +772,17 @@ function SuikaLatro.f.drop_ball()
             SuikaLatro.indicator.x = SuikaLatro.walls.rightwall.body:getX() - size_offset - 12
         end
         table.insert(SuikaLatro.balls, Ball(SuikaLatro.indicator.x, SuikaLatro.indicator.y))
-        SuikaLatro.indicator.x = SuikaLatro.indicator.x + (math.random() + 0.5) / 50 --makes stacking harder
+        SuikaLatro.indicator.x = SuikaLatro.indicator.x + (math.random() - 0.5) / 50 --makes stacking harder
         draw_card(G.hand, G.discard, 50, 'down', false, G.hand.highlighted[1])
         inc_career_stat('c_cards_played', 1)
         G.FUNCS.draw_from_deck_to_hand(1)
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            func = function()
+                save_run()
+                return true
+            end
+        }))
         --[[if #G.deck.cards == 0 then
             G.FUNCS.draw_from_deck_to_hand(1)
             G.FUNCS.draw_from_discard_to_deck()
@@ -851,20 +896,15 @@ end
 
 function G.UIDEF.suika_main()
     return {n = G.UIT.ROOT, config = {r = 0.1, minw = 7, minh = 10, align = "tm", padding = 0.2, colour = G.C.UI.TRANSPARENT_DARK }, nodes = {
-        --[[{n=G.UIT.C, config={align = "cm", padding = 0.1, emboss = 0.05, r = 0.1, }, nodes={
-                
-            }
-        },]]
     }}
 end
 
 function SuikaLatro.f.drawBG()
-    local menu = nil
-    menu = UIBox{
+    SuikaLatro.BG = UIBox{
         definition = G.UIDEF.suika_main(),
-        config = {align='cm', offset = {x=0,y=G.ROOM.T.y + 2}, major = G.ROOM_ATTACH, bond = 'Weak'}
+        config = {align='cm', offset = {x=0,y=G.ROOM.T.y + SuikaLatro.world_T.y - 0.5}, major = G.ROOM_ATTACH, bond = 'Weak'}
     }
-    return menu
+    SuikaLatro.BG:recalculate()
 end
 
 G.FUNCS.suika_can_play = function(e)

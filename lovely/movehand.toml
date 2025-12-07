@@ -10,7 +10,7 @@ target = "cardarea.lua"
 position = "at"
 pattern = "config = { align = 'cm', offset = {x=0,y=0}, major = self, parent = self}"
 payload = """
-config = { align = 'cm', offset = {x= self == G.hand and 9 or 0,y=self == G.hand and -3.5 or 0}, major = self , parent = self}
+config = { align = 'cm', offset = {x= self == G.hand and 8.85 or 0,y=self == G.hand and -3.5 or 0}, major = self , parent = self}
 """
 match_indent = true
 overwrite = false
@@ -35,7 +35,11 @@ target = "cardarea.lua"
 position = "at"
 pattern = "card.T.x = self.T.x + (self.T.w-self.card_w)*((k-1)/math.max(max_cards-1, 1) - 0.5*(#self.cards-max_cards)/math.max(max_cards-1, 1)) + 0.5*(self.card_w - card.T.w)"
 payload = """
-card.T.x = 9 + self.T.x + 0.5*(self.T.w-self.card_w)*((k-1)/math.max(max_cards-1, 1) - 0.25*(#self.cards-max_cards)/math.max(max_cards-1, 1)) + 0.5*(self.card_w - card.T.w)
+if self == G.hand and not (G.STATE == G.STATES.TAROT_PACK or G.STATE == G.STATES.SPECTRAL_PACK or G.STATE == G.STATES.SMODS_BOOSTER_OPENED) then
+    card.T.x = 8.85 + self.T.x + 0.5*(self.T.w-self.card_w)*((k-1)/math.max(max_cards-1, 1) - 0.25*(#self.cards-max_cards)/math.max(max_cards-1, 1)) + 0.5*(self.card_w - card.T.w)
+else
+    card.T.x = self.T.x + (self.T.w-self.card_w)*((k-1)/math.max(max_cards-1, 1) - 0.5*(#self.cards-max_cards)/math.max(max_cards-1, 1)) + 0.5*(self.card_w - card.T.w)
+end
 """
 match_indent = true
 overwrite = false
@@ -83,7 +87,7 @@ target = "game.lua"
 position = "at"
 pattern = '''config = {align="bm", offset = {x=0,y=0.3},major = G.hand, bond = 'Weak'}'''
 payload = """
-config = {align="bm", offset = {x=6.5,y=-3.2},major = G.hand, bond = 'Weak'}
+config = {align="bm", offset = {x=6.35,y=-3.2},major = G.hand, bond = 'Weak'}
 """
 match_indent = true
 overwrite = false
