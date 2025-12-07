@@ -4,6 +4,7 @@ end
 
 function SMODS.current_mod.reset_game_globals(run_start) --hide vanilla poker hands (start of run)
     if run_start then 
+        SuikaLatro.world_T.y = 15 --hide suika on start of new run
         for k,v in pairs(G.GAME.hands) do 
             if not string.find(k, 'suika') then
                 SMODS.PokerHand:take_ownership(k,
