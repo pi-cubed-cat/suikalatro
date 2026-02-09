@@ -288,7 +288,25 @@ return {
             },
         },
         Planet={},
-        Spectral={},
+        Spectral = {
+            c_sigil = {
+                text = {
+                    "Draw #1# cards to hand,",
+                    "then convert all",
+                    "cards in hand to a",
+                    "single random {C:attention}suit",
+                },
+            },
+            c_ouija = {
+                text = {
+                    "Draw #1# cards to hand,",
+                    "then convert all cards",
+                    "in hand to a single",
+                    "random {C:attention}rank",
+                    "{C:red}-1{} hand size",
+                },
+            },
+        },
         Stake={},
         Tag={},
         Tarot={
@@ -352,7 +370,166 @@ return {
         ranks={},
         suits_plural={},
         suits_singular={},
-        tutorial={},
+        tutorial={
+            suika_intro1 = {
+                "Welcome to {E:1,C:green}Suikalatro{}!",
+                "It's time for you",
+                "to have a ball~!"
+            },
+            suika_intro2 = {
+                "In this world, instead of using playing",
+                "cards and making poker hands to",
+                "score, you need to {C:attention}drop balls{} and",
+                "make {C:attention}'Poker Combos'{}!",
+            },
+            suika_intro3 = {
+                "This white dot here is your {C:attention}cursor{}.",
+                "This is where the balls you select will",
+                "drop from, into the {C:attention}box{} below.",
+            },
+            suika_intro4 = {
+                "Your hand size has gotten smaller!",
+                "Anyways, try selecting {C:attention}exactly one{}",
+                "card from your hand.",
+            },
+            suika_intro5 = {
+                "You may notice that cards of higher {C:attention}rank{}",
+                "give {C:attention}exponentially more{} {C:chips}chips{}, but their",
+                "balls are {C:attention}much larger{}!",
+            },
+            suika_intro6 = {
+                "Check out your new {C:attention}deck{}!",
+                "Can you spot the differences?",
+            },
+            suika_intro7 = {
+                "Use the {C:attention}A{} and {C:attention}D{} keys or",
+                "{C:attention}LEFT ARROW{} and {C:attention}RIGHT ARROW{} keys",
+                "to move the selected",
+                "ball left and right!",
+            },
+            suika_intro8 = {
+                "Use the {C:attention}S{} key or {C:attention}DOWN ARROW{}",
+                "key to {C:attention}drop{} the ball. Try",
+                "dropping some balls into the box!",
+            },
+            
+            suika_dropfive1 = {
+                "Hey... why aren't any of",
+                "the balls merging yet?",
+            },
+            suika_dropfive2 = {
+                "Well, merging them at the {C:attention}right time{}",
+                "is critical to your {C:attention}score{}!",
+            },
+            suika_dropfive3 = {
+                "Balls of the same rank will",
+                "only {C:attention}merge{} together",
+                "after you {C:blue}Play Hand{}.",
+            },
+            suika_dropfive4 = {
+                "Check out the new {C:attention}Poker Combos{}",
+                "tab in Run Info!",
+            },
+            suika_dropfive5 = {
+                "The Poker Combos with",
+                "a {C:tarot}purple background{}",
+                "are calculated {C:attention}first{}!",
+            },
+            suika_dropfive6 = {
+                "This category involves checking for",
+                "contiguous groups of balls of the",
+                "{C:attention}same suit{} in the box.",
+            },
+            suika_dropfive7 = {
+                "The Poker Combos with",
+                "an {C:attention}orange background{}",
+                "are calculated afterwards,",
+                "and {C:attention}merging occurs!{}",
+            },
+            suika_dropfive8 = {
+                "From however your box of balls",
+                "may cascade, you may score {C:attention}multiple{}",
+                "poker combos in one hand...",
+            },
+            suika_dropfive9 = {
+                "...and maybe even the same",
+                "poker combo multiple times!",
+            },
+            suika_dropfive10 = {
+                "Try fill your box with balls,",
+                "then press {C:blue}Play Hand{}! Keep",
+                "in mind the {C:attention}Poker Combos{}!",
+            },
+            
+            suika_secondhand1 = {
+                "Be careful not to fill",
+                "your box too much!",
+            },
+            suika_secondhand2 = {
+                "If a ball touches another ball ",
+                "whilst it is {C:attention}entirely above{}",
+                "the red line, it's {E:1,C:red}game over{}!",
+            },
+            suika_secondhand3 = {
+                "Make sure your balls are",
+                "dropped properly in order ",
+                "to let them merge together",
+                "and make room!",
+            },
+            suika_secondhand4 = {
+                "Oh, and balls won't",
+                "fall out of the box.",
+                "Trust me, I've tried.",
+            },
+
+            suika_shop1 = {
+                "Check out this {C:tarot}The Empress{} card!",
+            },
+            suika_shop2 = {
+                "Enhancements on cards will",
+                "affect the balls they drop.",
+            },
+            suika_shop3 = {
+                "Some enhancements have {C:attention}new effects{}!",
+                "Most of the {C:tarot}Tarot{} cards can have",
+                "their ability applied to {C:attention}an additional card{}.",
+            },
+            suika_shop4 = {
+                "Let's take the card into",
+                "the Blind for a whirl."
+            },
+
+            suika_bigblind1 = {
+                "In vanilla Balatro, card like",
+                "Mult and Bonus cards",
+                "activate in the played hand",
+                "from {C:attention}left to right{}.",
+            },
+            suika_bigblind2 = {
+                "In Suikalatro, instead",
+                "their effects activate",
+                "whenever the ball {C:attention}merges{}!",
+            },
+            suika_bigblind3 = {
+                "So every time a pair of balls {C:attention}merge{},",
+                "think of it like {C:attention}two playing cards{}",
+                "{C:attention}scoring at the same time{}!",
+            },
+            suika_bigblind4 = {
+                "When a ball with an enhancement merges",
+                "with an {C:attention}unenhanced ball{}, the 'child' ball is",
+                "{C:attention}guaranteed{} to have the enhancement!",
+            },
+            suika_bigblind5 = {
+                "Two balls of {C:attention}different enhancements{} merging",
+                "results in the 'child' ball having a {C:attention}random",
+                "enhancement{} from either of its 'parents'.",
+            },
+            suika_bigblind6 = {
+                "Take advantage of these facts ",
+                "to create glorious cascades!",
+            },
+        },
         v_dictionary={},
         v_text={},
     },

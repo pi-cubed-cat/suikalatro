@@ -16,7 +16,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.3,
-                        text = "Suikalatro v0.3.0 (DEMO)",
+                        text = "Suikalatro v0.4.0 (DEMO)",
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -42,6 +42,7 @@ local function load_the_suika(img)
 end
 
 love.graphics.setDefaultFilter('nearest', 'nearest')
+
 suika_seals = {
     Red = load_the_suika("seals/red.png"),
     Blue = load_the_suika("seals/blue.png"),
@@ -143,6 +144,7 @@ SuikaLatro = {
         ['Spades'] = 0,
         ['Clubs'] = 0
     },
+    play_wait_time = 0,
 }
 
 local get_blind_amount_ref = get_blind_amount
@@ -155,6 +157,9 @@ assert(SMODS.load_file("content/rankoverrides.lua"))()
 assert(SMODS.load_file("content/jokers.lua"))()
 assert(SMODS.load_file("content/tarots_spectrals_seals.lua"))()
 assert(SMODS.load_file("content/blinds.lua"))()
+assert(SMODS.load_file("content/vouchers.lua"))()
+assert(SMODS.load_file("content/modicon.lua"))()
+assert(SMODS.load_file("content/tutorial.lua"))()
 
 local screen_w, screen_h = love.window.getMode()
 
@@ -602,7 +607,15 @@ function SuikaLatro.f.update(dt)
         SuikaLatro.next_ball = nil
     end
 
-    if SuikaLatro.do_merging then
+    if not SuikaLatro.do_merging then
+        SuikaLatro.play_wait_time = 0
+        for k, v in ipairs(SuikaLatro.balls) do
+            if v.merge_target then
+                v.fixture:setMask()
+                v.merge_target.fixture:setMask()
+            end
+        end
+    else -- if do_merging
         for k, v in ipairs(SuikaLatro.balls) do
             if v.merge_target then
                 v.fixture:setMask(1)
@@ -617,6 +630,7 @@ function SuikaLatro.f.update(dt)
                     )
                 else
                     if v.dont_prod then -- only one of the balls creates a new ball
+                        SuikaLatro.play_wait_time = 0
                         SuikaLatro.lowball = false
                         local selected_ball = math.random()
                         local merge_count = math.max(v.merges, v.merge_target.merges) + 1
@@ -751,6 +765,12 @@ function SuikaLatro.f.update(dt)
                 end
             end
         end
+
+        SuikaLatro.play_wait_time = SuikaLatro.play_wait_time + dt
+        if SuikaLatro.play_wait_time > 3 then
+            G.FUNCS.suika_play_pt2()
+        end
+        
     end
 
     for i = #SuikaLatro.balls, 1, -1 do
@@ -775,7 +795,9 @@ function SuikaLatro.f.drop_ball()
         SuikaLatro.indicator.x = SuikaLatro.indicator.x + (math.random() - 0.5) / 50 --makes stacking harder
         draw_card(G.hand, G.discard, 50, 'down', false, G.hand.highlighted[1])
         inc_career_stat('c_cards_played', 1)
-        G.FUNCS.draw_from_deck_to_hand(1)
+        if #G.hand.cards <= G.hand.config.card_limit then
+            SMODS.draw_cards(G.hand.config.card_limit - #G.hand.cards + 1)
+        end
         G.E_MANAGER:add_event(Event({
             trigger = 'after',
             func = function()
@@ -867,8 +889,10 @@ function SuikaLatro.f.draw()
     love.graphics.setColor(G.C.RED) --boundary line
     love.graphics.polygon("fill", poly_to_pixels(boundary.body:getWorldPoints(boundary.shape:getPoints())))
 
-    love.graphics.setColor(G.C.GREY, 0.5) --half-boundary line
-    love.graphics.polygon("fill", poly_to_pixels(half_boundary.body:getWorldPoints(half_boundary.shape:getPoints())))
+    if #SMODS.find_card('j_half') > 0 then
+        love.graphics.setColor(G.C.GREY, 0.5) --half-boundary line
+        love.graphics.polygon("fill", poly_to_pixels(half_boundary.body:getWorldPoints(half_boundary.shape:getPoints())))
+    end
 
     love.graphics.setColor(G.C.BLACK) --grounds
     for k,v in pairs(SuikaLatro.walls) do
@@ -894,6 +918,25 @@ function SuikaLatro.f.draw()
     
 end
 
+suika_tutorial = {
+    gameover = load_the_suika("tutorial/gameover.png"),
+    biology = load_the_suika("tutorial/biology.png")
+}
+
+love_draw_ref = love.draw
+function love.draw()
+    love_draw_ref()
+    love.graphics.setColor(1, 1, 1)
+    if G.OVERLAY_TUTORIAL and G.OVERLAY_TUTORIAL.step == 2 
+    and G.SETTINGS.suikalatro_tutorial_progress.section == 'secondhand' then
+        love.graphics.draw(suika_tutorial.gameover, screen_w*3/5, screen_h*1/5, nil, to_pixels(0.015))
+    end
+    if G.OVERLAY_TUTORIAL and (G.OVERLAY_TUTORIAL.step == 4 or G.OVERLAY_TUTORIAL.step == 5)
+    and G.SETTINGS.suikalatro_tutorial_progress.section == 'bigblind' then
+        love.graphics.draw(suika_tutorial.biology, screen_w*3/5, screen_h*1/5, nil, to_pixels(0.015))
+    end
+end
+
 function G.UIDEF.suika_main()
     return {n = G.UIT.ROOT, config = {r = 0.1, minw = 7, minh = 10, align = "tm", padding = 0.2, colour = G.C.UI.TRANSPARENT_DARK }, nodes = {
     }}
@@ -908,7 +951,9 @@ function SuikaLatro.f.drawBG()
 end
 
 G.FUNCS.suika_can_play = function(e)
-    if SuikaLatro.balls and #SuikaLatro.balls > 0 then 
+    if SuikaLatro.balls and #SuikaLatro.balls > 0 
+    and (G.SETTINGS.suikalatro_tutorial_complete 
+    or G.SETTINGS.suikalatro_tutorial_progress.completed_parts['drop5']) then 
         e.config.colour = G.C.BLUE
         e.config.button = 'suika_play'
     else
@@ -1099,6 +1144,9 @@ G.FUNCS.suika_play = function(e)
             end
         end
     end]]
+end
+
+G.FUNCS.suika_play_pt2 = function(e)
     G.E_MANAGER:add_event(Event({
         func = function()
             SuikaLatro.do_merging = false

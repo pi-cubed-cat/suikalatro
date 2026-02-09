@@ -70,7 +70,7 @@ SMODS.Blind:take_ownership('plant',
     true
 )
 
-SMODS.Blind:take_ownership('serpent',
+SMODS.Blind:take_ownership('serpent', -- only draw 1 card on discards? (change min ante to 1)
     {
     in_pool = function(self, args) return false end,
     no_collection = true

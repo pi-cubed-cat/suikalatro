@@ -1,0 +1,66 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# TUTORIAL - Start Run
+[[patches]]
+[patches.pattern]
+target = 'functions/UI_definitions.lua'
+pattern = '''
+UIBox_button{id = 'main_menu_play', button = not G.SETTINGS.tutorial_complete and "start_run" or "setup_run", colour = G.C.BLUE, minw = 3.65, minh = 1.55, label = {localize('b_play_cap')}, scale = text_scale*2, col = true},
+'''
+match_indent = true
+position = 'at'
+payload = '''
+UIBox_button{id = 'main_menu_play', button = (not G.SETTINGS.suikalatro_tutorial_complete and "suikalatro_start_run") or ("setup_run"), colour = G.C.BLUE, minw = 3.65, minh = 1.55, label = {localize('b_play_cap')}, scale = text_scale*2, col = true},
+'''
+
+# TUTORIAL - Tutorial Controller
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''
+if not G.SETTINGS.tutorial_complete then G.FUNCS.tutorial_controller() end
+'''
+match_indent = true
+position = 'at'
+payload = '''
+if not G.SETTINGS.suikalatro_tutorial_complete then G.FUNCS.suikalatro_tutorial_controller() end
+'''
+
+# TUTORIAL - Forced Boss Blind
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''
+self.GAME.round_resets.blind_choices.Boss = get_new_boss()
+'''
+match_indent = true
+position = 'at'
+payload = '''
+self.GAME.round_resets.blind_choices.Boss = (G.SETTINGS.suikalatro_tutorial_progress or {}).forced_boss or get_new_boss()
+'''
+
+# TUTORIAL - Forced The Empress
+[[patches]]
+[patches.pattern]
+target = 'functions/UI_definitions.lua'
+pattern = '''
+if area == G.shop_jokers and G.SETTINGS.tutorial_progress and G.SETTINGS.tutorial_progress.forced_shop and G.SETTINGS.tutorial_progress.forced_shop[#G.SETTINGS.tutorial_progress.forced_shop] then
+    local t = G.SETTINGS.tutorial_progress.forced_shop
+    local _center = G.P_CENTERS[t[#t]] or G.P_CENTERS.c_empress
+    local card = Card(area.T.x + area.T.w/2, area.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, _center, {bypass_discovery_center = true, bypass_discovery_ui = true})
+    t[#t] = nil
+    if not t[1] then G.SETTINGS.tutorial_progress.forced_shop = nil end
+'''
+match_indent = true
+position = 'at'
+payload = '''
+if area == G.shop_jokers and G.SETTINGS.suikalatro_tutorial_progress and G.SETTINGS.suikalatro_tutorial_progress.forced_shop and G.SETTINGS.suikalatro_tutorial_progress.forced_shop[#G.SETTINGS.suikalatro_tutorial_progress.forced_shop] then
+    local t = G.SETTINGS.suikalatro_tutorial_progress.forced_shop
+    local _center = G.P_CENTERS[t[#t]] or G.P_CENTERS.c_empress
+    local card = Card(area.T.x + area.T.w/2, area.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, _center, {bypass_discovery_center = true, bypass_discovery_ui = true})
+    t[#t] = nil
+    if not t[1] then G.SETTINGS.suikalatro_tutorial_progress.forced_shop = nil end
+'''

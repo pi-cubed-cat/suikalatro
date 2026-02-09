@@ -1,0 +1,199 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 2
+
+[[patches]]
+[patches.pattern]
+target = "cardarea.lua"
+position = "at"
+pattern = '''
+    if not self.deck_preview and not G.OVERLAY_MENU and (
+        (self.deck and self.deck.cards[1] and self.deck.cards[1].states.collide.is and ((not self.deck.cards[1].states.drag.is) or self.CONTROLLER.HID.touch) and (not self.CONTROLLER.HID.controller)) or 
+        G.CONTROLLER.held_buttons.triggerleft) then
+        if self.buttons then
+            self.buttons.states.visible = false
+        end
+        self.deck_preview = UIBox{
+            definition = self.UIDEF.deck_preview(),
+            config = {align='tm', offset = {x=0,y=-0.8},major = self.hand, bond = 'Weak'}
+        }
+        self.E_MANAGER:add_event(Event({
+            blocking = false,
+            blockable = false,
+            func = function()
+                if self.deck_preview and not (((self.deck and self.deck.cards[1] and self.deck.cards[1].states.collide.is and not self.CONTROLLER.HID.controller)) or G.CONTROLLER.held_buttons.triggerleft) then 
+                    self.deck_preview:remove()
+                    self.deck_preview = nil
+                    local _card = G.CONTROLLER.focused.target
+                    local start = G.TIMERS.REAL
+                    self.E_MANAGER:add_event(Event({
+                        func = function()
+                            if _card and _card.area and _card.area == G.hand then
+                                local _x, _y = _card:put_focused_cursor()
+                                G.CONTROLLER:update_cursor({x=_x/(G.TILESCALE*G.TILESIZE),y=_y/(G.TILESCALE*G.TILESIZE)})
+                            end
+                            if start + 0.4 < G.TIMERS.REAL then
+                                return true
+                            end
+                        end
+                    }))
+                    return true
+                end
+            end
+        }))
+    end
+    if not self.buttons and not self.deck_preview then
+        self.buttons = UIBox{
+            definition = create_UIBox_buttons(),
+            config = {align="bm", offset = {x=6.35,y=-3.2},major = G.hand, bond = 'Weak'}
+        }
+    end
+    if self.buttons and not self.buttons.states.visible and not self.deck_preview then
+        self.buttons.states.visible = true
+    end
+'''
+payload = """
+if self == G.deck then
+    --[[if G.CONTROLLER.HID.controller and G.STATE == G.STATES.SELECTING_HAND and not self.children.peek_deck then
+        self.children.peek_deck = UIBox{
+            definition = 
+                {n=G.UIT.ROOT, config = {align = 'cm', padding = 0.1, r =0.1, colour = G.C.CLEAR}, nodes={
+                    {n=G.UIT.R, config={align = "cm", r =0.1, colour = adjust_alpha(G.C.L_BLACK, 0.5),func = 'set_button_pip', focus_args = {button = 'triggerleft', orientation = 'bm', scale = 0.6, type = 'none'}}, nodes={
+                        {n=G.UIT.R, config={align = "cm"}, nodes={
+                            {n=G.UIT.T, config={text = 'PEEK', scale = 0.48, colour = G.C.WHITE, shadow = true}}
+                        }},
+                        {n=G.UIT.R, config={align = "cm"}, nodes={
+                            {n=G.UIT.T, config={text = 'DECK', scale = 0.38, colour = G.C.WHITE, shadow = true}}
+                        }},
+                    }},
+                }},
+            config = { align = 'cl', offset = {x=-0.5,y=0.1}, major = self, parent = self}
+        }
+        self.children.peek_deck.states.collide.can = false
+    elseif (not G.CONTROLLER.HID.controller or G.STATE ~= G.STATES.SELECTING_HAND) and self.children.peek_deck then
+        self.children.peek_deck:remove()
+        self.children.peek_deck = nil
+    end]]
+    if not self.children.view_deck then 
+        self.children.view_deck = UIBox{
+            definition = 
+                {n=G.UIT.ROOT, config = {align = 'cm', padding = 0.1, r =0.1, colour = G.C.CLEAR}, nodes={
+                    {n=G.UIT.R, config={align = "cm", padding = 0.05, r =0.1, colour = adjust_alpha(G.C.BLACK, 0.5),func = 'set_button_pip', focus_args = {button = 'triggerright', orientation = 'bm', scale = 0.6}, button = 'deck_info'}, nodes={
+                        {n=G.UIT.R, config={align = "cm", maxw = 2}, nodes={
+                            {n=G.UIT.T, config={text = localize('k_view'), scale = 0.48, colour = G.C.WHITE, shadow = true}}
+                        }},
+                        {n=G.UIT.R, config={align = "cm", maxw = 2}, nodes={
+                            {n=G.UIT.T, config={text = localize('k_deck'), scale = 0.38, colour = G.C.WHITE, shadow = true}}
+                        }},
+                    }},
+                }},
+            config = { align = 'cm', offset = {x=0,y=0}, major = self.cards[1] or self, parent = self}
+        }
+        self.children.view_deck.states.collide.can = false
+    end
+if G.deck_preview or self.states.collide.is or (G.buttons and G.buttons.states.collide.is and G.CONTROLLER.HID.controller) then self.children.view_deck:draw() end
+--[[if self.children.peek_deck then self.children.peek_deck:draw() end]]
+end
+"""
+match_indent = true
+overwrite = false
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "at"
+pattern = '''
+    if not self.deck_preview and not G.OVERLAY_MENU and (
+        (self.deck and self.deck.cards[1] and self.deck.cards[1].states.collide.is and ((not self.deck.cards[1].states.drag.is) or self.CONTROLLER.HID.touch) and (not self.CONTROLLER.HID.controller)) or 
+        G.CONTROLLER.held_buttons.triggerleft) then
+        if self.buttons then
+            self.buttons.states.visible = false
+        end
+        self.deck_preview = UIBox{
+            definition = self.UIDEF.deck_preview(),
+            config = {align='tm', offset = {x=0,y=-0.8},major = self.hand, bond = 'Weak'}
+        }
+        self.E_MANAGER:add_event(Event({
+            blocking = false,
+            blockable = false,
+            func = function()
+                if self.deck_preview and not (((self.deck and self.deck.cards[1] and self.deck.cards[1].states.collide.is and not self.CONTROLLER.HID.controller)) or G.CONTROLLER.held_buttons.triggerleft) then 
+                    self.deck_preview:remove()
+                    self.deck_preview = nil
+                    local _card = G.CONTROLLER.focused.target
+                    local start = G.TIMERS.REAL
+                    self.E_MANAGER:add_event(Event({
+                        func = function()
+                            if _card and _card.area and _card.area == G.hand then
+                                local _x, _y = _card:put_focused_cursor()
+                                G.CONTROLLER:update_cursor({x=_x/(G.TILESCALE*G.TILESIZE),y=_y/(G.TILESCALE*G.TILESIZE)})
+                            end
+                            if start + 0.4 < G.TIMERS.REAL then
+                                return true
+                            end
+                        end
+                    }))
+                    return true
+                end
+            end
+        }))
+    end
+    if not self.buttons and not self.deck_preview then
+        self.buttons = UIBox{
+            definition = create_UIBox_buttons(),
+            config = {align="bm", offset = {x=6.35,y=-3.2},major = G.hand, bond = 'Weak'}
+        }
+    end
+    if self.buttons and not self.buttons.states.visible and not self.deck_preview then
+        self.buttons.states.visible = true
+    end
+'''
+payload = """
+    --[[if not self.deck_preview and not G.OVERLAY_MENU and (
+        (self.deck and self.deck.cards[1] and self.deck.cards[1].states.collide.is and ((not self.deck.cards[1].states.drag.is) or self.CONTROLLER.HID.touch) and (not self.CONTROLLER.HID.controller)) or 
+        G.CONTROLLER.held_buttons.triggerleft) then
+        if self.buttons then
+            self.buttons.states.visible = false
+        end
+        self.deck_preview = UIBox{
+            definition = self.UIDEF.deck_preview(),
+            config = {align='tm', offset = {x=0,y=-0.8},major = self.hand, bond = 'Weak'}
+        }
+        self.E_MANAGER:add_event(Event({
+            blocking = false,
+            blockable = false,
+            func = function()
+                if self.deck_preview and not (((self.deck and self.deck.cards[1] and self.deck.cards[1].states.collide.is and not self.CONTROLLER.HID.controller)) or G.CONTROLLER.held_buttons.triggerleft) then 
+                    self.deck_preview:remove()
+                    self.deck_preview = nil
+                    local _card = G.CONTROLLER.focused.target
+                    local start = G.TIMERS.REAL
+                    self.E_MANAGER:add_event(Event({
+                        func = function()
+                            if _card and _card.area and _card.area == G.hand then
+                                local _x, _y = _card:put_focused_cursor()
+                                G.CONTROLLER:update_cursor({x=_x/(G.TILESCALE*G.TILESIZE),y=_y/(G.TILESCALE*G.TILESIZE)})
+                            end
+                            if start + 0.4 < G.TIMERS.REAL then
+                                return true
+                            end
+                        end
+                    }))
+                    return true
+                end
+            end
+        }))
+    end]]
+    if not self.buttons and not self.deck_preview then
+        self.buttons = UIBox{
+            definition = create_UIBox_buttons(),
+            config = {align="bm", offset = {x=6.35,y=-3.2},major = G.hand, bond = 'Weak'}
+        }
+    end
+    if self.buttons and not self.buttons.states.visible and not self.deck_preview then
+        self.buttons.states.visible = true
+    end
+"""
+match_indent = true
+overwrite = false

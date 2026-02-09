@@ -211,11 +211,11 @@ SMODS.Joker:take_ownership('half',
     }, true
 )
 
-SMODS.Joker:take_ownership('four_fingers',
+--[[SMODS.Joker:take_ownership('four_fingers',
     {
         rarity = 3,
     }, true
-)
+)]]
 
 SMODS.Joker:take_ownership('mime',
     {

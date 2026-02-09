@@ -43,7 +43,7 @@ end
 match_indent = true
 overwrite = false
 
-# set default hand size (ball queue) to 3
+# set default hand size to 3
 [[patches]]
 [patches.pattern]
 target = "functions/misc_functions.lua"
@@ -51,6 +51,34 @@ position = "at"
 pattern = "hand_size = 8,"
 payload = """
 hand_size = 3,
+"""
+match_indent = true
+overwrite = false
+
+# allow stake wins on ante 6
+[[patches]]
+[patches.pattern]
+target = "functions/misc_functions.lua"
+position = "at"
+pattern = '''
+if win_ante and (win_ante >= 8) or not SMODS.add_to_pool(v) then
+'''
+payload = """
+if win_ante and (win_ante >= 6) or not SMODS.add_to_pool(v) then
+"""
+match_indent = true
+overwrite = false
+
+# win_ante is 6
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+position = "at"
+pattern = '''
+win_ante = 8,
+'''
+payload = """
+win_ante = 6,
 """
 match_indent = true
 overwrite = false
