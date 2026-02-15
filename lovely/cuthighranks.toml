@@ -10,6 +10,7 @@ position = "before"
 pattern = "if self.GAME.starting_params.no_faces and SMODS.Ranks[v.value].face then keep = false end"
 payload = """
 if SuikaLatro.cut_high_ranks and (v.value == '7' or v.value == '8' or v.value == '9' or v.value == '10' or v.value == 'Jack' or v.value == 'Queen' or v.value == 'King' or v.value == 'Ace') then keep = false end
+if G.GAME.starting_params.no_6 and v.value == '6' then keep = false end
 """
 match_indent = true
 overwrite = false

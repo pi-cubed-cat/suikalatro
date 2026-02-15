@@ -1,6 +1,15 @@
 return {
     descriptions = {
-        Back={},
+        Back={
+            b_abandoned = {
+                name = "Abandoned Deck",
+                text = {
+                    "Start run with",
+                    "no {C:attention}6{} cards",
+                    "in your deck",
+                },
+            },
+        },
         Blind={},
         Edition={},
         Enhanced={
@@ -185,12 +194,21 @@ return {
                     "{C:attention}1 fewer{} ball",
                 },
             },
+            j_8_ball={
+                name="8 Ball",
+                text={
+                    "{C:green}#1# in #2#{} chance for each",
+                    "{C:attention}8{} ball to create a",
+                    "{C:tarot}Tarot{} card when merging",
+                    "{C:inactive}(Must have room)",
+                },
+            },
             j_faceless={
                 name="Faceless Joker",
                 text={
                     "Earn {C:money}$#1#{} if ",
-                    "discard contains a",
-                    "{C:attention}face card{}",
+                    "discard contains",
+                    "a {C:attention}face card{}",
                 },
             },
             j_seance={
@@ -268,12 +286,347 @@ return {
                     "a {C:attention}#2#",
                 },
             },
-             j_burnt={
+            j_burnt={
                 name="Burnt Joker",
                 text={
                     "Upgrade the level of",
                     "a random poker combo",
                     "on {C:attention}discard{}",
+                },
+            },
+            j_fibonacci = {
+                name = "Fibonacci",
+                text = {
+                    "Each ball of rank {C:attention}Ace{},",
+                    "{C:attention}2{}, {C:attention}3{}, {C:attention}5{}, or {C:attention}8{} gives",
+                    "{C:mult}+#1#{} Mult when merging",
+                },
+            },
+            j_scary_face = {
+                name = "Scary Face",
+                text = {
+                    "Played balls of {C:attention}face{}",
+                    "rank give {C:chips}+#1#{} Chips",
+                    "when scored",
+                },
+            },
+            j_scary_face = {
+                name = "Scary Face",
+                text = {
+                    "Balls of {C:attention}face{} rank",
+                    "give {C:chips}+#1#{} Chips",
+                    "when merging",
+                },
+            },
+            j_pareidolia = {
+                name = "Pareidolia",
+                text = {
+                    "All cards and balls ",
+                    "are considered to",
+                    "be of {C:attention}face{} rank",
+                },
+            },
+            j_even_steven = {
+                name = "Even Steven",
+                text = {
+                    "Balls with {C:attention}even{}",
+                    "rank give {C:mult}+#1#{} Mult",
+                    "when merging",
+                    "{C:inactive}(10, 8, 6, 4, 2)",
+                },
+            },
+            j_odd_todd = {
+                name = "Odd Todd",
+                text = {
+                    "Balls with {C:attention}odd{}",
+                    "rank give {C:chips}+#1#{} Chips",
+                    "when merging",
+                    "{C:inactive}(A, 9, 7, 5, 3)",
+                },
+            },
+            j_scholar = {
+                name = "Scholar",
+                text = {
+                    "{C:attention}Ace{} Balls",
+                    "give {X:mult,C:white} X#1# {} Mult",
+                    "when merging",
+                },
+            },
+            j_business = {
+                name = "Business Card",
+                text = {
+                    "Balls of {C:attention}face{} rank",
+                    "have a {C:green}#1# in #2#{} chance to",
+                    "give {C:money}$#3#{} when merging",
+                },
+            },
+            j_raised_fist = {
+                name = "Raised Fist",
+                text = {
+                    "Adds {C:attention}triple{} the rank",
+                    "of {C:attention}lowest{} ranked ball",
+                    "in box to {C:mult}Mult{}",
+                },
+            },
+            j_supernova = {
+                name = "Supernova",
+                text = {
+                    "Gains {C:mult}+#1#{} Mult for each",
+                    "unique {C:attention}poker combo{} ",
+                    "in played hand",
+                    "{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)",
+                },
+            },
+            j_ride_the_bus = {
+                name = "Ride the Bus",
+                text = {
+                    "Gains {C:mult}+#1#{} Mult per",
+                    "{C:attention}consecutive{} hand",
+                    "played without a",
+                    "merging {C:attention}face{} ball",
+                    "{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)",
+                },
+            },
+            j_runner = {
+                name = "Runner",
+                text = {
+                    "Gains {C:chips}+#2#{} Chips if",
+                    "played hand contained a",
+                    "{C:attention}Merge 4X{} or {C:attention}Combo Breaker{}",
+                    "{C:inactive}(Currently {C:chips}+#1#{C:inactive} Chips)",
+                },
+            },
+            j_dna = {
+                name = "DNA",
+                text = {
+                    "Add a copy of {C:attention}first card{}",
+                    "dropped this round to deck,",
+                    "and draw it to {C:attention}hand",
+                },
+            },
+            j_sixth_sense = {
+                name = "Sixth Sense",
+                text = {
+                    "If {C:attention}first card{} dropped this",
+                    "round is a {C:attention}6{}, destroy it and",
+                    "create a {C:spectral}Spectral{} card",
+                    "{C:inactive}(Must have room)",
+                },
+            },
+            j_hiker = {
+                name = "Hiker",
+                text = {
+                    "{C:attention}Playing cards{}",
+                    "permanently gain",
+                    "{C:chips}+#1#{} Chips when dropped",
+                },
+            },
+            j_square = {
+                name = "Square Joker",
+                text = {
+                    "This Joker gains {C:chips}+#2#{} Chips",
+                    "if played hand has a multiple",
+                    "of {C:attention}4{} balls in the box",
+                    "{C:inactive}(Currently {C:chips}+#1#{C:inactive} Chips)",
+                },
+            },
+            j_vampire = {
+                name = "Vampire",
+                text = {
+                    "After an {C:attention}Enhanced card{} is dropped,",
+                    "remove its {C:attention}Enhancement{} and",
+                    "this Joker gains {X:mult,C:white} X#1# {} Mult",
+                    "{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)",
+                },
+            },
+            j_baron = {
+                name = "Baron",
+                text = {
+                    "Each {C:attention}King{} ball",
+                    "remaining in box",
+                    "gives {X:mult,C:white} X#1# {} Mult",
+                },
+            },
+            j_midas_mask = {
+                name = "Midas Mask",
+                text = {
+                    "After a {C:attention}face{} card",
+                    "is dropped, it becomes",
+                    "a {C:attention}Gold Card{}",
+                },
+            },
+            j_photograph = {
+                name = "Photograph",
+                text = {
+                    "{C:attention}First{} merging balls",
+                    "each hand of {C:attention}face{}",
+                    "rank give {X:mult,C:white} X#1# {} Mult",
+                },
+            },
+            j_reserved_parking = {
+                name = "Reserved Parking",
+                text = {
+                    "Each ball of {C:attention}face{}",
+                    "rank remaining",
+                    "in box gives {C:money}$#1#{}",
+                },
+            },
+            j_trousers = {
+                name = "Spare Trousers",
+                text = {
+                    "This Joker gains {C:mult}+#1#{} Mult",
+                    "for each {C:attention}#2#{} scored",
+                    "{C:inactive}(Currently {C:red}+#3#{C:inactive} Mult)",
+                },
+            },
+            j_ancient = {
+                name = "Ancient Joker",
+                text = {
+                    "Each ball with",
+                    "{V:1}#2#{} suit gives",
+                    "{X:mult,C:white} X#1# {} Mult when merging",
+                    "{s:0.8}suit changes at end of round",
+                },
+            },
+            j_walkie_talkie = {
+                name = "Walkie Talkie",
+                text = {
+                    "Each {C:attention}10{} or {C:attention}4{} ball",
+                    "gives {C:chips}+#1#{} Chips and",
+                    "{C:mult}+#2#{} Mult when merging",
+                },
+            },
+            j_smiley = {
+                name = "Smiley Face",
+                text = {
+                    "Balls of {C:attention}face{}",
+                    "rank give {C:mult}+#1#{} Mult",
+                    "when merging",
+                },
+            },
+            j_ticket = {
+                name = "Golden Ticket",
+                text = {
+                    "{C:attention}Gold{} balls earn",
+                    "{C:money}$#1#{} when merging",
+                },
+            },
+            j_rough_gem = {
+                name = "Rough Gem",
+                text = {
+                    "Balls with",
+                    "{C:diamonds}Diamond{} suit earn",
+                    "{C:money}$#1#{} when merging",
+                },
+            },
+            j_bloodstone = {
+                name = "Bloodstone",
+                text = {
+                    "{C:green}#1# in #2#{} chance",
+                    "for balls with",
+                    "{C:hearts}Heart{} suit to give",
+                    "{X:mult,C:white} X#3# {} Mult when merging",
+                },
+            },
+            j_arrowhead = {
+                name = "Arrowhead",
+                text = {
+                    "Balls with",
+                    "{C:spades}Spade{} suit give",
+                    "{C:chips}+#1#{} Chips when merging",
+                },
+            },
+            j_onyx_agate = {
+                name = "Onyx Agate",
+                text = {
+                    "Balls with",
+                    "{C:clubs}Club{} suit give",
+                    "{C:mult}+#1#{} Mult when merging",
+                },
+            },
+            j_glass = {
+                name = "Glass Joker",
+                text = {
+                    "This Joker gains {X:mult,C:white} X#1# {} Mult",
+                    "when a {C:attention}Glass ball{} shatters",
+                    "{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)",
+                },
+            },
+            j_wee = {
+                name = "Wee Joker",
+                text = {
+                    "This Joker gains",
+                    "{C:chips}+#2#{} Chips when a",
+                    "{C:attention}2{} ball merges",
+                    "{C:inactive}(Currently {C:chips}+#1#{C:inactive} Chips)",
+                },
+            },
+            j_idol = {
+                name = "The Idol",
+                text = {
+                    "Each {C:attention}#2#{} of",
+                    "{V:1}#3#{} ball gives",
+                    "{X:mult,C:white} X#1# {} Mult when merging",
+                    "{s:0.8}Card changes every round",
+                },
+            },
+            j_seeing_double = {
+                name = "Seeing Double",
+                text = {
+                    "{C:attention}7{} balls give {X:mult,C:white} X#1# {} Mult",
+                    "when merging, increases",
+                    "to {X:mult,C:white} X#2# {} Mult for the",
+                    "rest of this hand when",
+                    "a {C:attention}7{} of {C:clubs}Clubs{} ball merges",
+                },
+            },
+            j_matador = { -- Matador
+                text = {
+                    "On {C:attention}final hand{} of", 
+                    "{C:attention}Boss Blind{}, merging",
+                    "balls earn {C:money}$#1#{}",
+                },
+            },
+            j_shoot_the_moon = {
+                name = "Shoot the Moon",
+                text = {
+                    "Each {C:attention}Queen{} ball",
+                    "gives {X:mult,C:white} X#1# {} Mult",
+                    "when merging or",
+                    "remaining in the box",
+                },
+            },
+            j_caino = {
+                name = "Canio",
+                text = {
+                    "This Joker gains {X:mult,C:white} X#1# {} Mult",
+                    "when a {C:attention}face{} card",
+                    "or ball is destroyed",
+                    "{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)",
+                },
+            },
+            j_triboulet = {
+                name = "Triboulet",
+                text = {
+                    "{C:attention}Face{} balls each give",
+                    "{X:mult,C:white} X#1# {} Mult when merging",
+                },
+            },
+            j_superposition = {
+                name = "Superposition",
+                text = {
+                    "Create a {C:spectral}Spectral{} card",
+                    "when an {C:attention}Ace{} merges",
+                    "{C:inactive}(Must have room)",
+                },
+            },
+            j_todo_list = {
+                name = "To Do List",
+                text = {
+                    "Earn {C:money}$#1#{} for each",
+                    "{C:attention}#2#{} scored,",
+                    "poker combo and earning",
+                    "changes at end of round",
                 },
             },
         },

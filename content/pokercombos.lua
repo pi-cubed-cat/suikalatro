@@ -16,7 +16,23 @@ function SMODS.current_mod.reset_game_globals(run_start) --hide vanilla poker ha
             end
         end
     end
-end -- see thesereallyshouldbehooksbuticba.toml for continue run
+end
+
+-- hide vanilla poker hands (continuing run) 
+local Game_start_run_ref = Game.start_run 
+function Game:start_run(args)
+    Game_start_run_ref(self, args)
+    for k,v in pairs(G.GAME.hands) do 
+        if not string.find(k, 'suika') then
+            SMODS.PokerHand:take_ownership(k,
+                {
+                visible = function(self) return false end
+                },
+                true
+            )
+        end
+    end
+end
 
 SMODS.PokerHand { -- Mega Flush
     key = 'mega_flush',

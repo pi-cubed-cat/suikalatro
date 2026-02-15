@@ -1,7 +1,16 @@
-local filesystem = NFS or love.filesystem
-local suika_mod_path = SMODS.current_mod
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- EDIT KEYBINDS BELOW (defaults are a, d, s)
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
-local gameMainMenuRef = Game.main_menu --code from aikoyori's shenanigans
+suika_cursor_left = 'a'
+suika_cursor_right = 'd'
+suika_cursor_drop = 's'
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- DISPLAY VERSION ON MAIN MENU
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+local gameMainMenuRef = Game.main_menu
 function Game:main_menu(change_context)
     gameMainMenuRef(self, change_context)
     UIBox({
@@ -9,21 +18,26 @@ function Game:main_menu(change_context)
             n = G.UIT.ROOT,
             config = {
                 align = "cm",
-                colour = G.C.UI.TRANSPARENT_DARK
+                colour = {
+                    G.C.UI.TRANSPARENT_DARK[1],
+                    G.C.UI.TRANSPARENT_DARK[2],
+                    G.C.UI.TRANSPARENT_DARK[3],
+                    G.C.UI.TRANSPARENT_DARK[4] * 2
+                }
             },
             nodes = {
                 {
                     n = G.UIT.T,
                     config = {
-                        scale = 0.3,
-                        text = "Suikalatro v0.4.0 (DEMO)",
+                        scale = 0.5,
+                        text = "Suikalatro v0.5.0 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
             }
         },
         config = {
-            align = "tli",
+            align = "tmi",
             bond = "Weak",
             offset = {
                 x = 0,
@@ -33,6 +47,13 @@ function Game:main_menu(change_context)
         }
     })
 end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- LOAD BALL FRONTS (SUITS, ENHANCEMENTS, AND SEALS)
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+local filesystem = NFS or love.filesystem
+local suika_mod_path = SMODS.current_mod
 
 local function load_the_suika(img)
     local full_path = (suika_mod_path.path..'assets/'..img)
@@ -94,6 +115,10 @@ suika_fronts = {
     },
 }
 
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- DEFINE A WHOLE LOTTA BULLSHIT
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 love.physics.setMeter(64)
 SuikaLatro = {
     world = love.physics.newWorld(0, 9.81*64, true),
@@ -127,7 +152,7 @@ SuikaLatro = {
     show_flushes = true,
     lowball = true,
     poker_combos = {
-        five_flush = {chips = 40, mult = 2, chips_mod = 20, mult_mod = 2},
+        five_flush = {chips = 40, mult = 4, chips_mod = 20, mult_mod = 2},
         ten_flush = {chips = 80, mult = 7, chips_mod = 20, mult_mod = 4},
         mega_flush = {chips = 150, mult = 15, chips_mod = 50, mult_mod = 5},
         merge_1 = {chips = 5, mult = 1, chips_mod = 10, mult_mod = 1},
@@ -147,6 +172,7 @@ SuikaLatro = {
     play_wait_time = 0,
 }
 
+-- 10X blind ante
 local get_blind_amount_ref = get_blind_amount
 function get_blind_amount(ante)
     return get_blind_amount_ref(ante) * 10
@@ -158,10 +184,16 @@ assert(SMODS.load_file("content/jokers.lua"))()
 assert(SMODS.load_file("content/tarots_spectrals_seals.lua"))()
 assert(SMODS.load_file("content/blinds.lua"))()
 assert(SMODS.load_file("content/vouchers.lua"))()
+assert(SMODS.load_file("content/decks.lua"))()
 assert(SMODS.load_file("content/modicon.lua"))()
+assert(SMODS.load_file("content/rewrite_evaluate_play.lua"))()
 assert(SMODS.load_file("content/tutorial.lua"))()
 
-local screen_w, screen_h = love.window.getMode()
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- STATIC PHYSICS OBJECTS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+SuikaLatro.screen_w, SuikaLatro.screen_h = love.window.getMode()
 
 local suikaground = SuikaLatro.walls.ground
 suikaground.body = love.physics.newBody(SuikaLatro.world, 0, SuikaLatro.box.height/2, "static") --shape anchors to the body from its center
@@ -197,27 +229,29 @@ half_boundary = {}
 half_boundary.body = love.physics.newBody(SuikaLatro.world, 0, 0 + boundary_width/2, "static")
 half_boundary.shape = love.physics.newRectangleShape(SuikaLatro.box.width, boundary_width)
 
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- PIXEL TO GAME UNITS TRANSFORM FUNCTIONS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 -- Transform pixels into game units (code from the Hot Potato mod's Plinko minigame) 
-local function to_game_units(val)
+function to_game_units(val)
     return val / (G.TILESCALE*G.TILESIZE)
 end
 
-local function to_pixels(val)
+function to_pixels(val)
     return val * (G.TILESCALE*G.TILESIZE)
 end
-
-local screen_w, screen_h
 
 local function t_x(x)
     return to_pixels(
         -- offset 0,0 to be relative to the center of the screen, then transform x from pixels to screen units
-        to_game_units(screen_w/2) + SuikaLatro.world_T.x + x / SuikaLatro.world_width * SuikaLatro.world_T.w
+        to_game_units(SuikaLatro.screen_w/2) + SuikaLatro.world_T.x + x / SuikaLatro.world_width * SuikaLatro.world_T.w
     )
 end
 
 local function t_y(y)
     -- same as above
-    return to_pixels(to_game_units(screen_h/2) + SuikaLatro.world_T.y + y / SuikaLatro.world_height * SuikaLatro.world_T.h)
+    return to_pixels(to_game_units(SuikaLatro.screen_h/2) + SuikaLatro.world_T.y + y / SuikaLatro.world_height * SuikaLatro.world_T.h)
 end
 
 local function t_r(r)
@@ -231,6 +265,10 @@ end
 local function poly_to_pixels(x1, y1, x2, y2, x3, y3, x4, y4)
     return t_x(x1), t_y(y1), t_x(x2), t_y(y2), t_x(x3), t_y(y3), t_x(x4), t_y(y4)
 end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- BALL INIT
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 Ball = Object:extend()
 
@@ -246,10 +284,10 @@ function get_size(input, stone)
     end
 end
 
-function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix_edition, fix_seal, fix_size)
+function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix_edition, fix_seal, fix_size, perma_bonuses)
     self.body = love.physics.newBody(SuikaLatro.world, x, y, "dynamic")
     self.flush_size = 0
-    if not fixed_properties then
+    if not fixed_properties then -- next ball
         --self.rank = SuikaLatro.next_ball.base.value
         self.id = SuikaLatro.next_ball.base.id
         self.suit = SuikaLatro.next_ball.base.suit
@@ -258,7 +296,30 @@ function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix
         self.seal = SuikaLatro.next_ball.seal
         self.size = get_size(self.id, SuikaLatro.next_ball.config.center.key == 'm_stone')
         self.merges = 0
-    else
+        
+        self.perma_bonuses = {}
+        local perma_bonus_all = {
+            'perma_bonus',      -- permanent chips, from vanilla
+            'perma_mult',
+            'perma_x_chips',
+            'perma_x_mult',
+
+            'perma_h_chips',
+            'perma_h_mult',
+            'perma_h_x_chips',
+            'perma_h_x_mult',
+
+            'perma_p_dollars',  -- money on scoring
+            'perma_h_dollars',  -- money on held at end of round (like gold cards)
+
+            'perma_repetitions', -- retriggers in any context
+        }
+        for k,v in pairs(perma_bonus_all) do
+            if SuikaLatro.next_ball.ability[v] then
+                self.perma_bonuses[v] = SuikaLatro.next_ball.ability[v]
+            end
+        end
+    else -- after merged balls
         rank_delta = rank_delta or 0
         --self.rank = fixed_properties.rank + rank_delta
         self.id = fixed_properties.id + rank_delta > 14 and 2 or fixed_properties.id + rank_delta
@@ -268,6 +329,12 @@ function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix
         self.seal = fix_seal or fixed_properties.seal
         self.size = get_size(self.id, self.enhancement == 'm_stone')
         self.merges = combo or 0
+        self.perma_bonuses = {}
+        if perma_bonuses then
+            for k,v in pairs(perma_bonuses) do
+                self.perma_bonuses[k] = v
+            end
+        end
     end
     self.canvas = love.graphics.newCanvas(self.size*2, self.size*2)
     self.shape = love.physics.newCircleShape(self.size)
@@ -281,6 +348,10 @@ function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix
     self.merge_target = nil
     self.remove = false
 end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- ENABLING, SAVING, AND LOADING
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 function SuikaLatro.f.enable_suika()
     SuikaLatro.world_T.y = 15
@@ -332,6 +403,40 @@ function save_run()
         G.GAME.SuikaLatro_balls[k].size = ball.size
     end
     save_run_ref()
+end
+
+local Game_start_run_ref = Game.start_run -- continuing run stuff 
+function Game:start_run(args)
+    Game_start_run_ref(self, args)
+    SuikaLatro.f.reset_suika()
+    SuikaLatro.do_merging = false
+    if G.STATE == G.STATES.SELECTING_HAND then
+        SuikaLatro.world_T.y = 2.5
+    end
+    if G.GAME.SuikaLatro_balls then
+        for k,v in ipairs(G.GAME.SuikaLatro_balls) do
+            table.insert(SuikaLatro.balls, Ball(v.x, v.y, v, 0, 0, nil, nil, nil, v.size))
+        end
+    end
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- FLUSH CALCS AND RANK & SUIT UTILS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+function SuikaLatro.f.is_rank(ball, rank)
+    if ball.enhancement == 'm_stone' then
+        return false
+    end 
+    return ball.id == rank
+end
+
+function SuikaLatro.f.is_face(ball, from_boss)
+    if ball.debuff and not from_boss then return end
+    if SuikaLatro.f.is_rank(ball, 11) or SuikaLatro.f.is_rank(ball, 12) or SuikaLatro.f.is_rank(ball, 13)
+    or next(SMODS.find_card("j_pareidolia")) then
+        return true
+    end
 end
 
 function SuikaLatro.f.is_suit(ball, suit)
@@ -401,6 +506,10 @@ function SuikaLatro.f.find_flush_groups()
     SuikaLatro.flush_groups = groups
 end
 
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- MERGING CHECKS AND COLLISION SOUNDS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 function beginContact(a, b, coll)
     local x, y = coll:getNormal()
     local objA = a:getUserData()
@@ -464,6 +573,10 @@ function endContact(a, b, coll)
     end
 end
 
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- UPDATE HOOK-RELATED
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 SuikaLatro.world:setCallbacks(beginContact, endContact)
 
 function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
@@ -476,7 +589,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
             major = G.ROOM_ATTACH,
             backdrop_colour = G.C.MULT,
             align = 'cm',
-            offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
             silent = true
         })
         play_sound('multhit1')
@@ -491,7 +604,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
             major = G.ROOM_ATTACH,
             backdrop_colour = G.C.CHIPS,
             align = 'cm',
-            offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
             silent = true
         })
         play_sound('chips1')
@@ -506,7 +619,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
             major = G.ROOM_ATTACH,
             backdrop_colour = G.C.MULT,
             align = 'cm',
-            offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
             silent = true
         })
         play_sound('multhit2')
@@ -522,7 +635,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
                 major = G.ROOM_ATTACH,
                 backdrop_colour = G.C.MULT,
                 align = 'cm',
-                offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+                offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
                 silent = true
             })
             play_sound('multhit1')
@@ -538,7 +651,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
                 major = G.ROOM_ATTACH,
                 backdrop_colour = G.C.MONEY,
                 align = 'cm',
-                offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+                offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
                 silent = true
             })
             play_sound('coin3')
@@ -553,7 +666,7 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
             major = G.ROOM_ATTACH,
             backdrop_colour = G.C.MULT,
             align = 'cm',
-            offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
             silent = true
         })
         play_sound('multhit2')
@@ -568,13 +681,17 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
             major = G.ROOM_ATTACH,
             backdrop_colour = G.C.MONEY,
             align = 'cm',
-            offset = {x = -20/2 + 20/screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
             silent = true
         })
         play_sound('coin3')
         ease_dollars(amt, true)
     end
 end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- UPDATE HOOK (merging, timers, indicator movement, flush calcs, physics, ball removing)
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 function SuikaLatro.f.update(dt)
     if SuikaLatro.BG then SuikaLatro.BG:remove() end
@@ -588,13 +705,13 @@ function SuikaLatro.f.update(dt)
     end
     --if not G.STATE == G.STATES.GAME_OVER then SuikaLatro.world:update(dt) end
     local size_offset = SuikaLatro.next_ball and (SuikaLatro.next_ball.facing == 'back' and 20 or get_size(SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.config.center.key == 'm_stone')) or 20
-    if love.keyboard.isDown("left") or love.keyboard.isDown("a") then
+    if love.keyboard.isDown("left") or love.keyboard.isDown(suika_cursor_left) then
         SuikaLatro.indicator.x = SuikaLatro.indicator.x - 200 * dt
         if SuikaLatro.walls.leftwall.body:getX() + size_offset + 12 > SuikaLatro.indicator.x then
             SuikaLatro.indicator.x = SuikaLatro.walls.leftwall.body:getX() + size_offset + 12
         end
     end
-    if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
+    if love.keyboard.isDown("right") or love.keyboard.isDown(suika_cursor_right) then
         SuikaLatro.indicator.x = SuikaLatro.indicator.x + 200 * dt
         if SuikaLatro.walls.rightwall.body:getX() - size_offset - 12 < SuikaLatro.indicator.x then
             SuikaLatro.indicator.x = SuikaLatro.walls.rightwall.body:getX() - size_offset - 12
@@ -622,7 +739,7 @@ function SuikaLatro.f.update(dt)
                 v.merge_target.fixture:setMask(1)
                 local delta_x, delta_y = (v.body:getX() - v.merge_target.body:getX()), (v.body:getY() - v.merge_target.body:getY())
                 local distance = math.sqrt( ( delta_x )^2 + ( delta_y )^2 )
-                if distance > 15*math.sqrt(v.id) then
+                if distance > 15*math.sqrt(v.id) then -- this should be changed to be based on v.size, but it works for now
                     local angle = math.atan2(delta_y, delta_x)
                     v.body:setLinearVelocity(
                     -50000 * dt * math.cos(angle),
@@ -637,6 +754,21 @@ function SuikaLatro.f.update(dt)
                         local fixed_enhancement = nil
                         local fixed_edition = nil
                         local fixed_seal = nil
+                        local perma_bonus_table = {}
+                        if v.perma_bonuses then
+                            for k,v in pairs(v.perma_bonuses) do
+                                perma_bonus_table[k] = v
+                            end
+                        end 
+                        if v.merge_target.perma_bonuses then
+                            for k,v in pairs(v.merge_target.perma_bonuses) do
+                                if not perma_bonus_table[k] then
+                                    perma_bonus_table[k] = v
+                                elseif v > perma_bonus_table[k] then
+                                    perma_bonus_table[k] = v
+                                end
+                            end
+                        end 
                         if (v.enhancement ~= 'c_base' or v.merge_target.enhancement ~= 'c_base') and (v.enhancement == 'c_base' or v.merge_target.enhancement == 'c_base') then
                             fixed_enhancement = v.enhancement ~= 'c_base' and v.enhancement or v.merge_target.enhancement
                         end
@@ -647,10 +779,11 @@ function SuikaLatro.f.update(dt)
                             fixed_seal = v.seal or v.merge_target.seal
                         end
                         if not ((v.enhancement == 'm_glass' and pseudorandom('suika_glass') < G.GAME.probabilities.normal / 2) or (v.merge_target.enhancement == 'm_glass' and pseudorandom('suika_glass2') < G.GAME.probabilities.normal / 2)) then
-                            table.insert(SuikaLatro.balls, Ball(v.body:getX(), v.body:getY(), selected_ball > 0.5 and v.merge_target or v, 1, merge_count, fixed_enhancement, fixed_edition, fixed_seal))
+                            table.insert(SuikaLatro.balls, Ball(v.body:getX(), v.body:getY(), selected_ball > 0.5 and v.merge_target or v, 1, merge_count, fixed_enhancement, fixed_edition, fixed_seal, nil, perma_bonus_table))
                         else
                             play_sound('glass'..math.random(1, 6), math.random()*0.2 + 0.9,0.4)
                             play_sound('generic1', math.random()*0.2 + 0.9,0.5)
+                            SMODS.calculate_context({balls_shattered = true, other_balls = {v, v.merge_target}})
                         end
                         local combo_chips = 0
                         local combo_mult = 0
@@ -722,12 +855,13 @@ function SuikaLatro.f.update(dt)
                                     major = G.ROOM_ATTACH,
                                     backdrop_colour = merge_count < 5 and G.C.ORANGE or G.C.RED,
                                     align = 'cm',
-                                    offset = {x = -20/2 + 20/screen_w * t_x(x_pos), y = -11.5/2 + 11.5/screen_h * t_y(y_pos)},
+                                    offset = {x = -20/2 + 20/SuikaLatro.screen_w * t_x(x_pos), y = -11.5/2 + 11.5/SuikaLatro.screen_h * t_y(y_pos)},
                                     silent = true
                                 })
                                 play_sound('multhit1', math.random()*0.2 + 0.7 + 0.1*merge_count, 0.6 + merge_count/20)
 
                                 G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + combo_chips + 2^(get_size(id_)/SuikaLatro.ball_sizefactor)/2 + 2^(get_size(id2_)/SuikaLatro.ball_sizefactor)/2
+                                 + (v.perma_bonuses['perma_bonus'] or 0) + (v.merge_target.perma_bonuses['perma_bonus'] or 0)
                                 G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
                                 G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + combo_mult
                                 G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
@@ -756,6 +890,38 @@ function SuikaLatro.f.update(dt)
                                 end
                             }))
                         end
+                        local scoring_list = {v, v.merge_target}
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'immediate',
+                            blockable = false,
+                            func = function()
+                                for i=1,2 do
+                                    scoring_list[i].pos = {
+                                        x = x_pos,
+                                        y = y_pos,
+                                    }
+                                    G.E_MANAGER:add_event(Event({
+                                        trigger = 'immediate',
+                                        blockable = false,
+                                        --delay = 0.25*(-1 + i),
+                                        func = function()
+                                            SMODS.calculate_context({suika_individual = true, other_ball = scoring_list[i]})
+                                        return true
+                                        end
+                                    }))
+                                    delay(0.25)
+                                end
+                                return true
+                            end
+                        }))
+                        
+                        --[[for i=1,2 do
+                            scoring_list[i].pos = {
+                                x = x_pos,
+                                y = y_pos,
+                            }
+                            SMODS.calculate_context({suika_individual = true, other_ball = scoring_list[i]})
+                        end]]
                         v.merge_target.remove = true
                         v.remove = true
                     --else
@@ -767,7 +933,7 @@ function SuikaLatro.f.update(dt)
         end
 
         SuikaLatro.play_wait_time = SuikaLatro.play_wait_time + dt
-        if SuikaLatro.play_wait_time > 3 then
+        if SuikaLatro.do_merging and SuikaLatro.play_wait_time > 3 then
             G.FUNCS.suika_play_pt2()
         end
         
@@ -781,9 +947,22 @@ function SuikaLatro.f.update(dt)
     end
 end
 
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- DROPPING BALLS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 function SuikaLatro.f.drop_ball()
     if G.hand and G.hand.highlighted and #G.hand.highlighted == 1 and SuikaLatro.drop_wait_time > 0.8 then
-        SuikaLatro.drop_wait_time = 0
+        if G.hand.highlighted[1]:get_id() <= 3 
+        or SMODS.has_enhancement(G.hand.highlighted[1], 'm_stone') then
+            SuikaLatro.drop_wait_time = 0.2
+        elseif G.hand.highlighted[1]:get_id() <= 6 then
+            SuikaLatro.drop_wait_time = 0
+        elseif G.hand.highlighted[1]:get_id() <= 9 then
+            SuikaLatro.drop_wait_time = -0.3
+        else
+            SuikaLatro.drop_wait_time = -0.6
+        end
         SuikaLatro.next_ball = G.hand.highlighted[1]
         local size_offset = SuikaLatro.next_ball and get_size(SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.config.center.key == 'm_stone') or 10
         if SuikaLatro.walls.leftwall.body:getX() + size_offset + 12 > SuikaLatro.indicator.x then
@@ -793,7 +972,12 @@ function SuikaLatro.f.drop_ball()
         end
         table.insert(SuikaLatro.balls, Ball(SuikaLatro.indicator.x, SuikaLatro.indicator.y))
         SuikaLatro.indicator.x = SuikaLatro.indicator.x + (math.random() - 0.5) / 50 --makes stacking harder
-        draw_card(G.hand, G.discard, 50, 'down', false, G.hand.highlighted[1])
+        
+        SMODS.calculate_context({suika_drop_card = true, other_card = G.hand.highlighted[1]})
+        
+        if not G.hand.highlighted[1].being_destroyed then
+            draw_card(G.hand, G.discard, 50, 'down', false, G.hand.highlighted[1])
+        end
         inc_career_stat('c_cards_played', 1)
         if #G.hand.cards <= G.hand.config.card_limit then
             SMODS.draw_cards(G.hand.config.card_limit - #G.hand.cards + 1)
@@ -821,12 +1005,16 @@ SMODS.Keybind {
 }
 
 SMODS.Keybind {
-    key_pressed = 's',
+    key_pressed = suika_cursor_drop,
     event = 'pressed',
     action = function(self)
         SuikaLatro.f.drop_ball()
     end
 }
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- DRAWING
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 function SuikaLatro.f.draw_ball(ball, x_pos, y_pos, size, id, suit, front)
     if type(size) == 'string' then --flipped cards -> hidden nextball
@@ -876,7 +1064,7 @@ function SuikaLatro.f.draw_ball(ball, x_pos, y_pos, size, id, suit, front)
 end
 
 function SuikaLatro.f.draw()
-    screen_w, screen_h = love.window.getMode()
+    SuikaLatro.screen_w, SuikaLatro.screen_h = love.window.getMode()
     love.graphics.setDefaultFilter('nearest', 'nearest')
     local next_is_stone = nil
     if SuikaLatro.next_ball and SuikaLatro.next_ball.facing == 'front' then
@@ -918,24 +1106,32 @@ function SuikaLatro.f.draw()
     
 end
 
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- TUTORIAL DRAWING DIAGRAMS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 suika_tutorial = {
     gameover = load_the_suika("tutorial/gameover.png"),
     biology = load_the_suika("tutorial/biology.png")
 }
 
-love_draw_ref = love.draw
+local love_draw_ref = love.draw
 function love.draw()
     love_draw_ref()
     love.graphics.setColor(1, 1, 1)
     if G.OVERLAY_TUTORIAL and G.OVERLAY_TUTORIAL.step == 2 
     and G.SETTINGS.suikalatro_tutorial_progress.section == 'secondhand' then
-        love.graphics.draw(suika_tutorial.gameover, screen_w*3/5, screen_h*1/5, nil, to_pixels(0.015))
+        love.graphics.draw(suika_tutorial.gameover, SuikaLatro.screen_w*3/5, SuikaLatro.screen_h*1/5, nil, to_pixels(0.015))
     end
     if G.OVERLAY_TUTORIAL and (G.OVERLAY_TUTORIAL.step == 4 or G.OVERLAY_TUTORIAL.step == 5)
     and G.SETTINGS.suikalatro_tutorial_progress.section == 'bigblind' then
-        love.graphics.draw(suika_tutorial.biology, screen_w*3/5, screen_h*1/5, nil, to_pixels(0.015))
+        love.graphics.draw(suika_tutorial.biology, SuikaLatro.screen_w*3/5, SuikaLatro.screen_h*1/5, nil, to_pixels(0.015))
     end
 end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- BOX BACKDROP
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 function G.UIDEF.suika_main()
     return {n = G.UIT.ROOT, config = {r = 0.1, minw = 7, minh = 10, align = "tm", padding = 0.2, colour = G.C.UI.TRANSPARENT_DARK }, nodes = {
@@ -949,6 +1145,10 @@ function SuikaLatro.f.drawBG()
     }
     SuikaLatro.BG:recalculate()
 end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- PLAY HAND AND PLAY HAND BUTTON
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 G.FUNCS.suika_can_play = function(e)
     if SuikaLatro.balls and #SuikaLatro.balls > 0 
@@ -1035,7 +1235,7 @@ G.FUNCS.suika_play = function(e)
                         major = G.ROOM_ATTACH,
                         backdrop_colour = G.C.SUITS[v[1].suit],
                         align = 'cm',
-                        offset = {x = -20/2 + 20/screen_w * t_x(v[1].body:getX()), y = -11.5/2 + 11.5/screen_h * t_y(v[1].body:getY())},
+                        offset = {x = -20/2 + 20/SuikaLatro.screen_w * t_x(v[1].body:getX()), y = -11.5/2 + 11.5/SuikaLatro.screen_h * t_y(v[1].body:getY())},
                         silent = true
                     })
                     play_sound('chips1', math.random()*0.2 + 0.9, 1)
@@ -1064,7 +1264,7 @@ G.FUNCS.suika_play = function(e)
                         major = G.ROOM_ATTACH,
                         backdrop_colour = G.C.SUITS[v[1].suit],
                         align = 'cm',
-                        offset = {x = -20/2 + 20/screen_w * t_x(v[1].body:getX()), y = -11.5/2 + 11.5/screen_h * t_y(v[1].body:getY())},
+                        offset = {x = -20/2 + 20/SuikaLatro.screen_w * t_x(v[1].body:getX()), y = -11.5/2 + 11.5/SuikaLatro.screen_h * t_y(v[1].body:getY())},
                         silent = true
                     })
                     play_sound('chips1', math.random()*0.2 + 0.9, 1)
@@ -1094,7 +1294,7 @@ G.FUNCS.suika_play = function(e)
                         major = G.ROOM_ATTACH,
                         backdrop_colour = G.C.SUITS[v[1].suit],
                         align = 'cm',
-                        offset = {x = -20/2 + 20/screen_w * t_x(v[1].body:getX()), y = -11.5/2 + 11.5/screen_h * t_y(v[1].body:getY())},
+                        offset = {x = -20/2 + 20/SuikaLatro.screen_w * t_x(v[1].body:getX()), y = -11.5/2 + 11.5/SuikaLatro.screen_h * t_y(v[1].body:getY())},
                         silent = true
                     })
                     play_sound('chips1', math.random()*0.2 + 0.9, 1)
@@ -1131,7 +1331,7 @@ G.FUNCS.suika_play = function(e)
         return true
         end
     }))
-    delay(10)
+    --delay(10)
     --[[while not is_stopped do
         local is_stopped = true
         delay(1)
@@ -1169,15 +1369,39 @@ G.FUNCS.suika_play_pt2 = function(e)
     G.E_MANAGER:add_event(Event({
         func = function()
             for k,v in ipairs(SuikaLatro.balls) do
+                local x_pos, y_pos = v.body:getX(), v.body:getY()
+                v.pos = {
+                    x = x_pos,
+                    y = y_pos,
+                }
+            end
+            SMODS.calculate_context({suika_before_jokers = true})
+            return true
+        end
+    }))
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            for k,v in ipairs(SuikaLatro.balls) do
+                local x_pos, y_pos = v.body:getX(), v.body:getY()
+                v.pos = {
+                    x = x_pos,
+                    y = y_pos,
+                }
                 if v.enhancement == 'm_steel' then
                     delay(1)
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+                            SuikaLatro.f.enhancement_message(v.pos.x, v.pos.y, v.enhancement)
                         return true
                         end
                     }))
                 end
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        SMODS.calculate_context({suika_hand_individual = true, other_ball = v})
+                        return true
+                    end
+                }))
             end
             return true
         end
@@ -1205,7 +1429,7 @@ G.FUNCS.suika_play_pt2 = function(e)
             G.E_MANAGER:add_event(Event({
                 trigger = 'immediate',
                 func = function()
-                    G.FUNCS.evaluate_play()
+                    SuikaLatro.f.evaluate_play_jokers()
                     return true
                 end
             }))
