@@ -1,6 +1,6 @@
 WIP!!!! THIS PROJECT IS STILL IN DEVELOPMENT. There may be crashes or issues, apologies!
 
-This mod requires Steamodded. As of writing, the newest releases are not compatible, so please use version [1.0.0-beta-1016c](https://github.com/Steamodded/smods/releases/tag/1.0.0-beta-1016c).
+This mod requires Steamodded. I'd recommend using release version [1.0.0-beta-1016c](https://github.com/Steamodded/smods/releases/tag/1.0.0-beta-1016c) or later.
 
 Use WASD or the arrow keys to move the indicator and drop balls.
 
