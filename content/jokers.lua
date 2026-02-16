@@ -86,6 +86,13 @@ function SuikaLatro.f.score_message_joker(args)
     
 end
 
+SMODS.Atlas {
+    key = "suika_jokers",
+    path = "suika_jokers.png",
+    px = 71,
+    py = 95
+}
+
 SMODS.Joker:take_ownership('greedy_joker',
     {
         config = { extra = { s_mult = 3, suit = 'Diamonds' }, },
@@ -160,6 +167,7 @@ SMODS.Joker:take_ownership('gluttenous_joker',
 
 SMODS.Joker:take_ownership('jolly',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_mult = 8, type = 'suika_merge_1' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_mult, localize(card.ability.extra.type, 'poker_hands') } }
@@ -176,6 +184,7 @@ SMODS.Joker:take_ownership('jolly',
 
 SMODS.Joker:take_ownership('zany',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_mult = 12, type = 'suika_merge_2' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_mult, localize(card.ability.extra.type, 'poker_hands') } }
@@ -192,6 +201,7 @@ SMODS.Joker:take_ownership('zany',
 
 SMODS.Joker:take_ownership('mad',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_mult = 16, type = 'suika_merge_3' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_mult, localize(card.ability.extra.type, 'poker_hands') } }
@@ -208,12 +218,13 @@ SMODS.Joker:take_ownership('mad',
 
 SMODS.Joker:take_ownership('crazy',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_mult = 12, type = 'suika_five_flush' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_mult, localize(card.ability.extra.type, 'poker_hands') } }
         end,
         calculate = function(self, card, context)
-            if context.joker_main and SuikaLatro.triggered_combos[card.ability.extra.type] then
+            if context.joker_main and (SuikaLatro.triggered_combos[card.ability.extra.type] or SuikaLatro.triggered_combos['suika_ten_flush'] or SuikaLatro.triggered_combos['suika_mega_flush']) then
                 return {
                     mult = card.ability.extra.t_mult
                 }
@@ -224,12 +235,13 @@ SMODS.Joker:take_ownership('crazy',
 
 SMODS.Joker:take_ownership('droll',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_mult = 20, type = 'suika_ten_flush' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_mult, localize(card.ability.extra.type, 'poker_hands') } }
         end,
         calculate = function(self, card, context)
-            if context.joker_main and SuikaLatro.triggered_combos[card.ability.extra.type] then
+            if context.joker_main and (SuikaLatro.triggered_combos[card.ability.extra.type] or SuikaLatro.triggered_combos['suika_mega_flush']) then
                 return {
                     mult = card.ability.extra.t_mult
                 }
@@ -240,6 +252,7 @@ SMODS.Joker:take_ownership('droll',
 
 SMODS.Joker:take_ownership('sly',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_chips = 50, type = 'suika_merge_1' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_chips, localize(card.ability.extra.type, 'poker_hands') } }
@@ -256,6 +269,7 @@ SMODS.Joker:take_ownership('sly',
 
 SMODS.Joker:take_ownership('wily',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_chips = 100, type = 'suika_merge_2' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_chips, localize(card.ability.extra.type, 'poker_hands') } }
@@ -272,6 +286,7 @@ SMODS.Joker:take_ownership('wily',
 
 SMODS.Joker:take_ownership('clever',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_chips = 150, type = 'suika_merge_3' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_chips, localize(card.ability.extra.type, 'poker_hands') } }
@@ -288,12 +303,13 @@ SMODS.Joker:take_ownership('clever',
 
 SMODS.Joker:take_ownership('devious',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_chips = 100, type = 'suika_five_flush' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_chips, localize(card.ability.extra.type, 'poker_hands') } }
         end,
         calculate = function(self, card, context)
-            if context.joker_main and SuikaLatro.triggered_combos[card.ability.extra.type] then
+            if context.joker_main and (SuikaLatro.triggered_combos[card.ability.extra.type] or SuikaLatro.triggered_combos['suika_ten_flush'] or SuikaLatro.triggered_combos['suika_mega_flush']) then
                 return {
                     chips = card.ability.extra.t_chips
                 }
@@ -304,12 +320,13 @@ SMODS.Joker:take_ownership('devious',
 
 SMODS.Joker:take_ownership('crafty',
     {
+        atlas = "suika_jokers",
         config = { extra = { t_chips = 180, type = 'suika_ten_flush' }, },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.t_chips, localize(card.ability.extra.type, 'poker_hands') } }
         end,
         calculate = function(self, card, context)
-            if context.joker_main and SuikaLatro.triggered_combos[card.ability.extra.type] then
+            if context.joker_main and (SuikaLatro.triggered_combos[card.ability.extra.type] or SuikaLatro.triggered_combos['suika_mega_flush']) then
                 return {
                     chips = card.ability.extra.t_chips
                 }
@@ -673,6 +690,7 @@ SMODS.Joker:take_ownership('space',
 
 SMODS.Joker:take_ownership('runner',
     {
+        atlas = "suika_jokers",
         config = { extra = { chips = 0, chip_mod = 25 } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.chips, card.ability.extra.chip_mod } }
@@ -1528,6 +1546,7 @@ SMODS.Joker:take_ownership('hit_the_road',
 
 SMODS.Joker:take_ownership('duo',
     {
+        atlas = "suika_jokers",
         config = { extra = { Xmult = 2, type = 'suika_merge_2' } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.Xmult, localize(card.ability.extra.type, 'poker_hands') } }
@@ -1544,6 +1563,7 @@ SMODS.Joker:take_ownership('duo',
 
 SMODS.Joker:take_ownership('trio',
     {
+        atlas = "suika_jokers",
         config = { extra = { Xmult = 3, type = 'suika_merge_3' } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.Xmult, localize(card.ability.extra.type, 'poker_hands') } }
@@ -1560,6 +1580,7 @@ SMODS.Joker:take_ownership('trio',
 
 SMODS.Joker:take_ownership('family',
     {
+        atlas = "suika_jokers",
         config = { extra = { Xmult = 4, type = 'suika_merge_4' } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.Xmult, localize(card.ability.extra.type, 'poker_hands') } }
@@ -1576,12 +1597,13 @@ SMODS.Joker:take_ownership('family',
 
 SMODS.Joker:take_ownership('order',
     {
+        atlas = "suika_jokers",
         config = { extra = { Xmult = 3, type = 'suika_five_flush' } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.Xmult, localize(card.ability.extra.type, 'poker_hands') } }
         end,
         calculate = function(self, card, context)
-            if context.joker_main and SuikaLatro.triggered_combos[card.ability.extra.type] then
+            if context.joker_main and (SuikaLatro.triggered_combos[card.ability.extra.type] or SuikaLatro.triggered_combos['suika_ten_flush'] or SuikaLatro.triggered_combos['suika_mega_flush']) then
                 return {
                     xmult = card.ability.extra.Xmult
                 }
@@ -1592,12 +1614,13 @@ SMODS.Joker:take_ownership('order',
 
 SMODS.Joker:take_ownership('tribe',
     {
+        atlas = "suika_jokers",
         config = { extra = { Xmult = 5, type = 'suika_ten_flush' } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.Xmult, localize(card.ability.extra.type, 'poker_hands') } }
         end,
         calculate = function(self, card, context)
-            if context.joker_main and SuikaLatro.triggered_combos[card.ability.extra.type] then
+            if context.joker_main and (SuikaLatro.triggered_combos[card.ability.extra.type] or SuikaLatro.triggered_combos['suika_mega_flush']) then
                 return {
                     xmult = card.ability.extra.Xmult
                 }

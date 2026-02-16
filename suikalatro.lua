@@ -30,7 +30,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.2 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.3 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -742,8 +742,8 @@ function SuikaLatro.f.update(dt)
                 if distance > 15*math.sqrt(v.id) then -- this should be changed to be based on v.size, but it works for now
                     local angle = math.atan2(delta_y, delta_x)
                     v.body:setLinearVelocity(
-                    -50000 * dt * math.cos(angle),
-                    -50000 * dt * math.sin(angle)
+                    -50000 * 1/60 * math.cos(angle),
+                    -50000 * 1/60 * math.sin(angle)
                     )
                 else
                     if v.dont_prod then -- only one of the balls creates a new ball

@@ -34,6 +34,13 @@ function Game:start_run(args)
     end
 end
 
+SMODS.Atlas {
+    key = "suika_planets",
+    path = "planets.png",
+    px = 71,
+    py = 95
+}
+
 SMODS.PokerHand { -- Mega Flush
     key = 'mega_flush',
     loc_txt = {
@@ -56,7 +63,8 @@ SMODS.PokerHand { -- Mega Flush
 
 SMODS.Consumable:take_ownership('neptune',
     {
-    config = { hand_type = 'suika_mega_flush' }
+    config = { hand_type = 'suika_mega_flush' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -83,7 +91,8 @@ SMODS.PokerHand { -- 10-Flush
 
 SMODS.Consumable:take_ownership('earth',
     {
-    config = { hand_type = 'suika_ten_flush' }
+    config = { hand_type = 'suika_ten_flush' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -110,7 +119,8 @@ SMODS.PokerHand { -- 5-Flush
 
 SMODS.Consumable:take_ownership('jupiter',
     {
-    config = { hand_type = 'suika_five_flush' }
+    config = { hand_type = 'suika_five_flush' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -136,7 +146,8 @@ SMODS.PokerHand { -- Combo Breaker
 
 SMODS.Consumable:take_ownership('saturn',
     {
-    config = { hand_type = 'suika_combo_breaker' }
+    config = { hand_type = 'suika_combo_breaker' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -162,7 +173,8 @@ SMODS.PokerHand { -- Merge 4X
 
 SMODS.Consumable:take_ownership('mars',
     {
-    config = { hand_type = 'suika_merge_4' }
+    config = { hand_type = 'suika_merge_4' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -188,7 +200,8 @@ SMODS.PokerHand { -- Merge 3X
 
 SMODS.Consumable:take_ownership('venus',
     {
-    config = { hand_type = 'suika_merge_3' }
+    config = { hand_type = 'suika_merge_3' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -214,7 +227,8 @@ SMODS.PokerHand { -- Merge 2X
 
 SMODS.Consumable:take_ownership('uranus',
     {
-    config = { hand_type = 'suika_merge_2' }
+    config = { hand_type = 'suika_merge_2' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -240,7 +254,8 @@ SMODS.PokerHand { -- Merge 1X
 
 SMODS.Consumable:take_ownership('mercury',
     {
-    config = { hand_type = 'suika_merge_1' }
+    config = { hand_type = 'suika_merge_1' },
+    atlas = "suika_planets",
     },
     true
 )
@@ -266,7 +281,8 @@ SMODS.PokerHand { -- Lowball
 
 SMODS.Consumable:take_ownership('pluto',
     {
-    config = { hand_type = 'suika_lowball' }
+    config = { hand_type = 'suika_lowball' },
+    atlas = "suika_planets",
     },
     true
 )
