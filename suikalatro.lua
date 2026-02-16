@@ -30,7 +30,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.1a (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.2 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -772,8 +772,8 @@ function SuikaLatro.f.update(dt)
                         if (v.enhancement ~= 'c_base' or v.merge_target.enhancement ~= 'c_base') and (v.enhancement == 'c_base' or v.merge_target.enhancement == 'c_base') then
                             fixed_enhancement = v.enhancement ~= 'c_base' and v.enhancement or v.merge_target.enhancement
                         end
-                        if (not v.edition or not v.merge_target.enhancement) and (v.edition or v.merge_target.edition) then
-                            fixed_enhancement = v.edition or v.merge_target.edition
+                        if (not v.edition or not v.merge_target.edition) and (v.edition or v.merge_target.edition) then
+                            fixed_edition = v.edition or v.merge_target.edition
                         end
                         if (not v.seal or not v.merge_target.seal) and (v.seal or v.merge_target.seal) then
                             fixed_seal = v.seal or v.merge_target.seal
