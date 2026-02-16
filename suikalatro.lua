@@ -30,7 +30,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.0 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.1 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -934,6 +934,7 @@ function SuikaLatro.f.update(dt)
 
         SuikaLatro.play_wait_time = SuikaLatro.play_wait_time + dt
         if SuikaLatro.do_merging and SuikaLatro.play_wait_time > 3 then
+            SuikaLatro.play_wait_time = 0
             G.FUNCS.suika_play_pt2()
         end
         
@@ -1347,25 +1348,19 @@ G.FUNCS.suika_play = function(e)
 end
 
 G.FUNCS.suika_play_pt2 = function(e)
-    G.E_MANAGER:add_event(Event({
-        func = function()
-            SuikaLatro.do_merging = false
-            for k,v in ipairs(SuikaLatro.balls) do
-                v.merges = 0
-            end
-            if SuikaLatro.lowball then
-                play_sound('chips1', math.random()*0.2 + 0.9, 1)
-                SuikaLatro.triggered_combos['suika_lowball'] = SuikaLatro.triggered_combos['suika_lowball'] and SuikaLatro.triggered_combos['suika_lowball'] + 1 or 1
-                G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + G.GAME.hands.suika_lowball.chips
-                G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
-                G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + G.GAME.hands.suika_lowball.mult
-                G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
-                G.GAME.hands.suika_lowball.played = G.GAME.hands.suika_lowball.played + 1
-            end
-        return true
-        end
-    }))
-    delay(1)
+    SuikaLatro.do_merging = false
+    for k,v in ipairs(SuikaLatro.balls) do
+        v.merges = 0
+    end
+    if SuikaLatro.lowball then
+        play_sound('chips1', math.random()*0.2 + 0.9, 1)
+        SuikaLatro.triggered_combos['suika_lowball'] = SuikaLatro.triggered_combos['suika_lowball'] and SuikaLatro.triggered_combos['suika_lowball'] + 1 or 1
+        G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + G.GAME.hands.suika_lowball.chips
+        G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
+        G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + G.GAME.hands.suika_lowball.mult
+        G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
+        G.GAME.hands.suika_lowball.played = G.GAME.hands.suika_lowball.played + 1
+    end
     G.E_MANAGER:add_event(Event({
         func = function()
             for k,v in ipairs(SuikaLatro.balls) do

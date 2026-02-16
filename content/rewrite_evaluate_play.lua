@@ -1,4 +1,5 @@
 SuikaLatro.f.evaluate_play_jokers = function(e)
+    print("evaluating jokers!")
     percent = 0.3
     percent_delta = 0.08
 
@@ -193,6 +194,7 @@ SuikaLatro.f.evaluate_play_jokers = function(e)
             trigger = 'immediate',
             func = function()
                 G.FUNCS.chip_UI_set()
+                print("setting blind score ('chips')")
                 return true
             end
         }))
@@ -207,7 +209,7 @@ SuikaLatro.f.evaluate_play_jokers = function(e)
         }))
 
     -- context.after calculations
-    SMODS.calculate_context({full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, after = true})
+    SMODS.calculate_context({scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, after = true})
     
     -- TARGET: effects after hand evaluation
 
