@@ -542,9 +542,11 @@ SMODS.Joker:take_ownership('scholar',
         rarity = 3,
         config = { extra = { x_mult = 3 } },
         in_pool = function(self, args)
-            for k,v in ipairs(G.playing_cards) do
-                if v.base.id == 14 then
-                    return true
+            if G.playing_cards then
+                for k,v in ipairs(G.playing_cards) do
+                    if v.base.id == 14 then
+                        return true
+                    end
                 end
             end
             return false
@@ -621,9 +623,11 @@ SMODS.Joker:take_ownership('superposition',
         rarity = 2,
         cost = 6,
         in_pool = function(self, args)
-            for k,v in ipairs(G.playing_cards) do
-                if v.base.id == 14 then
-                    return true
+            if G.playing_cards then
+                for k,v in ipairs(G.playing_cards) do
+                    if v.base.id == 14 then
+                        return true
+                    end
                 end
             end
             return false
@@ -1024,9 +1028,11 @@ SMODS.Joker:take_ownership('baron',
     {
         config = { extra = { xmult = 4 } },
         in_pool = function(self, args)
-            for k,v in ipairs(G.playing_cards) do
-                if v.base.id == 13 then
-                    return true
+            if G.playing_cards then
+                for k,v in ipairs(G.playing_cards) do
+                    if v.base.id == 13 then
+                        return true
+                    end
                 end
             end
             return false
@@ -1534,9 +1540,11 @@ SMODS.Joker:take_ownership('hit_the_road',
     {
         config = { extra = 1.5, x_mult = 1},
         in_pool = function(self, args)
-            for k,v in ipairs(G.playing_cards) do
-                if v.base.id == 11 then
-                    return true
+            if G.playing_cards then
+                for k,v in ipairs(G.playing_cards) do
+                    if v.base.id == 11 then
+                        return true
+                    end
                 end
             end
             return false
@@ -1652,9 +1660,11 @@ SMODS.Joker:take_ownership('shoot_the_moon',
         cost = 8,
         config = { extra = { xmult = 3 } },
         in_pool = function(self, args)
-            for k,v in ipairs(G.playing_cards) do
-                if v.base.id == 12 then
-                    return true
+            if G.playing_cards then
+                for k,v in ipairs(G.playing_cards) do
+                    if v.base.id == 12 then
+                        return true
+                    end
                 end
             end
             return false
