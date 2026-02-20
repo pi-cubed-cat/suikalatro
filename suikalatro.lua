@@ -30,7 +30,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.4 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.4a (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -188,6 +188,9 @@ assert(SMODS.load_file("content/decks.lua"))()
 assert(SMODS.load_file("content/modicon.lua"))()
 assert(SMODS.load_file("content/rewrite_evaluate_play.lua"))()
 assert(SMODS.load_file("content/tutorial.lua"))()
+if MP then
+    assert(SMODS.load_file("compat/multiplayer.lua"))()
+end
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 -- STATIC PHYSICS OBJECTS

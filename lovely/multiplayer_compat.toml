@@ -1,0 +1,18 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# disables hanging chad (mp) from appearing
+[[patches]]
+[patches.pattern]
+target = '''=[SMODS Multiplayer "objects/jokers/hanging_chad.lua"]'''
+pattern = '''
+	key = "hanging_chad",
+'''
+position = "after"
+payload = '''
+in_pool = function(self, args) return false end,
+'''
+overwrite = true
+match_indent = true
