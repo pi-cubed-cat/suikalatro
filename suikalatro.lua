@@ -30,7 +30,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.4a (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.4b (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -188,7 +188,7 @@ assert(SMODS.load_file("content/decks.lua"))()
 assert(SMODS.load_file("content/modicon.lua"))()
 assert(SMODS.load_file("content/rewrite_evaluate_play.lua"))()
 assert(SMODS.load_file("content/tutorial.lua"))()
-if MP then
+if next(SMODS.find_mod("Multiplayer")) then
     assert(SMODS.load_file("compat/multiplayer.lua"))()
 end
 
@@ -551,7 +551,58 @@ function beginContact(a, b, coll)
                 func = function()
                     G.STATE = G.STATES.HAND_PLAYED
                     G.STATE_COMPLETE = true
-                    end_round()
+                    if not MP or not MP.LOBBY.code then
+                        end_round()
+                    else
+                        SuikaLatro.MP_funcs.action_player_info(MP.GAME.lives - 1)
+                        if MP.is_pvp_boss() then
+                            
+                            G.E_MANAGER:add_event(Event({
+                                trigger = "immediate",
+                                func = function()
+                                    MP.ACTIONS.play_hand(G.GAME.chips, 0)
+                                    -- For now, never advance to next round
+                                    attention_text({
+                                        scale = 0.8,
+                                        text = localize("k_wait_enemy"),
+                                        hold = 10,
+                                        align = "cm",
+                                        offset = { x = 0, y = -1.5 },
+                                        major = G.play,
+                                    })
+                                    if G.hand.cards[1] and G.STATE == G.STATES.HAND_PLAYED then
+                                        SuikaLatro.MP_funcs.eval_hand_and_jokers()
+                                        G.FUNCS.draw_from_hand_to_discard()
+                                    end
+                                    return true
+                                end,
+                            }))
+
+                            --SuikaLatro.MP_funcs.action_end_pvp()
+                        else
+                            --MP.ACTIONS.fail_round(G.GAME.current_round.hands_played)
+                            --[[local self_lives = tostring(MP.GAME.lives - 1)
+                            Client.send({
+                                action = "enemyInfo",
+                                lives = self_lives,
+                                hands_left = '0',
+                                skips = tostring(MP.GAME.skips)
+                            })]]
+                            end_round()
+                            MP.ACTIONS.set_location('string')
+                            --[[Client.send({
+                                action = "winGame",
+                            })
+                            
+                            MP.end_game_jokers_payload = ""
+                            MP.nemesis_deck_string = ""
+                            MP.end_game_jokers_received = false
+                            MP.nemesis_deck_received = false
+                            G.STATE_COMPLETE = false
+                            G.STATE = G.STATES.GAME_OVER]]
+
+                        end
+                    end
                     return true
                 end,
             }))

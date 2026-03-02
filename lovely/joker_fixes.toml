@@ -30,3 +30,17 @@ if false and self.ability.name == 'Seeing Double' then
 '''
 match_indent = true
 overwrite = false
+
+# fix flower pot
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+position = "at"
+pattern = '''
+if self.ability.name == 'Flower Pot' then
+'''
+payload = '''
+if false and self.ability.name == 'Flower Pot' then
+'''
+match_indent = true
+overwrite = false

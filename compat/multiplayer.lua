@@ -43,3 +43,116 @@ action_asteroid = function()
         { mult = 0, chips = 0, handname = "", level = "" }
     )
 end
+
+SuikaLatro.MP_funcs = {}
+
+function SuikaLatro.MP_funcs.action_player_info(lives)
+	if MP.GAME.lives ~= lives then
+		if MP.GAME.lives ~= 0 and MP.LOBBY.config.gold_on_life_loss then
+			MP.GAME.comeback_bonus_given = false
+			MP.GAME.comeback_bonus = MP.GAME.comeback_bonus + 1
+		end
+		ease_lives(lives - MP.GAME.lives)
+		print("hi")
+        if MP.LOBBY.config.no_gold_on_round_loss and (G.GAME.blind and G.GAME.blind.dollars) then
+			G.GAME.blind.dollars = 0
+		end
+	end
+	MP.GAME.lives = lives
+end
+
+function SuikaLatro.MP_funcs.action_end_pvp()
+	MP.GAME.end_pvp = true
+	MP.GAME.timer = MP.LOBBY.config.timer_base_seconds
+	MP.GAME.timer_started = false
+end
+
+function SuikaLatro.MP_funcs.eval_hand_and_jokers()
+	for i = 1, #G.hand.cards do
+		--Check for hand doubling
+		local reps = { 1 }
+		local j = 1
+		while j <= #reps do
+			local percent = (i - 0.999) / (#G.hand.cards - 0.998) + (j - 1) * 0.1
+			if reps[j] ~= 1 then
+				card_eval_status_text(
+					(reps[j].jokers or reps[j].seals).card,
+					"jokers",
+					nil,
+					nil,
+					nil,
+					(reps[j].jokers or reps[j].seals)
+				)
+			end
+
+			--calculate the hand effects
+			local effects = { G.hand.cards[i]:get_end_of_round_effect() }
+			for k = 1, #G.jokers.cards do
+				--calculate the joker individual card effects
+				local eval = G.jokers.cards[k]:calculate_joker({
+					cardarea = G.hand,
+					other_card = G.hand.cards[i],
+					individual = true,
+					end_of_round = true,
+				})
+				if eval then table.insert(effects, eval) end
+			end
+
+			if reps[j] == 1 then
+				--Check for hand doubling
+				--From Red seal
+				local eval = eval_card(
+					G.hand.cards[i],
+					{ end_of_round = true, cardarea = G.hand, repetition = true, repetition_only = true }
+				)
+				if next(eval) and (next(effects[1]) or #effects > 1) then
+					for h = 1, eval.seals.repetitions do
+						reps[#reps + 1] = eval
+					end
+				end
+
+				--from Jokers
+				for j = 1, #G.jokers.cards do
+					--calculate the joker effects
+					local eval = eval_card(G.jokers.cards[j], {
+						cardarea = G.hand,
+						other_card = G.hand.cards[i],
+						repetition = true,
+						end_of_round = true,
+						card_effects = effects,
+					})
+					if next(eval) then
+						for h = 1, eval.jokers.repetitions do
+							reps[#reps + 1] = eval
+						end
+					end
+				end
+			end
+
+			for ii = 1, #effects do
+				--if this effect came from a joker
+				if effects[ii].card then
+					G.E_MANAGER:add_event(Event({
+						trigger = "immediate",
+						func = function()
+							effects[ii].card:juice_up(0.7)
+							return true
+						end,
+					}))
+				end
+
+				--If dollars
+				if effects[ii].h_dollars then
+					ease_dollars(effects[ii].h_dollars)
+					card_eval_status_text(G.hand.cards[i], "dollars", effects[ii].h_dollars, percent)
+				end
+
+				--Any extras
+				if effects[ii].extra then
+					card_eval_status_text(G.hand.cards[i], "extra", nil, percent, nil, effects[ii].extra)
+				end
+			end
+			j = j + 1
+		end
+	end
+end
