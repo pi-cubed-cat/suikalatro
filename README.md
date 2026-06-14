@@ -1,7 +1,7 @@
 WIP!!!! THIS PROJECT IS STILL IN DEVELOPMENT. There may be crashes or issues, apologies!
 VOLUME WARNING! Especially when many events happen at the same time! This is planned to be fixed in the future.
 
-This mod requires Steamodded. I'd recommend using release version [1.0.0-beta-1016c](https://github.com/Steamodded/smods/releases/tag/1.0.0-beta-1620a) or later.
+This mod requires Steamodded. I'd recommend using release version [1.0.0-beta-1620a](https://github.com/Steamodded/smods/releases/tag/1.0.0-beta-1620a) or later.
 
 Use WASD or the arrow keys to move the indicator and drop balls.
 
