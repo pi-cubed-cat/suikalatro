@@ -30,7 +30,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.4b (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.5 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -554,9 +554,7 @@ function beginContact(a, b, coll)
                     if not MP or not MP.LOBBY.code then
                         end_round()
                     else
-                        SuikaLatro.MP_funcs.action_player_info(MP.GAME.lives - 1)
                         if MP.is_pvp_boss() then
-                            
                             G.E_MANAGER:add_event(Event({
                                 trigger = "immediate",
                                 func = function()
@@ -577,30 +575,9 @@ function beginContact(a, b, coll)
                                     return true
                                 end,
                             }))
-
-                            --SuikaLatro.MP_funcs.action_end_pvp()
                         else
-                            --MP.ACTIONS.fail_round(G.GAME.current_round.hands_played)
-                            --[[local self_lives = tostring(MP.GAME.lives - 1)
-                            Client.send({
-                                action = "enemyInfo",
-                                lives = self_lives,
-                                hands_left = '0',
-                                skips = tostring(MP.GAME.skips)
-                            })]]
+                            MP.ACTIONS.fail_round(1)
                             end_round()
-                            MP.ACTIONS.set_location('string')
-                            --[[Client.send({
-                                action = "winGame",
-                            })
-                            
-                            MP.end_game_jokers_payload = ""
-                            MP.nemesis_deck_string = ""
-                            MP.end_game_jokers_received = false
-                            MP.nemesis_deck_received = false
-                            G.STATE_COMPLETE = false
-                            G.STATE = G.STATES.GAME_OVER]]
-
                         end
                     end
                     return true

@@ -46,21 +46,6 @@ end
 
 SuikaLatro.MP_funcs = {}
 
-function SuikaLatro.MP_funcs.action_player_info(lives)
-	if MP.GAME.lives ~= lives then
-		if MP.GAME.lives ~= 0 and MP.LOBBY.config.gold_on_life_loss then
-			MP.GAME.comeback_bonus_given = false
-			MP.GAME.comeback_bonus = MP.GAME.comeback_bonus + 1
-		end
-		ease_lives(lives - MP.GAME.lives)
-		print("hi")
-        if MP.LOBBY.config.no_gold_on_round_loss and (G.GAME.blind and G.GAME.blind.dollars) then
-			G.GAME.blind.dollars = 0
-		end
-	end
-	MP.GAME.lives = lives
-end
-
 function SuikaLatro.MP_funcs.action_end_pvp()
 	MP.GAME.end_pvp = true
 	MP.GAME.timer = MP.LOBBY.config.timer_base_seconds

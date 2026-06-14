@@ -8,8 +8,11 @@
     "badge_colour": "00AA00",
     "display_name": "Suikalatro",
     "dependencies": [
-        "Steamodded (>=1.0.0~BETA-0711a)"
+        "Steamodded (>=1.0.0~BETA-1620a)"
     ],
-    "version": "0.5.4b",
+    "conflicts": [
+		"JokerDisplay"
+	],
+    "version": "0.5.5",
     "allow_redistribution": true
 }
