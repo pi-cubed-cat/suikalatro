@@ -1,12 +1,4 @@
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
--- EDIT KEYBINDS BELOW (defaults are a, d, s)
---+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
-
-suika_cursor_left = 'a'
-suika_cursor_right = 'd'
-suika_cursor_drop = 's'
-
---+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 -- DISPLAY VERSION ON MAIN MENU
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
@@ -30,7 +22,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.5 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.6 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -188,6 +180,7 @@ assert(SMODS.load_file("content/decks.lua"))()
 assert(SMODS.load_file("content/modicon.lua"))()
 assert(SMODS.load_file("content/rewrite_evaluate_play.lua"))()
 assert(SMODS.load_file("content/tutorial.lua"))()
+assert(SMODS.load_file("content/config_menu.lua"))()
 if next(SMODS.find_mod("Multiplayer")) then
     assert(SMODS.load_file("compat/multiplayer.lua"))()
 end
@@ -736,13 +729,13 @@ function SuikaLatro.f.update(dt)
     end
     --if not G.STATE == G.STATES.GAME_OVER then SuikaLatro.world:update(dt) end
     local size_offset = SuikaLatro.next_ball and (SuikaLatro.next_ball.facing == 'back' and 20 or get_size(SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.config.center.key == 'm_stone')) or 20
-    if love.keyboard.isDown("left") or love.keyboard.isDown(suika_cursor_left) then
+    if love.keyboard.isDown(suika_mod_path.config.controls.cursor_left) or love.keyboard.isDown(suika_mod_path.config.controls.cursor_left_alt) then
         SuikaLatro.indicator.x = SuikaLatro.indicator.x - 200 * dt
         if SuikaLatro.walls.leftwall.body:getX() + size_offset + 12 > SuikaLatro.indicator.x then
             SuikaLatro.indicator.x = SuikaLatro.walls.leftwall.body:getX() + size_offset + 12
         end
     end
-    if love.keyboard.isDown("right") or love.keyboard.isDown(suika_cursor_right) then
+    if love.keyboard.isDown(suika_mod_path.config.controls.cursor_right) or love.keyboard.isDown(suika_mod_path.config.controls.cursor_right_alt) then
         SuikaLatro.indicator.x = SuikaLatro.indicator.x + 200 * dt
         if SuikaLatro.walls.rightwall.body:getX() - size_offset - 12 < SuikaLatro.indicator.x then
             SuikaLatro.indicator.x = SuikaLatro.walls.rightwall.body:getX() - size_offset - 12
@@ -1029,7 +1022,7 @@ function SuikaLatro.f.drop_ball()
 end
 
 SMODS.Keybind {
-    key_pressed = 'down',
+    key_pressed = suika_mod_path.config.controls.drop,
     event = 'pressed',
     action = function(self)
         SuikaLatro.f.drop_ball()
@@ -1037,7 +1030,7 @@ SMODS.Keybind {
 }
 
 SMODS.Keybind {
-    key_pressed = suika_cursor_drop,
+    key_pressed = suika_mod_path.config.controls.drop_alt,
     event = 'pressed',
     action = function(self)
         SuikaLatro.f.drop_ball()

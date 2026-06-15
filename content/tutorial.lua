@@ -23,9 +23,18 @@ G.FUNCS.suikalatro_start_run = function(e, args)
     G.FUNCS.wipe_off()
 end
 
-function reset_tutorial()
+G.FUNCS.suika_reset_tutorial = function()
     G.SETTINGS.suikalatro_tutorial_complete = false
     G.SETTINGS.suikalatro_tutorial_progress = nil
+end
+
+local Game_start_run_ref = Game.start_run -- reset tutorial if tutorial wasn't completed 
+function Game:start_run(args)
+    Game_start_run_ref(self, args)
+    local saveTable = args.savetext or nil
+    if not saveTable and not G.SETTINGS.suikalatro_tutorial_complete then
+        G.FUNCS.suika_reset_tutorial()
+    end
 end
 
 G.FUNCS.suikalatro_tutorial_controller = function()
