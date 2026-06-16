@@ -127,7 +127,7 @@ function SuikaLatro.UI.CreateKeybindUI(key, bind)
 			UIBox_button({
 				label = { SuikaLatro.UI.LocalizeKeybind(Suika.config.controls[bind]) or "None" },
 				col = true,
-				colour = G.C.CHIPS,
+				colour = G.C.GREEN,
 				scale = 0.3,
 				minw = 2.75,
 				maxw = 2.75,

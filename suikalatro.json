@@ -13,6 +13,6 @@
     "conflicts": [
 		"JokerDisplay"
 	],
-    "version": "0.5.6",
+    "version": "0.5.7",
     "allow_redistribution": true
 }

@@ -391,8 +391,8 @@ return {
                 name = "Runner",
                 text = {
                     "Gains {C:chips}+#2#{} Chips if",
-                    "played hand contained a",
-                    "{C:attention}Merge 4X{} or {C:attention}Combo Breaker{}",
+                    "played hand contained",
+                    "a {C:attention}Merge 4X{}",
                     "{C:inactive}(Currently {C:chips}+#1#{C:inactive} Chips)",
                 },
             },

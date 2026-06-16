@@ -22,7 +22,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.5.6 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.5.7 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -181,6 +181,7 @@ assert(SMODS.load_file("content/modicon.lua"))()
 assert(SMODS.load_file("content/rewrite_evaluate_play.lua"))()
 assert(SMODS.load_file("content/tutorial.lua"))()
 assert(SMODS.load_file("content/config_menu.lua"))()
+assert(SMODS.load_file("utils/particles.lua"))()
 if next(SMODS.find_mod("Multiplayer")) then
     assert(SMODS.load_file("compat/multiplayer.lua"))()
 end
@@ -723,10 +724,13 @@ function SuikaLatro.f.update(dt)
 
     SuikaLatro.drop_wait_time = SuikaLatro.drop_wait_time + dt
 
-    if SuikaLatro.do_physics then
+    if SuikaLatro.do_physics and not (#G.E_MANAGER.queues.base > 1 and SuikaLatro.do_merging) then
         SuikaLatro.world:update(dt)
         SuikaLatro.f.find_flush_groups()
     end
+
+    SuikaLatro.f.particles_update(dt)
+
     --if not G.STATE == G.STATES.GAME_OVER then SuikaLatro.world:update(dt) end
     local size_offset = SuikaLatro.next_ball and (SuikaLatro.next_ball.facing == 'back' and 20 or get_size(SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.config.center.key == 'm_stone')) or 20
     if love.keyboard.isDown(suika_mod_path.config.controls.cursor_left) or love.keyboard.isDown(suika_mod_path.config.controls.cursor_left_alt) then
@@ -773,8 +777,14 @@ function SuikaLatro.f.update(dt)
                     if v.dont_prod then -- only one of the balls creates a new ball
                         SuikaLatro.play_wait_time = 0
                         SuikaLatro.lowball = false
+
                         local selected_ball = math.random()
                         local merge_count = math.max(v.merges, v.merge_target.merges) + 1
+
+                        local pixel_x, pixel_y = p_to_pixels(v.body:getX(), v.body:getY())
+                        local col_suits = { G.C.SUITS[v.suit], G.C.SUITS[v.merge_target.suit] }
+                        SuikaLatro.f.explode_particles(pixel_x, pixel_y, 20 * merge_count, col_suits, 0.2)
+
                         local fixed_enhancement = nil
                         local fixed_edition = nil
                         local fixed_seal = nil
@@ -892,6 +902,7 @@ function SuikaLatro.f.update(dt)
                                 return true
                             end
                         }))
+                        delay(0.1)
                         if self_enhancement ~= 'c_base' and self_enhancement ~= 'm_gold' and self_enhancement ~= 'm_steel' then -- enhancements for ball 1
                             G.E_MANAGER:add_event(Event({
                                 trigger = 'after',
@@ -1124,6 +1135,8 @@ function SuikaLatro.f.draw()
         SuikaLatro.f.draw_ball(SuikaLatro.next_ball, SuikaLatro.indicator.x, SuikaLatro.indicator.y, get_size(SuikaLatro.next_ball.base.id, next_is_stone), SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.base.suit, SuikaLatro.next_ball.config.center.key)
     end
     
+    SuikaLatro.f.particles_draw()
+
     SuikaLatro.ff_count = #SMODS.find_card('j_four_fingers') or 0
     for k, v in ipairs(SuikaLatro.balls) do --fallen balls
         SuikaLatro.f.draw_ball(v, v.body:getX(), v.body:getY(), v.size, v.id, v.suit, v.enhancement)

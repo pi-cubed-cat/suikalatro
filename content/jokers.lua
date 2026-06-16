@@ -701,7 +701,7 @@ SMODS.Joker:take_ownership('runner',
         end,
         calculate = function(self, card, context)
             if context.suika_before_jokers and not context.blueprint then
-                if SuikaLatro.triggered_combos['suika_merge_4'] or SuikaLatro.triggered_combos['suika_combo_breaker'] then
+                if SuikaLatro.triggered_combos['suika_merge_4'] then
                     card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chip_mod
                     return {
                         message = localize('k_upgrade_ex'),
