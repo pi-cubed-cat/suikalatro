@@ -184,6 +184,7 @@ SuikaLatro.f.evaluate_play_jokers = function(e)
         G.E_MANAGER:add_event(Event({
             func = function()
                 play_sound('chips2')
+                check_and_set_high_score('hand',  G.GAME.current_round.current_hand.chip_total )
                 G.GAME.chips = G.GAME.chips + G.GAME.current_round.current_hand.chip_total
                 return true
             end

@@ -31,7 +31,7 @@ SMODS.Consumable:take_ownership('trance',
 )
 
 SMODS.Consumable:take_ownership('ouija', { -- Ouija
-    config = { extra = { draw_cards = 5 }},
+    config = { extra = { draw_cards = 4 }},
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.draw_cards } }
     end,
@@ -73,7 +73,6 @@ SMODS.Consumable:take_ownership('ouija', { -- Ouija
                         end
                     }))
                 end
-                G.hand:change_size(-1)
                 for i = 1, #G.hand.cards do
                     local percent = 0.85 + (i - 0.999) / (#G.hand.cards - 0.998) * 0.3
                     G.E_MANAGER:add_event(Event({
@@ -95,7 +94,7 @@ SMODS.Consumable:take_ownership('ouija', { -- Ouija
 }, true)
 
 SMODS.Consumable:take_ownership('sigil', { -- Sigil
-    config = { extra = { draw_cards = 5 }},
+    config = { extra = { draw_cards = 6 }},
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.draw_cards } }
     end,

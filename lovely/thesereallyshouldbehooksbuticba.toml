@@ -12,7 +12,7 @@ for _,v in ipairs(SMODS.get_card_areas('playing_cards', 'end_of_round')) do
 position = "before"
 payload = '''
 for k,v in ipairs(SuikaLatro.balls) do
-    if v.enhancement == 'm_gold' then
+    if v.enhancement == 'm_gold' and not v.debuff then
         delay(1)
         G.E_MANAGER:add_event(Event({
             func = function()

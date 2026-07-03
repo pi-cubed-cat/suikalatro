@@ -10,7 +10,44 @@ return {
                 },
             },
         },
-        Blind={},
+        Blind={
+            bl_suika_melon = {
+                name = 'The Melon',
+                text = {
+                    "Bigger balls",
+                }
+            },
+            bl_plant = {
+                text = {
+                    "All 2, 3, and 4 cards",
+                    "are debuffed",
+                },
+            },
+            bl_fish = {
+                text = {
+                    "Cards drawn face down",
+                    "after each card played",
+                },
+            },
+            bl_tooth = {
+                text = {
+                    "#1# in #2# cards",
+                    "lose $1 when played",
+                },
+            },
+            bl_flint = {
+                text = {
+                    "Poker combos give",
+                    "half chips and mult",
+                },
+            },
+            bl_house = {
+                text = {
+                    "Cards drawn face down",
+                    "until first Play or Discard",
+                },
+            },
+        },
         Edition={},
         Enhanced={
             m_bonus = {
@@ -656,7 +693,6 @@ return {
                     "then convert all cards",
                     "in hand to a single",
                     "random {C:attention}rank",
-                    "{C:red}-1{} hand size",
                 },
             },
         },
@@ -704,7 +740,15 @@ return {
                 },
             },
         },
-        Voucher={},
+        Voucher={
+            v_observatory = {
+                text = {
+                    "{C:planet}Planet{} cards in your",
+                    "{C:attention}consumable{} area",
+                    "give {X:red,C:white} X#1# {} Mult",
+                },
+            }
+        },
     },
     misc = {
         achievement_descriptions={},
