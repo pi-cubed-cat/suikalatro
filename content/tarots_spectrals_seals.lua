@@ -4,7 +4,7 @@
     no_collection = true
     },
     true
-)]]
+)
 
 SMODS.Consumable:take_ownership('talisman',
     {
@@ -12,7 +12,7 @@ SMODS.Consumable:take_ownership('talisman',
     no_collection = true
     },
     true
-)
+)]]
 
 SMODS.Consumable:take_ownership('deja_vu',
     {
@@ -22,13 +22,13 @@ SMODS.Consumable:take_ownership('deja_vu',
     true
 )
 
-SMODS.Consumable:take_ownership('trance',
+--[[SMODS.Consumable:take_ownership('trance',
     {
     in_pool = function(self, args) return false end,
     no_collection = true
     },
     true
-)
+)]]
 
 SMODS.Consumable:take_ownership('ouija', { -- Ouija
     config = { extra = { draw_cards = 4 }},
