@@ -22,7 +22,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.6.0 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.7.0 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -61,6 +61,12 @@ suika_seals = {
     Blue = load_the_suika("seals/blue.png"),
     Gold = load_the_suika("seals/gold.png"),
     Purple = load_the_suika("seals/purple.png"),
+}
+
+suika_editions = {
+    e_foil = load_the_suika("discount_shaders/foil.png"),
+    e_holo = load_the_suika("discount_shaders/holo.png"),
+    e_polychrome = load_the_suika("discount_shaders/polychrome.png"),
 }
 
 suika_fronts = {
@@ -132,6 +138,7 @@ SuikaLatro = {
     },
     balls = {}, --dynamic objects
     ball_sizefactor = 15,
+    bounciness = 0.1,
     next_ball = nil,
     indicator = {
         x = 0,
@@ -341,10 +348,11 @@ function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix
             end
         end
     end
+    
     self.canvas = love.graphics.newCanvas(self.size*2, self.size*2)
     self.shape = love.physics.newCircleShape(self.size)
     self.fixture = love.physics.newFixture(self.body, self.shape, 1)
-    self.fixture:setRestitution(0.1)
+    self.fixture:setRestitution(SuikaLatro.bounciness)
     if self.enhancement == 'm_steel' and not self.debuff then
         self.fixture:setDensity(100)
         self.body:resetMassData()
@@ -395,6 +403,9 @@ end
 
 local save_run_ref = save_run --save balls too!
 function save_run()
+    G.GAME.SuikaLatro_ball_sizefactor = SuikaLatro.ball_sizefactor
+    G.GAME.SuikaLatro_bounciness = SuikaLatro.bounciness
+    
     G.GAME.SuikaLatro_balls = {}
     for k, ball in ipairs(SuikaLatro.balls) do
         G.GAME.SuikaLatro_balls[k] = {}
@@ -407,6 +418,11 @@ function save_run()
         G.GAME.SuikaLatro_balls[k].seal = ball.seal
         G.GAME.SuikaLatro_balls[k].size = ball.size
         G.GAME.SuikaLatro_balls[k].debuff = ball.debuff
+
+        G.GAME.SuikaLatro_balls[k].perma_bonuses = {}
+        for kk,vv in pairs(ball.perma_bonuses) do
+            G.GAME.SuikaLatro_balls[k].perma_bonuses[kk] = v
+        end
     end
     save_run_ref()
 end
@@ -419,6 +435,8 @@ function Game:start_run(args)
     if G.STATE == G.STATES.SELECTING_HAND then
         SuikaLatro.world_T.y = 2.5
     end
+    SuikaLatro.ball_sizefactor = G.GAME.SuikaLatro_ball_sizefactor or 15
+    SuikaLatro.bounciness = G.GAME.SuikaLatro_bounciness or 0.1
     if G.GAME.SuikaLatro_balls then
         for k,v in ipairs(G.GAME.SuikaLatro_balls) do
             table.insert(SuikaLatro.balls, Ball(v.x, v.y, v, 0, 0, nil, nil, nil, v.size))
@@ -608,25 +626,25 @@ function endContact(a, b, coll)
 end
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
--- UPDATE HOOK-RELATED
+-- UPDATE HOOK-RELATED (ball-equivelants for card modifiers)
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
-SuikaLatro.world:setCallbacks(beginContact, endContact)
+function SuikaLatro.f.debuff_message(x_, y_)
+    attention_text({
+        text = localize('k_debuffed'),
+        scale = 0.5,
+        hold = 1,
+        major = G.ROOM_ATTACH,
+        backdrop_colour = G.C.RED,
+        align = 'cm',
+        offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+        silent = true
+    })
+    play_sound('cancel')
+end
 
 function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
-    if mtype == 'debuff' then
-        attention_text({
-            text = localize('k_debuffed'),
-            scale = 0.5,
-            hold = 1,
-            major = G.ROOM_ATTACH,
-            backdrop_colour = G.C.RED,
-            align = 'cm',
-            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
-            silent = true
-        })
-        play_sound('cancel')
-    elseif mtype == 'm_mult' then
+    if mtype == 'm_mult' then
         if not amt then amt = 4 end
         attention_text({
             text = "+"..amt,
@@ -735,6 +753,95 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
     end
 end
 
+function SuikaLatro.f.edition_message(x_, y_, etype, amt)
+    if etype == 'e_foil' then
+        if not amt then amt = 50 end
+        attention_text({
+            text = "+"..amt,
+            scale = 0.5,
+            hold = 1,
+            major = G.ROOM_ATTACH,
+            backdrop_colour = G.C.DARK_EDITION,
+            align = 'cm',
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            silent = true
+        })
+        play_sound('foil2', 1, 0.7)
+        G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips + amt
+        G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
+    elseif etype == 'e_holo' then
+        if not amt then amt = 10 end
+        attention_text({
+            text = "+"..amt,
+            scale = 0.5,
+            hold = 1,
+            major = G.ROOM_ATTACH,
+            backdrop_colour = G.C.DARK_EDITION,
+            align = 'cm',
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            silent = true
+        })
+        play_sound('foil2', 1, 0.7)
+        G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + amt
+        G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
+    elseif mtype == 'e_polychrome' then
+        if not amt then amt = 1.5 end
+        attention_text({
+            text = 'X'..amt,
+            scale = 0.5,
+            hold = 1,
+            major = G.ROOM_ATTACH,
+            backdrop_colour = G.C.DARK_EDITION,
+            align = 'cm',
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            silent = true
+        })
+        play_sound('foil2', 1, 0.7)
+        G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult * amt
+        G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
+    end
+end
+
+function SuikaLatro.f.seal_message(x_, y_, stype, amt)
+    if stype == "Gold" then
+        if not amt then amt = 3 end
+        attention_text({
+            text = "$"..20,
+            scale = 0.5,
+            hold = 1,
+            major = G.ROOM_ATTACH,
+            backdrop_colour = G.C.MONEY,
+            align = 'cm',
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            silent = true
+        })
+        play_sound('coin3')
+        ease_dollars(amt, true)
+    end
+    if stype == "Blue" then
+        if not amt then amt = 2 end
+        local _poker_hands = {}
+        for handname, _ in pairs(G.GAME.hands) do
+            if string.find(handname, 'suika') and SMODS.is_poker_hand_visible(handname) then
+                _poker_hands[#_poker_hands + 1] = handname
+            end
+        end
+        local _hand = pseudorandom_element(_poker_hands, 'blue_seal')
+        attention_text({
+            text = localize('k_upgrade_ex'),
+            scale = 0.5,
+            hold = 1,
+            major = G.ROOM_ATTACH,
+            backdrop_colour = G.C.SECONDARY_SET.Planet,
+            align = 'cm',
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            silent = true
+        })
+        play_sound('generic1')
+        SMODS.upgrade_poker_hands({hands = {_hand}, level_up = amt})
+    end
+end
+
 function SuikaLatro.f.create_dummy_card(ball)
     local suit = ball.suit
     local id = ball.id
@@ -774,6 +881,8 @@ end
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 -- UPDATE HOOK (merging, timers, indicator movement, flush calcs, physics, ball removing)
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+SuikaLatro.world:setCallbacks(beginContact, endContact)
 
 function SuikaLatro.f.update(dt)
     if SuikaLatro.BG then SuikaLatro.BG:remove() end
@@ -877,7 +986,11 @@ function SuikaLatro.f.update(dt)
                         local self_debuff = v.debuff
                         local other_debuff = v.merge_target.debuff
                         local self_enhancement = not self_debuff and v.enhancement or nil
+                        local self_edition = not self_debuff and v.edition or nil
+                        local self_seal = not self_debuff and v.seal or nil
                         local other_enhancement = not other_debuff and v.merge_target.enhancement or nil
+                        local other_edition = not other_debuff and v.merge_target.edition or nil
+                        local other_seal = not other_debuff and v.merge_target.seal or nil
 
                         if not ((self_enhancement == 'm_glass' and pseudorandom('suika_glass') < G.GAME.probabilities.normal / 2) or (other_enhancement == 'm_glass' and pseudorandom('suika_glass2') < G.GAME.probabilities.normal / 2)) then
                             table.insert(SuikaLatro.balls, Ball(v.body:getX(), v.body:getY(), selected_ball > 0.5 and v.merge_target or v, 1, merge_count, fixed_enhancement, fixed_edition, fixed_seal, nil, perma_bonus_table, (v.debuff and v.merge_target.debuff and true) or false))
@@ -977,6 +1090,7 @@ function SuikaLatro.f.update(dt)
                                 return true
                             end
                         }))
+
                         delay(0.1)
                         if not self_debuff then
                             if self_enhancement ~= 'c_base' and self_enhancement ~= 'm_gold' and self_enhancement ~= 'm_steel' then -- enhancements for ball 1
@@ -990,17 +1104,19 @@ function SuikaLatro.f.update(dt)
                                     end
                                 }))
                             end
-                        else
-                            G.E_MANAGER:add_event(Event({
-                                trigger = 'after',
-                                blockable = false,
-                                delay = 1,
-                                func = function()
-                                    SuikaLatro.f.enhancement_message(x_pos, y_pos, 'debuff')
-                                    return true
-                                end
-                            }))
+                            if self_edition and self_edition ~= 'e_negative' then -- editions for ball 1
+                                G.E_MANAGER:add_event(Event({
+                                    trigger = 'after',
+                                    blockable = false,
+                                    delay = 1,
+                                    func = function()
+                                        SuikaLatro.f.edition_message(x_pos, y_pos, self_edition)
+                                        return true
+                                    end
+                                }))
+                            end
                         end
+
                         if not other_debuff then
                             if other_enhancement ~= 'c_base' and other_enhancement ~= 'm_gold' and other_enhancement ~= 'm_steel' then -- enhancements for ball 2
                                 G.E_MANAGER:add_event(Event({
@@ -1013,13 +1129,64 @@ function SuikaLatro.f.update(dt)
                                     end
                                 }))
                             end
-                        elseif not self_debuff then
+                            if other_edition and other_edition ~= 'e_negative' then -- editions for ball 2
+                                G.E_MANAGER:add_event(Event({
+                                    trigger = 'after',
+                                    blockable = false,
+                                    delay = 1 + (self_edition and 1 or 0),
+                                    func = function()
+                                        SuikaLatro.f.edition_message(x_pos, y_pos, other_edition)
+                                        return true
+                                    end
+                                }))
+                            end 
+                        end
+
+                        if not self_debuff then
+                            if self_seal and self_seal == 'Gold' then
+                                G.E_MANAGER:add_event(Event({
+                                    trigger = 'after',
+                                    blockable = false,
+                                    delay = 1,
+                                    func = function()
+                                        SuikaLatro.f.seal_message(x_pos, y_pos, self_seal)
+                                        return true
+                                    end
+                                }))
+                            end
+                        end
+                        if not other_debuff then
+                            if other_seal and other_seal == 'Gold' then
+                                G.E_MANAGER:add_event(Event({
+                                    trigger = 'after',
+                                    blockable = false,
+                                    delay = 1 + (self_seal == "Gold" and 1 or 0),
+                                    func = function()
+                                        SuikaLatro.f.seal_message(x_pos, y_pos, other_seal)
+                                        return true
+                                    end
+                                }))
+                            end
+                        end
+
+                        if self_debuff or other_debuff then
                             G.E_MANAGER:add_event(Event({
                                 trigger = 'after',
                                 blockable = false,
                                 delay = 1,
                                 func = function()
-                                    SuikaLatro.f.enhancement_message(x_pos, y_pos, 'debuff')
+                                    SuikaLatro.f.debuff_message(x_pos, y_pos)
+                                    return true
+                                end
+                            }))
+                        end
+                        if self_debuff and other_debuff then
+                            G.E_MANAGER:add_event(Event({
+                                trigger = 'after',
+                                blockable = false,
+                                delay = 2,
+                                func = function()
+                                    SuikaLatro.f.debuff_message(x_pos, y_pos)
                                     return true
                                 end
                             }))
@@ -1159,6 +1326,14 @@ SMODS.Keybind {
 -- DRAWING
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
+local stencil_x = 0
+local stencil_y = 0
+local stencil_size = 1
+
+local function stencil_func()
+    love.graphics.circle("fill", stencil_x, stencil_y, t_r(stencil_size))
+end
+
 function SuikaLatro.f.draw_ball(ball, x_pos, y_pos, size, id, suit, front, seal, edition, debuff)
     if type(size) == 'string' then --flipped cards -> hidden nextball
         local x, y = p_to_pixels(x_pos, y_pos)
@@ -1170,6 +1345,7 @@ function SuikaLatro.f.draw_ball(ball, x_pos, y_pos, size, id, suit, front, seal,
         love.graphics.setColor(darken({1, 1, 1}, 0.5)) 
         love.graphics.printf('?', x, y, 200, "center", 0, t_r(40 + 10*math.sin(love.timer.getTime()))/24, t_r(40 + 10*math.sin(love.timer.getTime()))/24, 99, 10.5)
     else
+        -- main ball body
         local color = G.C.SUITS[suit]
         if front == 'm_stone' then
             color = G.C.GREY
@@ -1190,6 +1366,25 @@ function SuikaLatro.f.draw_ball(ball, x_pos, y_pos, size, id, suit, front, seal,
             love.graphics.draw(suika_fronts.m_stone, x, y, angle, t_r(size/24), t_r(size/24), 18, 18)
         else
             love.graphics.draw(suika_fronts[suit][front], x, y, angle, t_r(size/24), t_r(size/24), 18, 18)
+        end
+
+        -- editions
+        if edition and suika_editions[edition] then
+            love.graphics.setColor(1, 1, 1)
+            local old_blend_mode = love.graphics.getBlendMode()
+            stencil_x, stencil_y, stencil_size = x, y, size
+            love.graphics.stencil(stencil_func, "replace", 1)
+            love.graphics.setStencilTest("greater", 0)
+            love.graphics.setBlendMode("multiply", "premultiplied")
+            love.graphics.draw(suika_editions[edition], x, y, 0, t_r(size/100), t_r(size/100), 136.5, 183)
+            love.graphics.setBlendMode(old_blend_mode)
+            love.graphics.setStencilTest()
+        end
+
+        -- seals
+        if seal and suika_seals[seal] then
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(suika_seals[seal], x, y, angle, t_r(size/40), t_r(size/40), 46, 46)
         end
 
         -- rank text
@@ -1245,7 +1440,7 @@ function SuikaLatro.f.draw()
     elseif SuikaLatro.next_ball.facing == 'back' then
         SuikaLatro.f.draw_ball(SuikaLatro.next_ball, SuikaLatro.indicator.x, SuikaLatro.indicator.y, "?")
     else
-        SuikaLatro.f.draw_ball(SuikaLatro.next_ball, SuikaLatro.indicator.x, SuikaLatro.indicator.y, get_size(SuikaLatro.next_ball.base.id, next_is_stone), SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.base.suit, SuikaLatro.next_ball.config.center.key, SuikaLatro.next_ball.seal, SuikaLatro.next_ball.edition, SuikaLatro.next_ball.debuff)
+        SuikaLatro.f.draw_ball(SuikaLatro.next_ball, SuikaLatro.indicator.x, SuikaLatro.indicator.y, get_size(SuikaLatro.next_ball.base.id, next_is_stone), SuikaLatro.next_ball.base.id, SuikaLatro.next_ball.base.suit, SuikaLatro.next_ball.config.center.key, SuikaLatro.next_ball.seal, (SuikaLatro.next_ball.edition and SuikaLatro.next_ball.edition.key or nil), SuikaLatro.next_ball.debuff)
     end
     
     SuikaLatro.f.particles_draw()

@@ -17,6 +17,12 @@ return {
                     "Bigger balls",
                 }
             },
+            bl_suika_cherry = {
+                name = 'The Cherry',
+                text = {
+                    "Bouncier balls",
+                }
+            },
             bl_plant = {
                 text = {
                     "All 2, 3, and 4 cards",
@@ -662,18 +668,31 @@ return {
                 text = {
                     "Earn {C:money}$#1#{} for each",
                     "{C:attention}#2#{} scored,",
-                    "poker combo and earning",
-                    "changes at end of round",
+                    "poker combo and earnings",
+                    "change at end of round",
                 },
             },
         },
         Other={
             purple_seal={
-                name="Purple Seal",
                 text={
                     "Creates 2 {C:tarot}Tarot{} cards",
                     "when {C:attention}discarded",
                     "{C:inactive}(Must have room)",
+                },
+            },
+            blue_seal = {
+                text = {
+                    "Upgrade a random",
+                    "{C:attention}poker combo{} #1# times",
+                    "if {C:attention}remaining in box{}",
+                    "at end of round",
+                },
+            },
+            gold_seal = {
+                text = {
+                    "Earns {C:money}$#1#{}",
+                    "when merging",
                 },
             },
         },

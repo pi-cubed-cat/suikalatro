@@ -3,6 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
+# gold cards and blue cards
 [[patches]] 
 [patches.pattern]
 target = "functions/state_events.lua"
@@ -17,6 +18,15 @@ for k,v in ipairs(SuikaLatro.balls) do
         G.E_MANAGER:add_event(Event({
             func = function()
                 SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
+            return true
+            end
+        }))
+    end
+    if v.seal and v.seal == 'Blue' and not v.debuff then
+        delay(1)
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                SuikaLatro.f.seal_message(v.body:getX(), v.body:getY(), v.seal)
             return true
             end
         }))

@@ -1,10 +1,10 @@
-SMODS.Consumable:take_ownership('aura',
+--[[SMODS.Consumable:take_ownership('aura',
     {
     in_pool = function(self, args) return false end,
     no_collection = true
     },
     true
-)
+)]]
 
 SMODS.Consumable:take_ownership('talisman',
     {
@@ -166,16 +166,23 @@ SMODS.Seal:take_ownership('Red',
 
 SMODS.Seal:take_ownership('Blue',
     {
-    in_pool = function(self, args) return false end,
-    no_collection = true
+        config = { extra = { upgrades = 2 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { self.config.extra.upgrades } }
+        end,
+        calculate = function(self, card, context)
+
+        end,
     },
     true
 )
 
 SMODS.Seal:take_ownership('Gold',
     {
-    in_pool = function(self, args) return false end,
-    no_collection = true
+        config = { extra = { money = 3 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { self.config.extra.money } }
+        end,
     },
     true
 )

@@ -226,25 +226,26 @@ SMODS.Atlas({
 })
 
 SMODS.Blind {
-        key = "melon",
-        dollars = 5,
-        mult = 2,
-        pos = { x = 0, y = 0 },
-        atlas = 'suikablind',
-        boss = { min = 1 },
-        boss_colour = HEX("50bf7c"),
-        calculate = function(self, blind, context)
-            if context.setting_blind then
-                SuikaLatro.ball_sizefactor = 15
-            end
-        end,
-        disable = function(self)
-            SuikaLatro.ball_sizefactor = 12
-        end,
-        defeat = function(self)
-            SuikaLatro.ball_sizefactor = 12
+    key = "melon",
+    dollars = 5,
+    mult = 2,
+    pos = { x = 0, y = 0 },
+    atlas = 'suikablind',
+    boss = { min = 1 },
+    boss_colour = HEX("50bf7c"),
+    discovered = true,
+    calculate = function(self, blind, context)
+        if context.setting_blind then
+            SuikaLatro.ball_sizefactor = 15
         end
-    }
+    end,
+    disable = function(self)
+        SuikaLatro.ball_sizefactor = 12
+    end,
+    defeat = function(self)
+        SuikaLatro.ball_sizefactor = 12
+    end
+}
 
 local blind_disable_disable = Blind.disable
 function Blind:disable()
@@ -258,3 +259,31 @@ function Blind:disable()
         end
     end
 end
+
+SMODS.Blind {
+    key = "cherry",
+    dollars = 5,
+    mult = 2,
+    pos = { x = 0, y = 1 },
+    atlas = 'suikablind',
+    boss = { min = 1 },
+    boss_colour = HEX("b52d2d"),
+    discovered = true,
+    calculate = function(self, blind, context)
+        if context.setting_blind then
+            SuikaLatro.bounciness = 0.75
+        end
+    end,
+    disable = function(self)
+        SuikaLatro.bounciness = 0.1
+        for k,v in ipairs(SuikaLatro.balls) do
+            v.fixture:setRestitution(SuikaLatro.bounciness)
+        end
+    end,
+    defeat = function(self)
+        SuikaLatro.bounciness = 0.1
+        for k,v in ipairs(SuikaLatro.balls) do
+            v.fixture:setRestitution(SuikaLatro.bounciness)
+        end
+    end
+}
