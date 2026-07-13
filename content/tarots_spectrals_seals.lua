@@ -12,7 +12,7 @@ SMODS.Consumable:take_ownership('talisman',
     no_collection = true
     },
     true
-)]]
+)
 
 SMODS.Consumable:take_ownership('deja_vu',
     {
@@ -20,7 +20,7 @@ SMODS.Consumable:take_ownership('deja_vu',
     no_collection = true
     },
     true
-)
+)]]
 
 --[[SMODS.Consumable:take_ownership('trance',
     {
@@ -158,8 +158,13 @@ SMODS.Consumable:take_ownership('sigil', { -- Sigil
 
 SMODS.Seal:take_ownership('Red',
     {
-    in_pool = function(self, args) return false end,
-    no_collection = true
+        config = { extra = { retriggers = 1 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { self.config.extra.retriggers } }
+        end,
+        calculate = function(self, card, context)
+
+        end,
     },
     true
 )
@@ -260,6 +265,11 @@ SMODS.Consumable:take_ownership('devil',
     },
     true
 )
+
+-- fix gold cards held in hand giving money
+function Card:get_h_dollars()
+    return 0
+end
 
 SMODS.Consumable:take_ownership('hanged_man',
     {

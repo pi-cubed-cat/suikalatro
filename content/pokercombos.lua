@@ -55,7 +55,7 @@ SMODS.PokerHand { -- Mega Flush
     l_mult = SuikaLatro.poker_combos.mega_flush.mult_mod,
     l_chips = SuikaLatro.poker_combos.mega_flush.chips_mod,
     example = {},
-    order_offset = 10000,
+    order_offset = 99999,
     evaluate = function(parts, hand)
     
     end
@@ -83,7 +83,7 @@ SMODS.PokerHand { -- 10-Flush
     l_mult = SuikaLatro.poker_combos.ten_flush.mult_mod,
     l_chips = SuikaLatro.poker_combos.ten_flush.chips_mod,
     example = {},
-    order_offset = 10000,
+    order_offset = 99999,
     evaluate = function(parts, hand)
     
     end
@@ -111,7 +111,7 @@ SMODS.PokerHand { -- 5-Flush
     l_mult = SuikaLatro.poker_combos.five_flush.mult_mod,
     l_chips = SuikaLatro.poker_combos.five_flush.chips_mod,
     example = {},
-    order_offset = 10000,
+    order_offset = 99999,
     evaluate = function(parts, hand)
     
     end
@@ -139,6 +139,7 @@ SMODS.PokerHand { -- Combo Breaker
     l_mult = SuikaLatro.poker_combos.combo_breaker.mult_mod,
     l_chips = SuikaLatro.poker_combos.combo_breaker.chips_mod,
     example = {},
+    order_offset = 10000,
     evaluate = function(parts, hand)
     
     end
@@ -166,6 +167,7 @@ SMODS.PokerHand { -- Merge 4X
     l_mult = SuikaLatro.poker_combos.merge_4.mult_mod,
     l_chips = SuikaLatro.poker_combos.merge_4.chips_mod,
     example = {},
+    order_offset = 10000,
     evaluate = function(parts, hand)
     
     end
@@ -193,6 +195,7 @@ SMODS.PokerHand { -- Merge 3X
     l_mult = SuikaLatro.poker_combos.merge_3.mult_mod,
     l_chips = SuikaLatro.poker_combos.merge_3.chips_mod,
     example = {},
+    order_offset = 10000,
     evaluate = function(parts, hand)
     
     end
@@ -220,6 +223,7 @@ SMODS.PokerHand { -- Merge 2X
     l_mult = SuikaLatro.poker_combos.merge_2.mult_mod,
     l_chips = SuikaLatro.poker_combos.merge_2.chips_mod,
     example = {},
+    order_offset = 10000,
     evaluate = function(parts, hand)
     
     end
@@ -247,6 +251,7 @@ SMODS.PokerHand { -- Merge 1X
     l_mult = SuikaLatro.poker_combos.merge_1.mult_mod,
     l_chips = SuikaLatro.poker_combos.merge_1.chips_mod,
     example = {},
+    order_offset = 10000,
     evaluate = function(parts, hand)
     
     end
@@ -274,6 +279,7 @@ SMODS.PokerHand { -- Lowball
     l_mult = SuikaLatro.poker_combos.lowball.mult_mod,
     l_chips = SuikaLatro.poker_combos.lowball.chips_mod,
     example = {},
+    order_offset = 10000,
     evaluate = function(parts, hand)
     
     end

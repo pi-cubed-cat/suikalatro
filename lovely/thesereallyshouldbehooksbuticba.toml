@@ -12,24 +12,60 @@ for _,v in ipairs(SMODS.get_card_areas('playing_cards', 'end_of_round')) do
 '''
 position = "before"
 payload = '''
+
 for k,v in ipairs(SuikaLatro.balls) do
-    if v.enhancement == 'm_gold' and not v.debuff then
-        delay(1)
-        G.E_MANAGER:add_event(Event({
-            func = function()
-                SuikaLatro.f.enhancement_message(v.body:getX(), v.body:getY(), v.enhancement)
-            return true
-            end
-        }))
+    local x_pos, y_pos = v.body:getX(), v.body:getY()
+    v.pos = {
+        x = x_pos,
+        y = y_pos,
+    }
+    
+    SuikaLatro.retrig[v] = {'base'}
+    if v.seal and v.seal == 'Red' then
+        SuikaLatro.retrig[v][#SuikaLatro.retrig[v]+1] = 'Red'
     end
-    if v.seal and v.seal == 'Blue' and not v.debuff then
-        delay(1)
-        G.E_MANAGER:add_event(Event({
-            func = function()
-                SuikaLatro.f.seal_message(v.body:getX(), v.body:getY(), v.seal)
-            return true
-            end
-        }))
+    SMODS.calculate_context({suika_ball_remain_repetition = true, other_ball = v})
+
+    if v.debuff then SuikaLatro.retrig[v] = {'base'} end
+
+    for i = 1, #SuikaLatro.retrig[v] do
+        if SuikaLatro.retrig[v][i] == "Red" then
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.seal_message(v.pos.x, v.pos.y, "Red")
+                    return true
+                end
+            }))
+        elseif type(SuikaLatro.retrig[v][i]) == 'table' then
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.score_message_joker({
+                        retriggers = 1,
+                        obj = v,
+                        juice_card = SuikaLatro.retrig[v][i],
+                    })
+                    return true
+                end
+            }))
+        end
+        if v.enhancement == 'm_gold' and not v.debuff then
+            delay(1)
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.enhancement_message(v.pos.x, v.pos.y, v.enhancement)
+                return true
+                end
+            }))
+        end
+        if v.seal and v.seal == 'Blue' and not v.debuff then
+            delay(1)
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.seal_message(v.pos.x, v.pos.y, v.seal)
+                return true
+                end
+            }))
+        end
     end
 end
 '''
@@ -44,6 +80,7 @@ G.STATE = G.STATES.ROUND_EVAL
 position = "after"
 payload = '''
 SuikaLatro.f.disable_suika()
+SuikaLatro.retrig = {}
 '''
 match_indent = true
 

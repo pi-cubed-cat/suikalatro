@@ -12,15 +12,22 @@ return {
         },
         Blind={
             bl_suika_melon = {
-                name = 'The Melon',
+                name = 'The Watermelon',
                 text = {
-                    "Bigger balls",
+                    "     Bigger balls     ",
                 }
             },
             bl_suika_cherry = {
                 name = 'The Cherry',
                 text = {
                     "Bouncier balls",
+                }
+            },
+            bl_suika_persimmon = {
+                name = 'The Persimmon',
+                text = {
+                    "After Play, drop a",
+                    "random 5 ball into box",
                 }
             },
             bl_plant = {
@@ -51,6 +58,13 @@ return {
                 text = {
                     "Cards drawn face down",
                     "until first Play or Discard",
+                },
+            },
+            bl_serpent = {
+                name = "The Serpent",
+                text = {
+                    "After Play or Discard,",
+                    "always draw 1 card",
                 },
             },
         },
@@ -672,6 +686,70 @@ return {
                     "change at end of round",
                 },
             },
+            j_mime = {
+                text = {
+                    "Retrigger all",
+                    "ball {C:attention}remaining",
+                    "{C:attention}in box{} effects",
+                },
+            },
+            j_dusk = {
+                text = {
+                    "Retrigger all ball",
+                    "merge effects in",
+                    "{C:attention}final hand{} of round",
+                },
+            },
+            j_hack = {
+                text = {
+                    "Retrigger merge",
+                    "effects of each",
+                    "{C:attention}2{}, {C:attention}3{}, {C:attention}4{}, and {C:attention}5{}",
+                },
+            },
+            j_selzer = {
+                text = {
+                    "Retrigger all ball",
+                    "merge effects for",
+                    "the next {C:attention}#1#{} hands",
+                },
+            },
+            j_sock_and_buskin = {
+                text = {
+                    "Retrigger all",
+                    "merge effects for",
+                    "balls of {C:attention}face{} rank",
+                    "{C:attention}#1#{} additional times",
+                },
+            },
+            j_hanging_chad = {
+                text = {
+                    "Retrigger {C:attention}first{} merging",
+                    "balls' merge effects",
+                    "{C:attention}#1#{} additional times",
+                },
+            },
+            j_splash = {
+                text = {
+                    "{E:1,s:1.3}?????",
+                },
+            },
+            j_card_sharp = {
+                name = "Card Sharp",
+                text = {
+                    "{E:1,s:1.3}?????",
+                },
+            },
+            j_obelisk = {
+                text = {
+                    "{E:1,s:1.3}?????",
+                },
+            },
+            j_space = {
+                text = {
+                    "{E:1,s:1.3}?????",
+                },
+            },
         },
         Other={
             purple_seal={
@@ -693,6 +771,11 @@ return {
                 text = {
                     "Earns {C:money}$#1#{}",
                     "when merging",
+                },
+            },
+            red_seal = {
+                text = {
+                    "Retriggers {C:attention}#1#{} time",
                 },
             },
         },
@@ -760,6 +843,15 @@ return {
             },
         },
         Voucher={
+            v_telescope = {
+                name = "Telescope",
+                text = {
+                    "{C:attention}Celestial Packs{} always",
+                    "contain the {C:planet}Planet{}",
+                    "card for your most",
+                    "played {C:attention}poker combo",
+                },
+            },
             v_observatory = {
                 text = {
                     "{C:planet}Planet{} cards in your",

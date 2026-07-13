@@ -1,11 +1,3 @@
-SMODS.Blind:take_ownership('serpent', -- only draw 1 card on discards? (change min ante to 1)
-    {
-    in_pool = function(self, args) return false end,
-    no_collection = true
-    },
-    true
-)
-
 SMODS.Blind:take_ownership('arm',
     {
     in_pool = function(self, args) return false end,
@@ -94,6 +86,25 @@ SMODS.Blind:take_ownership('final_leaf',
     },
     true
 )]]
+
+SMODS.Blind:take_ownership('serpent', 
+    {
+        name = "The Serpent 2",
+        boss = { min = 2 },
+        modifies_draw = true, -- SMODS addition, you need this if the blind modifies the draws
+        calculate = function(self, blind, context)
+            if blind.disabled then return end
+
+            if context.drawing_cards and (G.GAME.current_round.hands_played ~= 0 or G.GAME.current_round.discards_used ~= 0) then
+                return {
+                    cards_to_draw = 1
+                }
+            end
+        end
+    },
+    true
+)
+
 
 SMODS.Blind:take_ownership('tooth',
     {
@@ -199,7 +210,7 @@ SMODS.Blind:take_ownership('final_bell',
                 end
                 if not any_forced then
                     G.hand:unhighlight_all()
-                    local forced_card = pseudorandom_element(G.hand.cards, 'vremade_cerulean_bell')
+                    local forced_card = pseudorandom_element(G.hand.cards, 'cerulean_bell')
                     forced_card.ability.forced_selection = true
                     G.hand:add_to_highlighted(forced_card)
                 end
@@ -259,6 +270,22 @@ function Blind:disable()
         end
     end
 end
+
+SMODS.Blind {
+    key = "persimmon",
+    dollars = 5,
+    mult = 2,
+    pos = { x = 0, y = 2 },
+    atlas = 'suikablind',
+    boss = { min = 1 },
+    boss_colour = HEX("e56a2f"),
+    discovered = true,
+    calculate = function(self, blind, context)
+        if context.after and not blind.disabled then
+            table.insert(SuikaLatro.balls, Ball(pseudorandom('persimmon')*10, -400, {id = 5}))
+        end
+    end,
+}
 
 SMODS.Blind {
     key = "cherry",

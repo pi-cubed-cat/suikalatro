@@ -57,6 +57,9 @@ function SuikaLatro.f.score_message_joker(args)
         message = (args.dollars <-0.01 and '-' or '')..localize("$")..tostring(math.abs(args.dollars))
         sound = sound or 'coin3'
     end
+    if args.retriggers and args.retriggers > 0 then
+        message = localize('k_again_ex')
+    end
 
     sound = sound or 'generic1'
     col = col or G.C.ORANGE
@@ -366,13 +369,6 @@ SMODS.Joker:take_ownership('half',
     }, true
 )]]
 
-SMODS.Joker:take_ownership('mime',
-    {
-        in_pool = function(self, args) return false end,
-        no_collection = true
-    }, true
-)
-
 SMODS.Joker:take_ownership('8_ball',
     {
         config = { extra = { odds = 2 } },
@@ -406,12 +402,7 @@ SMODS.Joker:take_ownership('8_ball',
     }, true
 )
 
-SMODS.Joker:take_ownership('dusk',
-    {
-        in_pool = function(self, args) return false end,
-        no_collection = true
-    }, true
-)
+
 
 SMODS.Joker:take_ownership('raised_fist',
     {
@@ -482,12 +473,7 @@ SMODS.Joker:take_ownership('scary_face',
     }, true
 )
 
-SMODS.Joker:take_ownership('hack',
-    {
-        in_pool = function(self, args) return false end,
-        no_collection = true
-    }, true
-)
+
 
 SMODS.Joker:take_ownership('even_steven',
     {
@@ -688,7 +674,7 @@ SMODS.Joker:take_ownership('ride_the_bus',
 SMODS.Joker:take_ownership('space',
     {
         in_pool = function(self, args) return false end,
-        no_collection = true
+        --no_collection = true
     }, true
 )
 
@@ -766,7 +752,7 @@ SMODS.Joker:take_ownership('dna',
 SMODS.Joker:take_ownership('splash',
     {
         in_pool = function(self, args) return false end,
-        no_collection = true
+        --no_collection = true
     }, true
 )
 
@@ -926,7 +912,7 @@ SMODS.Joker:take_ownership('todo_list',
 SMODS.Joker:take_ownership('card_sharp',
     {
         in_pool = function(self, args) return false end,
-        no_collection = true
+        --no_collection = true
     }, true
 )
 
@@ -1068,7 +1054,7 @@ SMODS.Joker:take_ownership('cloud_9',
 SMODS.Joker:take_ownership('obelisk',
     {
         in_pool = function(self, args) return false end,
-        no_collection = true
+        --no_collection = true
     }, true
 )
 
@@ -1099,19 +1085,16 @@ SMODS.Joker:take_ownership('midas_mask',
 SMODS.Joker:take_ownership('photograph',
     {
         rarity = 2,
-        config = { extra = { xmult = 2, active = 2 } },
+        config = { extra = { xmult = 2, ball_list = {} } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.xmult } }
         end,
         calculate = function(self, card, context)
-            if context.press_play and not context.blueprint then
-                card.ability.extra.active = 2
-            end
             if context.suika_individual and SuikaLatro.f.is_face(context.other_ball) then
-                if card.ability.extra.active > 0 then
-                    card.ability.extra.active = card.ability.extra.active - 1
+                if #card.ability.extra.ball_list < 2 or card.ability.extra.ball_list[context.other_ball] then
+                    card.ability.extra.ball_list[context.other_ball] = true
                     if not SuikaLatro.f.is_face(context.other_ball.merge_target) then
-                        card.ability.extra.active = card.ability.extra.active - 1
+                        card.ability.extra.ball_list[context.other_ball.merge_target] = true
                     end
                     SuikaLatro.f.score_message_joker({
                         x_mult = card.ability.extra.xmult,
@@ -1119,6 +1102,9 @@ SMODS.Joker:take_ownership('photograph',
                         juice_card = card,
                     })
                 end
+            end
+            if context.after and not context.blueprint then
+                card.ability.extra.ball_list = {}
             end
         end
     }, true
@@ -1246,12 +1232,6 @@ SMODS.Joker:take_ownership('walkie_talkie',
     }, true
 )
 
-SMODS.Joker:take_ownership('selzer',
-    {
-        in_pool = function(self, args) return false end,
-        no_collection = true
-    }, true
-)
 
 SMODS.Joker:take_ownership('castle',
     {
@@ -1295,20 +1275,6 @@ SMODS.Joker:take_ownership('ticket',
                 })
             end
         end
-    }, true
-)
-
-SMODS.Joker:take_ownership('sock_and_buskin',
-    {
-        in_pool = function(self, args) return false end,
-        no_collection = true
-    }, true
-)
-
-SMODS.Joker:take_ownership('hanging_chad',
-    {
-        in_pool = function(self, args) return false end,
-        no_collection = true
     }, true
 )
 
@@ -1785,5 +1751,110 @@ SMODS.Joker:take_ownership('triboulet',
 SMODS.Joker:take_ownership('yorick',
     {
         config = {extra = {xmult = 1, discards = 12}}
+    }, true
+)
+
+function SuikaLatro.f.return_retriggers(amt, source, ball)
+    for i=1,amt do
+        SuikaLatro.retrig[ball][#SuikaLatro.retrig[ball]+1] = source
+    end
+end
+
+SMODS.Joker:take_ownership('mime',
+    {
+        calculate = function(self, card, context)
+            if context.suika_ball_remain_repetition then
+                SuikaLatro.f.return_retriggers(1, card, context.other_ball)
+            end
+        end,
+    }, true
+)
+
+SMODS.Joker:take_ownership('dusk',
+    {
+        calculate = function(self, card, context)
+            if context.suika_ball_merge_repetition and G.GAME.current_round.hands_left == 0 then
+                SuikaLatro.f.return_retriggers(1, card, context.other_ball)
+            end
+        end,
+    }, true
+)
+
+SMODS.Joker:take_ownership('hack',
+    {
+        calculate = function(self, card, context)
+            if context.suika_ball_merge_repetition and 
+            (SuikaLatro.f.is_rank(context.other_ball, 2) or 
+            SuikaLatro.f.is_rank(context.other_ball, 3) or
+            SuikaLatro.f.is_rank(context.other_ball, 4) or
+            SuikaLatro.f.is_rank(context.other_ball, 5)) then
+                SuikaLatro.f.return_retriggers(1, card, context.other_ball)
+            end
+        end,
+    }, true
+)
+
+SMODS.Joker:take_ownership('selzer',
+    {
+        config = { extra = { hands_left = 10 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra.hands_left } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_ball_merge_repetition then
+                SuikaLatro.f.return_retriggers(1, card, context.other_ball)
+            end
+            if context.after and not context.blueprint then
+                if card.ability.extra.hands_left - 1 <= 0 then
+                    SMODS.destroy_cards(card, nil, nil, true)
+                    return {
+                        message = localize('k_drank_ex'),
+                        colour = G.C.FILTER
+                    }
+                else
+                    card.ability.extra.hands_left = card.ability.extra.hands_left - 1
+                    return {
+                        message = card.ability.extra.hands_left .. '',
+                        colour = G.C.FILTER
+                    }
+                end
+            end
+        end
+    }, true
+)
+
+SMODS.Joker:take_ownership('sock_and_buskin',
+    {
+        name = 'Sock and Buskin 2',
+        rarity = 3,
+        config = { extra = { repetitions = 2 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra.repetitions } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_ball_merge_repetition and SuikaLatro.f.is_face(context.other_ball) then
+                SuikaLatro.f.return_retriggers(card.ability.extra.repetitions, card, context.other_ball)
+            end
+        end,
+    }, true
+)
+
+SMODS.Joker:take_ownership('hanging_chad',
+    {
+        name = 'Hanging Chad 2',
+        config = { extra = { repetitions = 2, ball_list = {} } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra.repetitions } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_ball_merge_repetition and 
+            (#card.ability.extra.ball_list < 2 or card.ability.extra.ball_list[context.other_ball]) then
+                card.ability.extra.ball_list[context.other_ball] = true
+                SuikaLatro.f.return_retriggers(card.ability.extra.repetitions, card, context.other_ball)
+            end
+            if context.after and not context.blueprint then
+                card.ability.extra.ball_list = {}
+            end
+        end,
     }, true
 )

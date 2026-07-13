@@ -22,7 +22,7 @@ function Game:main_menu(change_context)
                     n = G.UIT.T,
                     config = {
                         scale = 0.5,
-                        text = "Suikalatro v0.7.0 (DEMO)", -- title screen version
+                        text = "Suikalatro v0.8.0 (DEMO)", -- title screen version
                         colour = G.C.UI.TEXT_LIGHT
                     }
                 }
@@ -170,6 +170,7 @@ SuikaLatro = {
         ['Spades'] = 0,
         ['Clubs'] = 0
     },
+    retrig = {},
     play_wait_time = 0,
 }
 
@@ -333,11 +334,11 @@ function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix
     else -- after merged balls
         rank_delta = rank_delta or 0
         --self.rank = fixed_properties.rank + rank_delta
-        self.id = fixed_properties.id + rank_delta > 14 and 2 or fixed_properties.id + rank_delta
-        self.suit = fixed_properties.suit
-        self.enhancement = fix_enhancement or fixed_properties.enhancement
-        self.edition = fix_edition or fixed_properties.edition
-        self.seal = fix_seal or fixed_properties.seal
+        self.id = fixed_properties.id + rank_delta > 14 and 2 or fixed_properties.id + rank_delta or 2
+        self.suit = fixed_properties.suit or pseudorandom_element({'Spades', 'Clubs', 'Diamonds', 'Hearts'})
+        self.enhancement = fix_enhancement or fixed_properties.enhancement or 'c_base'
+        self.edition = fix_edition or fixed_properties.edition or nil
+        self.seal = fix_seal or fixed_properties.seal or nil
         self.size = get_size(self.id, self.enhancement == 'm_stone')
         self.merges = combo or 0
         self.perma_bonuses = {}
@@ -806,7 +807,7 @@ function SuikaLatro.f.seal_message(x_, y_, stype, amt)
     if stype == "Gold" then
         if not amt then amt = 3 end
         attention_text({
-            text = "$"..20,
+            text = "$"..amt,
             scale = 0.5,
             hold = 1,
             major = G.ROOM_ATTACH,
@@ -840,9 +841,22 @@ function SuikaLatro.f.seal_message(x_, y_, stype, amt)
         play_sound('generic1')
         SMODS.upgrade_poker_hands({hands = {_hand}, level_up = amt})
     end
+    if stype == "Red" then
+        attention_text({
+            text = localize('k_again_ex'),
+            scale = 0.5,
+            hold = 1,
+            major = G.ROOM_ATTACH,
+            backdrop_colour = G.C.RED,
+            align = 'cm',
+            offset = {x = -20/2 + 20/SuikaLatro.screen_w * (t_x(x_) + 20*math.random() - 0.5), y = -11.5/2 + 11.5/SuikaLatro.screen_h * (t_y(y_) + 20*math.random() - 0.5)},
+            silent = true
+        })
+        play_sound('generic1')
+    end
 end
 
-function SuikaLatro.f.create_dummy_card(ball)
+--[[function SuikaLatro.f.create_dummy_card(ball)
     local suit = ball.suit
     local id = ball.id
     local card_abbrev_suit = string.upper(string.sub(suit, 1, -#(suit)))
@@ -876,6 +890,199 @@ function SuikaLatro.f.create_dummy_card(ball)
     for kk,vv in pairs(ball.perma_bonuses) do
         dummy_card.ability[kk] = vv
     end
+end]]
+
+function SuikaLatro.f.eval_merge_ball_scoring_effects(combo_info, ball1, ball2, is_retrigger, score_ball1, score_ball2)
+    local x_pos = ball1.x
+    local y_pos = ball1.y
+    local id_ = ball1.enhancement == 'm_stone' and 2 or ball1.id
+    local id2_ = ball2.enhancement == 'm_stone' and 2 or ball2.id
+    
+    local self_debuff = ball1.debuff
+    local other_debuff = ball2.debuff
+    local self_enhancement = not self_debuff and ball1.enhancement or nil
+    local self_edition = not self_debuff and ball1.edition or nil
+    local self_seal = not self_debuff and ball1.seal or nil
+    local other_enhancement = not other_debuff and ball2.enhancement or nil
+    local other_edition = not other_debuff and ball2.edition or nil
+    local other_seal = not other_debuff and ball2.seal or nil
+
+    if not is_retrigger then
+        G.E_MANAGER:add_event(Event({ -- base chips & combo #
+            trigger = 'immediate',
+            blockable = false,
+            func = function()
+                attention_text({
+                    text = tostring(combo_info.merge_count.."X"),
+                    scale = 0.5 + combo_info.merge_count/10,
+                    hold = 0.3,
+                    major = G.ROOM_ATTACH,
+                    backdrop_colour = combo_info.merge_count < 5 and G.C.ORANGE or G.C.RED,
+                    align = 'cm',
+                    offset = {x = -20/2 + 20/SuikaLatro.screen_w * t_x(x_pos), y = -11.5/2 + 11.5/SuikaLatro.screen_h * t_y(y_pos)},
+                    silent = true
+                })
+                play_sound('multhit1', math.random()*0.2 + 0.7 + 0.1*combo_info.merge_count, 0.6 + combo_info.merge_count/20)
+
+                G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips
+                + (self_debuff and 0 or 2^(get_size(id_)/SuikaLatro.ball_sizefactor)/2)
+                + (other_debuff and 0 or 2^(get_size(id2_)/SuikaLatro.ball_sizefactor)/2)
+                + (self_debuff and 0 or (ball1.perma_bonuses['perma_bonus'] or 0))
+                + (other_debuff and 0 or (ball2.perma_bonuses['perma_bonus'] or 0))
+                + (combo_info.combo_chips * SuikaLatro.is_flint_active())
+                G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
+                G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + combo_info.combo_mult * SuikaLatro.is_flint_active()
+                G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
+                return true
+            end
+        }))
+    else
+        local amt = (self_debuff and 0 or 2^(get_size(id_)/SuikaLatro.ball_sizefactor)/2)
+        + (other_debuff and 0 or 2^(get_size(id2_)/SuikaLatro.ball_sizefactor)/2)
+        + (self_debuff and 0 or (ball1.perma_bonuses['perma_bonus'] or 0))
+        + (other_debuff and 0 or (ball2.perma_bonuses['perma_bonus'] or 0))
+        SuikaLatro.f.enhancement_message(x_pos, y_pos, 'm_chips', amt) -- base chips
+    end
+    
+    delay(0.1)
+
+    if score_ball1 or not is_retrigger then
+        if not self_debuff then
+            if self_enhancement ~= 'c_base' and self_enhancement ~= 'm_gold' and self_enhancement ~= 'm_steel' then -- enhancements for ball 1
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    blockable = false,
+                    delay = 1,
+                    func = function()
+                        SuikaLatro.f.enhancement_message(x_pos, y_pos, self_enhancement)
+                        return true
+                    end
+                }))
+            end
+            if self_edition and self_edition ~= 'e_negative' then -- editions for ball 1
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    blockable = false,
+                    delay = 1,
+                    func = function()
+                        SuikaLatro.f.edition_message(x_pos, y_pos, self_edition)
+                        return true
+                    end
+                }))
+            end
+        end
+    end
+
+    if score_ball2 or not is_retrigger then
+        if not other_debuff then
+            if other_enhancement ~= 'c_base' and other_enhancement ~= 'm_gold' and other_enhancement ~= 'm_steel' then -- enhancements for ball 2
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    blockable = false,
+                    delay = 1 + (self_enhancement ~= 'c_base' and 1 or 0),
+                    func = function()
+                        SuikaLatro.f.enhancement_message(x_pos, y_pos, other_enhancement)
+                        return true
+                    end
+                }))
+            end
+            if other_edition and other_edition ~= 'e_negative' then -- editions for ball 2
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    blockable = false,
+                    delay = 1 + (self_edition and 1 or 0),
+                    func = function()
+                        SuikaLatro.f.edition_message(x_pos, y_pos, other_edition)
+                        return true
+                    end
+                }))
+            end 
+        end
+    end
+
+    if score_ball1 or not is_retrigger then
+        if not self_debuff then
+            if self_seal and self_seal == 'Gold' then
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    blockable = false,
+                    delay = 1,
+                    func = function()
+                        SuikaLatro.f.seal_message(x_pos, y_pos, self_seal)
+                        return true
+                    end
+                }))
+            end
+        end
+    end
+    if score_ball2 or not is_retrigger then
+        if not other_debuff then
+            if other_seal and other_seal == 'Gold' then
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    blockable = false,
+                    delay = 1 + (self_seal == "Gold" and 1 or 0),
+                    func = function()
+                        SuikaLatro.f.seal_message(x_pos, y_pos, other_seal)
+                        return true
+                    end
+                }))
+            end
+        end
+    end
+    if not is_retrigger then
+        if self_debuff or other_debuff then
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                blockable = false,
+                delay = 1,
+                func = function()
+                    SuikaLatro.f.debuff_message(x_pos, y_pos)
+                    return true
+                end
+            }))
+        end
+        if self_debuff and other_debuff then
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                blockable = false,
+                delay = 2,
+                func = function()
+                    SuikaLatro.f.debuff_message(x_pos, y_pos)
+                    return true
+                end
+            }))
+        end
+    end
+    local scoring_list = {{ball = ball1, is_score = score_ball1}, {ball = ball2, is_score = score_ball2}}
+    G.E_MANAGER:add_event(Event({
+        trigger = 'immediate',
+        blockable = false,
+        func = function()
+            for i=1,2 do
+                scoring_list[i].ball.pos = {
+                    x = x_pos,
+                    y = y_pos,
+                }
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'immediate',
+                    blockable = false,
+                    --delay = 0.25*(-1 + i),
+                    func = function()
+                        if not scoring_list[i].ball.debuff and (not is_retrigger or scoring_list[i].is_score) then
+                            SMODS.calculate_context({suika_individual = true, other_ball = scoring_list[i].ball})
+                        else
+                            
+                        end
+                    return true
+                    end
+                }))
+                delay(0.25)
+            end
+            return true
+        end
+    }))
+    
 end
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
@@ -986,11 +1193,11 @@ function SuikaLatro.f.update(dt)
                         local self_debuff = v.debuff
                         local other_debuff = v.merge_target.debuff
                         local self_enhancement = not self_debuff and v.enhancement or nil
-                        local self_edition = not self_debuff and v.edition or nil
-                        local self_seal = not self_debuff and v.seal or nil
+                        --local self_edition = not self_debuff and v.edition or nil
+                        --local self_seal = not self_debuff and v.seal or nil
                         local other_enhancement = not other_debuff and v.merge_target.enhancement or nil
-                        local other_edition = not other_debuff and v.merge_target.edition or nil
-                        local other_seal = not other_debuff and v.merge_target.seal or nil
+                        --local other_edition = not other_debuff and v.merge_target.edition or nil
+                        --local other_seal = not other_debuff and v.merge_target.seal or nil
 
                         if not ((self_enhancement == 'm_glass' and pseudorandom('suika_glass') < G.GAME.probabilities.normal / 2) or (other_enhancement == 'm_glass' and pseudorandom('suika_glass2') < G.GAME.probabilities.normal / 2)) then
                             table.insert(SuikaLatro.balls, Ball(v.body:getX(), v.body:getY(), selected_ball > 0.5 and v.merge_target or v, 1, merge_count, fixed_enhancement, fixed_edition, fixed_seal, nil, perma_bonus_table, (v.debuff and v.merge_target.debuff and true) or false))
@@ -1057,169 +1264,63 @@ function SuikaLatro.f.update(dt)
                             elseif SuikaLatro.f.is_suit(v.merge_target, 'Spades') then SuikaLatro.scoring_suits["Spades"] = SuikaLatro.scoring_suits["Spades"] + 1
                             elseif SuikaLatro.f.is_suit(v.merge_target, 'Clubs') then SuikaLatro.scoring_suits["Clubs"] = SuikaLatro.scoring_suits["Clubs"] + 1 end
                         end
-                        local x_pos = v.body:getX()
-                        local y_pos = v.body:getY()
-                        local id_ = self_enhancement == 'm_stone' and 2 or v.id
-                        local id2_ = other_enhancement == 'm_stone' and 2 or v.merge_target.id
-                
-                        G.E_MANAGER:add_event(Event({ -- base chips & combo #
-                            trigger = 'immediate',
-                            blockable = false,
-                            func = function()
-                                attention_text({
-                                    text = tostring(merge_count.."X"),
-                                    scale = 0.5 + merge_count/10,
-                                    hold = 0.3,
-                                    major = G.ROOM_ATTACH,
-                                    backdrop_colour = merge_count < 5 and G.C.ORANGE or G.C.RED,
-                                    align = 'cm',
-                                    offset = {x = -20/2 + 20/SuikaLatro.screen_w * t_x(x_pos), y = -11.5/2 + 11.5/SuikaLatro.screen_h * t_y(y_pos)},
-                                    silent = true
-                                })
-                                play_sound('multhit1', math.random()*0.2 + 0.7 + 0.1*merge_count, 0.6 + merge_count/20)
 
-                                G.GAME.current_round.current_hand.chips = G.GAME.current_round.current_hand.chips
-                                + (self_debuff and 0 or 2^(get_size(id_)/SuikaLatro.ball_sizefactor)/2)
-                                + (other_debuff and 0 or 2^(get_size(id2_)/SuikaLatro.ball_sizefactor)/2)
-                                + (self_debuff and 0 or (v.perma_bonuses['perma_bonus'] or 0))
-                                + (other_debuff and 0 or (v.merge_target.perma_bonuses['perma_bonus'] or 0))
-                                + (combo_chips * SuikaLatro.is_flint_active())
-                                G.GAME.current_round.current_hand.chip_text = tostring(G.GAME.current_round.current_hand.chips)
-                                G.GAME.current_round.current_hand.mult = G.GAME.current_round.current_hand.mult + combo_mult * SuikaLatro.is_flint_active()
-                                G.GAME.current_round.current_hand.mult_text = tostring(G.GAME.current_round.current_hand.mult)
-                                return true
-                            end
-                        }))
-
-                        delay(0.1)
-                        if not self_debuff then
-                            if self_enhancement ~= 'c_base' and self_enhancement ~= 'm_gold' and self_enhancement ~= 'm_steel' then -- enhancements for ball 1
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'after',
-                                    blockable = false,
-                                    delay = 1,
-                                    func = function()
-                                        SuikaLatro.f.enhancement_message(x_pos, y_pos, self_enhancement)
-                                        return true
-                                    end
-                                }))
-                            end
-                            if self_edition and self_edition ~= 'e_negative' then -- editions for ball 1
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'after',
-                                    blockable = false,
-                                    delay = 1,
-                                    func = function()
-                                        SuikaLatro.f.edition_message(x_pos, y_pos, self_edition)
-                                        return true
-                                    end
-                                }))
-                            end
-                        end
-
-                        if not other_debuff then
-                            if other_enhancement ~= 'c_base' and other_enhancement ~= 'm_gold' and other_enhancement ~= 'm_steel' then -- enhancements for ball 2
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'after',
-                                    blockable = false,
-                                    delay = 1 + (self_enhancement ~= 'c_base' and 1 or 0),
-                                    func = function()
-                                        SuikaLatro.f.enhancement_message(x_pos, y_pos, other_enhancement)
-                                        return true
-                                    end
-                                }))
-                            end
-                            if other_edition and other_edition ~= 'e_negative' then -- editions for ball 2
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'after',
-                                    blockable = false,
-                                    delay = 1 + (self_edition and 1 or 0),
-                                    func = function()
-                                        SuikaLatro.f.edition_message(x_pos, y_pos, other_edition)
-                                        return true
-                                    end
-                                }))
-                            end 
-                        end
-
-                        if not self_debuff then
-                            if self_seal and self_seal == 'Gold' then
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'after',
-                                    blockable = false,
-                                    delay = 1,
-                                    func = function()
-                                        SuikaLatro.f.seal_message(x_pos, y_pos, self_seal)
-                                        return true
-                                    end
-                                }))
-                            end
-                        end
-                        if not other_debuff then
-                            if other_seal and other_seal == 'Gold' then
-                                G.E_MANAGER:add_event(Event({
-                                    trigger = 'after',
-                                    blockable = false,
-                                    delay = 1 + (self_seal == "Gold" and 1 or 0),
-                                    func = function()
-                                        SuikaLatro.f.seal_message(x_pos, y_pos, other_seal)
-                                        return true
-                                    end
-                                }))
-                            end
-                        end
-
-                        if self_debuff or other_debuff then
-                            G.E_MANAGER:add_event(Event({
-                                trigger = 'after',
-                                blockable = false,
-                                delay = 1,
-                                func = function()
-                                    SuikaLatro.f.debuff_message(x_pos, y_pos)
-                                    return true
-                                end
-                            }))
-                        end
-                        if self_debuff and other_debuff then
-                            G.E_MANAGER:add_event(Event({
-                                trigger = 'after',
-                                blockable = false,
-                                delay = 2,
-                                func = function()
-                                    SuikaLatro.f.debuff_message(x_pos, y_pos)
-                                    return true
-                                end
-                            }))
-                        end
-                        local scoring_list = {v, v.merge_target}
-                        G.E_MANAGER:add_event(Event({
-                            trigger = 'immediate',
-                            blockable = false,
-                            func = function()
-                                for i=1,2 do
-                                    scoring_list[i].pos = {
-                                        x = x_pos,
-                                        y = y_pos,
-                                    }
-                                    G.E_MANAGER:add_event(Event({
-                                        trigger = 'immediate',
-                                        blockable = false,
-                                        --delay = 0.25*(-1 + i),
-                                        func = function()
-                                            if not scoring_list[i].debuff then
-                                                SMODS.calculate_context({suika_individual = true, other_ball = scoring_list[i]})
-                                            else
-                                                
-                                            end
-                                        return true
-                                        end
-                                    }))
-                                    delay(0.25)
-                                end
-                                return true
-                            end
-                        }))
+                        -- cooking some BULLSHIT! :D
+                        local combo_info = {
+                            combo_chips = combo_chips,
+                            combo_mult = combo_mult,
+                            merge_count = merge_count,
+                        }
+                        v.x = v.body:getX()
+                        v.y = v.body:getY()
                         
+                        SuikaLatro.f.eval_merge_ball_scoring_effects(combo_info, v, v.merge_target, false)
+                        
+                        SuikaLatro.retrig[v] = {}
+                        SuikaLatro.retrig[v.merge_target] = {}
+                        if v.seal and v.seal == 'Red' then
+                            SuikaLatro.retrig[v][#SuikaLatro.retrig[v]+1] = 'Red'
+                        end
+                        if v.merge_target.seal and v.merge_target.seal == 'Red' then
+                            SuikaLatro.retrig[v.merge_target][#SuikaLatro.retrig[v.merge_target]+1] = 'Red'
+                        end
+                        SMODS.calculate_context({suika_ball_merge_repetition = true, other_ball = v})
+                        SMODS.calculate_context({suika_ball_merge_repetition = true, other_ball = v.merge_target})
+                        
+                        if v.debuff then SuikaLatro.retrig[v] = {} end
+                        if v.merge_target.debuff then SuikaLatro.retrig[v.merge_target] = {} end
+
+                        for i = 1, math.max(#SuikaLatro.retrig[v], #SuikaLatro.retrig[v.merge_target]) do
+                            SuikaLatro.play_wait_time = 0
+                            G.E_MANAGER:add_event(Event({
+                                func = function()
+                                    SuikaLatro.play_wait_time = 0
+                                    if SuikaLatro.retrig[v][i] == "Red" then
+                                        SuikaLatro.f.seal_message(v.x, v.y, "Red")
+                                    elseif SuikaLatro.retrig[v][i] then
+                                        SuikaLatro.f.score_message_joker({
+                                            retriggers = 1,
+                                            obj = SuikaLatro.retrig[v][i],
+                                            obj_type = 'card',
+                                            juice_card = SuikaLatro.retrig[v][i],
+                                        })
+                                    end
+                                    if SuikaLatro.retrig[v.merge_target][i] == "Red" then
+                                        SuikaLatro.f.seal_message(v.x, v.y, "Red")
+                                    elseif SuikaLatro.retrig[v.merge_target][i] then
+                                        SuikaLatro.f.score_message_joker({
+                                            retriggers = 1,
+                                            obj = SuikaLatro.retrig[v.merge_target][i],
+                                            obj_type = 'card',
+                                            juice_card = SuikaLatro.retrig[v.merge_target][i],
+                                        })
+                                    end
+                                    SuikaLatro.f.eval_merge_ball_scoring_effects(nil, v, v.merge_target, true, #SuikaLatro.retrig[v] > 0, #SuikaLatro.retrig[v.merge_target] > 0)
+                                return true
+                                end
+                            }))
+                        end
+
                         --[[for i=1,2 do
                             scoring_list[i].pos = {
                                 x = x_pos,
@@ -1236,8 +1337,9 @@ function SuikaLatro.f.update(dt)
                 end
             end
         end
-
-        SuikaLatro.play_wait_time = SuikaLatro.play_wait_time + dt
+        if #G.E_MANAGER.queues.base <= 1 then
+            SuikaLatro.play_wait_time = SuikaLatro.play_wait_time + dt
+        end
         if SuikaLatro.do_merging and SuikaLatro.play_wait_time > 3 then
             SuikaLatro.play_wait_time = 0
             G.FUNCS.suika_play_pt2()
@@ -1542,6 +1644,7 @@ G.FUNCS.suika_play = function(e)
     delay(0.4)
 
     SuikaLatro.do_physics = false
+    SuikaLatro.retrig = {}
 
     --[[G.GAME.current_round.current_hand.chip_total = 0
     G.GAME.current_round.current_hand.chips = 0
@@ -1683,19 +1786,6 @@ G.FUNCS.suika_play = function(e)
         return true
         end
     }))
-    --delay(10)
-    --[[while not is_stopped do
-        local is_stopped = true
-        delay(1)
-        for k,v in ipairs(SuikaLatro.balls) do
-            local a_x, a_y = v.body:getLinearVelocity()
-            local speed = math.sqrt(a_x^2 + a_y^2)
-            --print(speed)
-            if speed > 0.5 then
-                is_stopped = false
-            end
-        end
-    end]]
 end
 
 G.FUNCS.suika_play_pt2 = function(e)
@@ -1734,21 +1824,52 @@ G.FUNCS.suika_play_pt2 = function(e)
                     x = x_pos,
                     y = y_pos,
                 }
-                if v.enhancement == 'm_steel' and not v.debuff then
-                    delay(1)
+                
+                SuikaLatro.retrig[v] = {'base'}
+                if v.seal and v.seal == 'Red' then
+                    SuikaLatro.retrig[v][#SuikaLatro.retrig[v]+1] = 'Red'
+                end
+                SMODS.calculate_context({suika_ball_remain_repetition = true, other_ball = v})
+                
+                if v.debuff then SuikaLatro.retrig[v] = {'base'} end
+
+                for i = 1, #SuikaLatro.retrig[v] do
+                    if SuikaLatro.retrig[v][i] == "Red" then
+                        G.E_MANAGER:add_event(Event({
+                            func = function()
+                                SuikaLatro.f.seal_message(v.pos.x, v.pos.y, "Red")
+                                return true
+                            end
+                        }))
+                    elseif type(SuikaLatro.retrig[v][i]) == 'table' then
+                        G.E_MANAGER:add_event(Event({
+                            func = function()
+                                SuikaLatro.f.score_message_joker({
+                                    retriggers = 1,
+                                    obj = v,
+                                    juice_card = SuikaLatro.retrig[v][i],
+                                })
+                                return true
+                            end
+                        }))
+                    end
+                    if v.enhancement == 'm_steel' and not v.debuff then
+                        delay(1)
+                        G.E_MANAGER:add_event(Event({
+                            func = function()
+                                SuikaLatro.f.enhancement_message(v.pos.x, v.pos.y, v.enhancement)
+                            return true
+                            end
+                        }))
+                    end
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            SuikaLatro.f.enhancement_message(v.pos.x, v.pos.y, v.enhancement)
-                        return true
+                            SMODS.calculate_context({suika_hand_individual = true, other_ball = v})
+                            return true
                         end
                     }))
+                    
                 end
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        SMODS.calculate_context({suika_hand_individual = true, other_ball = v})
-                        return true
-                    end
-                }))
             end
             return true
         end
@@ -1776,6 +1897,7 @@ G.FUNCS.suika_play_pt2 = function(e)
             G.E_MANAGER:add_event(Event({
                 trigger = 'immediate',
                 func = function()
+                    SuikaLatro.retrig = {}
                     SuikaLatro.f.evaluate_play_jokers()
                     return true
                 end
