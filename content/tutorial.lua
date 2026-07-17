@@ -313,6 +313,11 @@ G.FUNCS.suikalatro_tutorial_part = function(_part)
         })]]
     elseif _part == 'bigblind' then
         step = suikalatro_tutorial_info({
+            text_key = 'suika_bigblind0',
+            attach = {major = G.ROOM_ATTACH, type = 'cm', offset = {x = 0, y = 0}},
+            step = step,
+        })
+        step = suikalatro_tutorial_info({
             text_key = 'suika_bigblind1',
             attach = {major = G.ROOM_ATTACH, type = 'cm', offset = {x = 0, y = 0}},
             step = step,

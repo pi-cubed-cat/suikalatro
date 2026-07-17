@@ -1,46 +1,4 @@
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
--- DISPLAY VERSION ON MAIN MENU
---+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
-
-local gameMainMenuRef = Game.main_menu
-function Game:main_menu(change_context)
-    gameMainMenuRef(self, change_context)
-    UIBox({
-        definition = {
-            n = G.UIT.ROOT,
-            config = {
-                align = "cm",
-                colour = {
-                    G.C.UI.TRANSPARENT_DARK[1],
-                    G.C.UI.TRANSPARENT_DARK[2],
-                    G.C.UI.TRANSPARENT_DARK[3],
-                    G.C.UI.TRANSPARENT_DARK[4] * 2
-                }
-            },
-            nodes = {
-                {
-                    n = G.UIT.T,
-                    config = {
-                        scale = 0.5,
-                        text = "Suikalatro v0.8.0 (DEMO)", -- title screen version
-                        colour = G.C.UI.TEXT_LIGHT
-                    }
-                }
-            }
-        },
-        config = {
-            align = "tmi",
-            bond = "Weak",
-            offset = {
-                x = 0,
-                y = 0
-            },
-            major = G.ROOM_ATTACH
-        }
-    })
-end
-
---+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 -- LOAD BALL FRONTS (SUITS, ENHANCEMENTS, AND SEALS)
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
@@ -189,7 +147,7 @@ assert(SMODS.load_file("content/vouchers.lua"))()
 assert(SMODS.load_file("content/decks.lua"))()
 assert(SMODS.load_file("content/boosters.lua"))()
 assert(SMODS.load_file("content/modicon.lua"))()
-assert(SMODS.load_file("content/main_menu_logo.lua"))()
+assert(SMODS.load_file("content/main_menu.lua"))()
 assert(SMODS.load_file("utils/rewrite_evaluate_play.lua"))()
 assert(SMODS.load_file("content/tutorial.lua"))()
 assert(SMODS.load_file("content/config_menu.lua"))()
@@ -395,10 +353,15 @@ function SuikaLatro.f.disable_suika()
     --end
 end
 
-function SuikaLatro.f.reset_suika()
+function SuikaLatro.f.reset_suika(carry_over)
     for i = #SuikaLatro.balls, 1, -1 do
         SuikaLatro.balls[i].body:destroy()
         table.remove(SuikaLatro.balls, i)
+    end
+    if carry_over and G.GAME.SuikaLatro_carryover_balls then
+        for k,v in ipairs(G.GAME.SuikaLatro_carryover_balls) do
+            table.insert(SuikaLatro.balls, Ball(v.x, v.y, v, 0, 0, nil, nil, nil, v.size))
+        end
     end
 end
 
@@ -609,9 +572,6 @@ function beginContact(a, b, coll)
     end
 end
 
---SuikaLatro.balls[#SuikaLatro.balls].body:getY()
---SuikaLatro.balls[#SuikaLatro.balls].size
---boundary.body:getY()
 function endContact(a, b, coll)
 	local x, y = coll:getNormal()
 	local objA = a:getUserData()
@@ -622,6 +582,8 @@ function endContact(a, b, coll)
             objB.merge_target = nil
             objA.dont_prod = nil
             objB.dont_prod = nil
+            --objA.fixture:setMask()
+            --objB.fixture:setMask()
         end
     end
 end
@@ -1571,7 +1533,7 @@ function love.draw()
     and G.SETTINGS.suikalatro_tutorial_progress.section == 'secondhand' then
         love.graphics.draw(suika_tutorial.gameover, SuikaLatro.screen_w*3/5, SuikaLatro.screen_h*1/5, nil, to_pixels(0.015))
     end
-    if G.OVERLAY_TUTORIAL and (G.OVERLAY_TUTORIAL.step == 4 or G.OVERLAY_TUTORIAL.step == 5)
+    if G.OVERLAY_TUTORIAL and (G.OVERLAY_TUTORIAL.step == 5 or G.OVERLAY_TUTORIAL.step == 6)
     and G.SETTINGS.suikalatro_tutorial_progress.section == 'bigblind' then
         love.graphics.draw(suika_tutorial.biology, SuikaLatro.screen_w*3/5, SuikaLatro.screen_h*1/5, nil, to_pixels(0.015))
     end

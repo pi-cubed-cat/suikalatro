@@ -3,7 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
-# gold cards and blue cards
+# end of round effects
 [[patches]] 
 [patches.pattern]
 target = "functions/state_events.lua"
@@ -12,6 +12,52 @@ for _,v in ipairs(SMODS.get_card_areas('playing_cards', 'end_of_round')) do
 '''
 position = "before"
 payload = '''
+local num_carry_over = 2
+G.GAME.SuikaLatro_carryover_balls = {}
+if #SuikaLatro.balls <= num_carry_over then
+    for i = 1, num_carry_over do
+        for k, ball in ipairs(SuikaLatro.balls) do
+            G.GAME.SuikaLatro_carryover_balls[k] = {}
+            G.GAME.SuikaLatro_carryover_balls[k].x = ball.body:getX()
+            G.GAME.SuikaLatro_carryover_balls[k].y = ball.body:getY()
+            G.GAME.SuikaLatro_carryover_balls[k].id = ball.id
+            G.GAME.SuikaLatro_carryover_balls[k].suit = ball.suit
+            G.GAME.SuikaLatro_carryover_balls[k].enhancement = ball.enhancement
+            G.GAME.SuikaLatro_carryover_balls[k].edition = ball.edition
+            G.GAME.SuikaLatro_carryover_balls[k].seal = ball.seal
+            G.GAME.SuikaLatro_carryover_balls[k].size = ball.size
+
+            G.GAME.SuikaLatro_carryover_balls[k].perma_bonuses = {}
+            for kk,vv in pairs(ball.perma_bonuses) do
+                G.GAME.SuikaLatro_carryover_balls[k].perma_bonuses[kk] = v
+            end
+        end
+    end
+else
+    local target_list = {}
+    for k, ball in ipairs(SuikaLatro.balls) do
+        target_list[k] = ball
+    end
+    for i = 1, num_carry_over do
+        local ball, ball_id = pseudorandom_element(target_list, 'suika_carryover')
+        target_list[ball_id] = nil
+        G.GAME.SuikaLatro_carryover_balls[i] = {}
+        G.GAME.SuikaLatro_carryover_balls[i].x = ball.body:getX()
+        G.GAME.SuikaLatro_carryover_balls[i].y = ball.body:getY()
+        G.GAME.SuikaLatro_carryover_balls[i].id = ball.id
+        G.GAME.SuikaLatro_carryover_balls[i].suit = ball.suit
+        G.GAME.SuikaLatro_carryover_balls[i].enhancement = ball.enhancement
+        G.GAME.SuikaLatro_carryover_balls[i].edition = ball.edition
+        G.GAME.SuikaLatro_carryover_balls[i].seal = ball.seal
+        G.GAME.SuikaLatro_carryover_balls[i].size = ball.size
+
+        G.GAME.SuikaLatro_carryover_balls[i].perma_bonuses = {}
+        for kk,vv in pairs(ball.perma_bonuses) do
+            G.GAME.SuikaLatro_carryover_balls[i].perma_bonuses[kk] = v
+        end
+    end
+
+end
 
 for k,v in ipairs(SuikaLatro.balls) do
     local x_pos, y_pos = v.body:getX(), v.body:getY()
@@ -66,6 +112,12 @@ for k,v in ipairs(SuikaLatro.balls) do
                 end
             }))
         end
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                SMODS.calculate_context({suika_hand_individual_endofround = true, other_ball = v})
+                return true
+            end
+        }))
     end
 end
 '''
@@ -93,7 +145,7 @@ SMODS.calculate_context({setting_blind = true, blind = G.GAME.round_resets.blind
 position = "after"
 payload = '''
 SuikaLatro.f.enable_suika()
-SuikaLatro.f.reset_suika()
+SuikaLatro.f.reset_suika(true)
 '''
 match_indent = true
 

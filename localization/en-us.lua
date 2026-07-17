@@ -686,6 +686,13 @@ return {
                     "change at end of round",
                 },
             },
+            j_cloud_9 = {
+                text = {
+                    "Earn {C:money}$#1#{} for each",
+                    "{C:attention}9{} ball remaining in box",
+                    "at {C:attention}end of round{}",
+                },
+            },
             j_mime = {
                 text = {
                     "Retrigger all",
@@ -704,7 +711,7 @@ return {
                 text = {
                     "Retrigger merge",
                     "effects of each",
-                    "{C:attention}2{}, {C:attention}3{}, {C:attention}4{}, and {C:attention}5{}",
+                    "{C:attention}2{} or {C:attention}3{} ball",
                 },
             },
             j_selzer = {
@@ -1007,8 +1014,14 @@ return {
                 "the Blind for a whirl."
             },
 
+            suika_bigblind0 = {
+                "Hey, some of your",
+                "balls from last round",
+                "carried over!",
+            },
             suika_bigblind1 = {
-                "In vanilla Balatro, card like",
+                "Anyways,",
+                "in vanilla Balatro, card like",
                 "Mult and Bonus cards",
                 "activate in the played hand",
                 "from {C:attention}left to right{}.",

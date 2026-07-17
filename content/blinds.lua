@@ -71,14 +71,6 @@ SMODS.Blind:take_ownership('head',
     true
 )
 
-SMODS.Blind:take_ownership('pillar',
-    {
-    in_pool = function(self, args) return false end,
-    no_collection = true
-    },
-    true
-)
-
 SMODS.Blind:take_ownership('final_leaf',
     {
     in_pool = function(self, args) return false end,
@@ -86,6 +78,13 @@ SMODS.Blind:take_ownership('final_leaf',
     },
     true
 )]]
+
+SMODS.Blind:take_ownership('pillar',
+    {
+    boss = { min = 2 },
+    },
+    true
+)
 
 SMODS.Blind:take_ownership('serpent', 
     {

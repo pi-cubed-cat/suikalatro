@@ -11,8 +11,9 @@
         "Steamodded (>=1.0.0~BETA-1620a)"
     ],
     "conflicts": [
-		"JokerDisplay"
+		"JokerDisplay",
+        "cartomancer"
 	],
-    "version": "0.8.0",
+    "version": "0.8.1",
     "allow_redistribution": true
 }

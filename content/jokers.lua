@@ -1047,7 +1047,31 @@ SMODS.Joker:take_ownership('baron',
 
 SMODS.Joker:take_ownership('cloud_9',
     {
-        config = { extra = 4 },
+        name = "Cloud 9 2",
+        config = { extra = { dollars = 5 } },
+        cost = 5,
+        blueprint_compat = true,
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra.dollars } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_hand_individual_endofround then
+                if SuikaLatro.f.is_rank(context.other_ball, 9) then
+                    if not context.other_ball.debuff then
+                        SuikaLatro.f.score_message_joker({
+                            dollars = card.ability.extra.dollars,
+                            obj = context.other_ball,
+                            juice_card = card,
+                        })
+                    else
+                        return {
+                            message = localize('k_debuffed'),
+                            colour = G.C.RED
+                        }
+                    end
+                end
+            end
+        end
     }, true
 )
 
@@ -1785,9 +1809,7 @@ SMODS.Joker:take_ownership('hack',
         calculate = function(self, card, context)
             if context.suika_ball_merge_repetition and 
             (SuikaLatro.f.is_rank(context.other_ball, 2) or 
-            SuikaLatro.f.is_rank(context.other_ball, 3) or
-            SuikaLatro.f.is_rank(context.other_ball, 4) or
-            SuikaLatro.f.is_rank(context.other_ball, 5)) then
+            SuikaLatro.f.is_rank(context.other_ball, 3)) then
                 SuikaLatro.f.return_retriggers(1, card, context.other_ball)
             end
         end,
