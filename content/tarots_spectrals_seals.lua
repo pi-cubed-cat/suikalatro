@@ -196,7 +196,7 @@ SMODS.Seal:take_ownership('Purple',
     {
         calculate = function(self, card, context)
             if context.discard and context.other_card == card then
-                for i = 1, 2 do
+                --for i = 1, 2 do
                     if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                         G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                         G.E_MANAGER:add_event(Event({
@@ -210,7 +210,7 @@ SMODS.Seal:take_ownership('Purple',
                         }))
                         card_eval_status_text(card, 'extra', nil, nil, nil, { message = localize('k_plus_tarot'), colour = G.C.PURPLE })
                     end
-                end
+                --end
             end
         end
     },
