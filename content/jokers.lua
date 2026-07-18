@@ -1109,16 +1109,18 @@ SMODS.Joker:take_ownership('midas_mask',
 SMODS.Joker:take_ownership('photograph',
     {
         rarity = 2,
-        config = { extra = { xmult = 2, ball_list = {} } },
+        config = { extra = { xmult = 2, ball_list = {}, ball_count = 0 } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.xmult } }
         end,
         calculate = function(self, card, context)
             if context.suika_individual and SuikaLatro.f.is_face(context.other_ball) then
-                if #card.ability.extra.ball_list < 2 or card.ability.extra.ball_list[context.other_ball] then
+                if card.ability.extra.ball_count < 2 or card.ability.extra.ball_list[context.other_ball] then
                     card.ability.extra.ball_list[context.other_ball] = true
+                    card.ability.extra.ball_count = card.ability.extra.ball_count + 1
                     if not SuikaLatro.f.is_face(context.other_ball.merge_target) then
                         card.ability.extra.ball_list[context.other_ball.merge_target] = true
+                        card.ability.extra.ball_count = card.ability.extra.ball_count + 1
                     end
                     SuikaLatro.f.score_message_joker({
                         x_mult = card.ability.extra.xmult,
@@ -1129,6 +1131,7 @@ SMODS.Joker:take_ownership('photograph',
             end
             if context.after and not context.blueprint then
                 card.ability.extra.ball_list = {}
+                card.ability.extra.ball_count = 0
             end
         end
     }, true
@@ -1864,18 +1867,20 @@ SMODS.Joker:take_ownership('sock_and_buskin',
 SMODS.Joker:take_ownership('hanging_chad',
     {
         name = 'Hanging Chad 2',
-        config = { extra = { repetitions = 2, ball_list = {} } },
+        config = { extra = { repetitions = 2, ball_list = {}, ball_count = 0 } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.repetitions } }
         end,
         calculate = function(self, card, context)
             if context.suika_ball_merge_repetition and 
-            (#card.ability.extra.ball_list < 2 or card.ability.extra.ball_list[context.other_ball]) then
+            (card.ability.extra.ball_count < 2 or card.ability.extra.ball_list[context.other_ball]) then
                 card.ability.extra.ball_list[context.other_ball] = true
+                card.ability.extra.ball_count = card.ability.extra.ball_count + 1
                 SuikaLatro.f.return_retriggers(card.ability.extra.repetitions, card, context.other_ball)
             end
             if context.after and not context.blueprint then
                 card.ability.extra.ball_list = {}
+                card.ability.extra.ball_count = 0
             end
         end,
     }, true

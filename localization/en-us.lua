@@ -121,6 +121,13 @@ return {
                     "{C:attention}Heavy{}"
                 },
             },
+            m_wild = {
+                text = {
+                    "Can be used",
+                    "as any suit,",
+                    "cannot be debuffed",
+                },
+            },
         },
         Joker={
             j_greedy_joker={
