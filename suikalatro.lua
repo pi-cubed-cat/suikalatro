@@ -782,7 +782,7 @@ function SuikaLatro.f.seal_message(x_, y_, stype, amt)
         ease_dollars(amt, true)
     end
     if stype == "Blue" then
-        if not amt then amt = 2 end
+        if not amt then amt = 3 end
         local _poker_hands = {}
         for handname, _ in pairs(G.GAME.hands) do
             if string.find(handname, 'suika') and SMODS.is_poker_hand_visible(handname) then
