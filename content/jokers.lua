@@ -413,7 +413,7 @@ SMODS.Joker:take_ownership('raised_fist',
                 local raised_card = nil
                 for k,v in ipairs(SuikaLatro.balls) do
                     if v.id < temp_ID and v.enhancement ~= 'm_stone' then
-                        temp_Mult = get_size(v.id)/SuikaLatro.ball_sizefactor
+                        temp_Mult = v.id
                         temp_ID = v.id
                         raised_card = v
                     end

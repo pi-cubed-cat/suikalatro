@@ -37,7 +37,7 @@ function SuikaLatro.f.explode_particles(x, y, number, colours, size)
         local rand_col = pseudorandom_element(colours) or G.C.RED
         table.insert(SuikaLatro.particles, { 
             colour = lighten(rand_col, 0.5*math.random()), 
-            pos = {x = x, y = y}, 
+            pos = {x = t_x(x), y = t_y(y)}, 
             vel = {x = speed*math.cos(vel_direction), y = speed*math.sin(vel_direction)},
             scale = (size or 1)*(math.random() + 1), 
             direction = direction,

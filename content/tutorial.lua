@@ -90,10 +90,6 @@ G.FUNCS.suikalatro_tutorial_controller = function()
             G.SETTINGS.suikalatro_tutorial_complete = true
             G.SETTINGS.suikalatro_tutorial_progress = nil
         end
-        --[[if G.SETTINGS.suikalatro_tutorial_progress.completed_parts['bigblind']
-        and G.SETTINGS.suikalatro_tutorial_progress.completed_parts['shop'] then
-            
-        end]]
     end
 end
 
@@ -275,42 +271,6 @@ G.FUNCS.suikalatro_tutorial_part = function(_part)
             attach = {major = G.ROOM_ATTACH, type = 'cm', offset = {x = -2, y = 0}},
             step = step,
         })
-        --[[step = suikalatro_tutorial_info({
-            hard_set = true,
-            text_key = 'bld_s_1',
-            highlight = {
-                G.SHOP_SIGN,
-            },
-            attach = {major = G.shop, type = 'tm', offset = {x = 0, y = 4}},
-            step = step,
-        })
-        step = suikalatro_tutorial_info({
-            text_key = 'bld_s_2',
-            highlight = {
-                G.SHOP_SIGN,
-                G.HUD:get_UIE_by_ID('dollar_text_UI').parent.parent.parent,
-                G.shop_booster
-            },
-            look = {0, -1},
-            snap_to = function() return G.shop_booster.cards[1] end,
-            attach = {major = G.shop, type = 'tm', offset = {x = 0, y = 8}},
-            no_button = true,
-            button_listen = 'buy_from_shop',
-            step = step,
-        })
-        step = suikalatro_tutorial_info({
-            text_key = 'bld_s_3',
-            highlight = function() return {
-                G.shop:get_UIE_by_ID('next_round_button'),
-                G.shop_booster
-            } end,
-            look = {-0.2, -1},
-            snap_to = function() if G.shop then return G.shop:get_UIE_by_ID('next_round_button') end end,
-            no_button = true,
-            button_listen = 'toggle_shop',
-            attach = {major = G.shop, type = 'tm', offset = {x = 0, y = 8}},
-            step = step,
-        })]]
     elseif _part == 'bigblind' then
         step = suikalatro_tutorial_info({
             text_key = 'suika_bigblind0',
@@ -449,7 +409,7 @@ function suikalatro_tutorial_info(args)
     return step+1
 end
 
-  G.FUNCS.suika_skip_tutorial_section = function(e)
+G.FUNCS.suika_skip_tutorial_section = function(e)
     G.OVERLAY_TUTORIAL.skip_steps = true
     G.SETTINGS.suikalatro_tutorial_complete = true
     G.SETTINGS.suikalatro_tutorial_progress = nil
@@ -458,4 +418,37 @@ end
     G.OVERLAY_TUTORIAL:remove()
     G.OVERLAY_TUTORIAL = nil
     G.E_MANAGER:clear_queue('tutorial')
-  end
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- TUTORIAL DRAWING DIAGRAMS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+local filesystem = NFS or love.filesystem
+local suika_mod_path = SMODS.current_mod
+
+local function load_the_suika(img)
+    local full_path = (suika_mod_path.path..'assets/'..img)
+    local file_data = assert(NFS.newFileData(full_path))
+    local tempimagedata = assert(love.image.newImageData(file_data))
+    return (assert(love.graphics.newImage(tempimagedata)))
+end
+
+suika_tutorial = {
+    gameover = load_the_suika("tutorial/gameover.png"),
+    biology = load_the_suika("tutorial/biology.png")
+}
+
+local love_draw_ref = love.draw
+function love.draw()
+    love_draw_ref()
+    love.graphics.setColor(1, 1, 1)
+    if G.OVERLAY_TUTORIAL and G.OVERLAY_TUTORIAL.step == 2 
+    and G.SETTINGS.suikalatro_tutorial_progress.section == 'secondhand' then
+        love.graphics.draw(suika_tutorial.gameover, SuikaLatro.screen_w*3/5, SuikaLatro.screen_h*1/5, nil, to_pixels(0.015))
+    end
+    if G.OVERLAY_TUTORIAL and (G.OVERLAY_TUTORIAL.step == 5 or G.OVERLAY_TUTORIAL.step == 6)
+    and G.SETTINGS.suikalatro_tutorial_progress.section == 'bigblind' then
+        love.graphics.draw(suika_tutorial.biology, SuikaLatro.screen_w*3/5, SuikaLatro.screen_h*1/5, nil, to_pixels(0.015))
+    end
+end

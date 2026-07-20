@@ -1,3 +1,249 @@
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- PLAY HAND BUTTON
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+G.FUNCS.suika_can_play = function(e)
+    if SuikaLatro.balls and #SuikaLatro.balls > 0 
+    and (G.SETTINGS.suikalatro_tutorial_complete 
+    or G.SETTINGS.suikalatro_tutorial_progress.completed_parts['drop5']) then 
+        e.config.colour = G.C.BLUE
+        e.config.button = 'suika_play'
+    else
+        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+        e.config.button = nil
+    end
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- PLAY HAND (before merging)
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+G.FUNCS.suika_play = function(e)
+    if G.play and G.play.cards[1] then print("word") return end
+    --check the hand first
+
+    stop_use()
+    G.hand:unhighlight_all()
+    G.GAME.blind.triggered = false
+    G.CONTROLLER.interrupt.focus = true
+    SuikaLatro.triggered_combos = {}
+    SuikaLatro.scoring_suits = {
+        ['Hearts'] = 0,
+        ['Diamonds'] = 0,
+        ['Spades'] = 0,
+        ['Clubs'] = 0
+    }
+    for k, v in ipairs(G.playing_cards) do
+        v.ability.forced_selection = nil
+    end
+    
+    table.sort(G.hand.highlighted, function(a,b) return a.T.x < b.T.x end)
+
+    G.E_MANAGER:add_event(Event({
+        trigger = 'immediate',
+        func = function()
+            G.STATE = G.STATES.HAND_PLAYED
+            G.STATE_COMPLETE = true
+            return true
+        end
+    }))
+    inc_career_stat('c_hands_played', 1)
+    ease_hands_played(-1)
+    delay(0.4)
+
+    SuikaLatro.do_physics = false
+    SuikaLatro.retrig = {}
+
+    if G.GAME.blind:press_play() then
+        G.E_MANAGER:add_event(Event({
+            trigger = 'immediate',
+            func = (function()
+                SMODS.juice_up_blind()
+                G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+                    play_sound('tarot2', 0.76, 0.4);return true end}))
+                play_sound('tarot2', 1, 0.4)
+                return true
+            end)
+        }))
+        delay(0.4)
+    end
+
+    SuikaLatro.lowball = true
+
+    -- evaluate flushes
+    local has_ff = #SMODS.find_card('j_four_fingers') or 0
+    for k,v in pairs(SuikaLatro.flush_groups) do
+        local x_ = v[1].body:getX()
+        local y_ = v[1].body:getY()
+        if #v >= 5 - has_ff and #v < 10 - has_ff then
+            delay(1)
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.ball_scoring_message({x = x_, y = y_}, {
+                        text = "5-Flush!", colour = G.C.SUITS[v[1].suit],
+                        scale = 0.8, hold = 0.3
+                    }, {
+                        sound_key = 'chips1', per = math.random()*0.2 + 0.9, vol = 1
+                    }, true)
+                    SuikaLatro.f.score_poker_combo('suika_five_flush')
+                    for i=1,#v do
+                        v[i].flush_size = 0
+                    end
+                    return true
+                end
+            }))
+        elseif #v >= 10 - has_ff and #v < 15 - has_ff then
+            delay(1)
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.ball_scoring_message({x = x_, y = y_}, {
+                        text = "10-Flush!", colour = G.C.SUITS[v[1].suit],
+                        scale = 1, hold = 0.3
+                    }, {
+                        sound_key = 'chips1', per = math.random()*0.2 + 0.9, vol = 1
+                    }, true)
+                    SuikaLatro.f.score_poker_combo('suika_ten_flush')
+                    SuikaLatro.f.score_poker_combo('suika_five_flush', true)
+                    for i=1,#v do
+                        v[i].flush_size = 0
+                    end
+                    return true
+                end
+            }))
+        elseif #v >= 15 - has_ff then
+            delay(1)
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    SuikaLatro.f.ball_scoring_message({x = x_, y = y_}, {
+                        text = "Mega Flush!", colour = G.C.SUITS[v[1].suit],
+                        scale = 1.2, hold = 0.3
+                    }, { 
+                        sound_key = 'chips1', per = math.random()*0.2 + 0.9, vol = 1
+                    }, true)
+                    SuikaLatro.f.score_poker_combo('suika_mega_flush')
+                    SuikaLatro.f.score_poker_combo('suika_ten_flush', true)
+                    SuikaLatro.f.score_poker_combo('suika_five_flush', true)
+                    for i=1,#v do
+                        v[i].flush_size = 0
+                    end
+                    return true
+                end
+            }))
+        end
+
+    end
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            SuikaLatro.show_flushes = false
+            for k,v in pairs(SuikaLatro.flush_groups) do
+                for i=1,#v do
+                    v[i].flush_size = 0
+                end
+            end
+        return true
+        end
+    }))
+    delay(3)
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            SuikaLatro.do_physics = true
+            SuikaLatro.do_merging = true
+        return true
+        end
+    }))
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- PLAY HAND (after merging)
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+G.FUNCS.suika_play_pt2 = function(e)
+    SuikaLatro.do_merging = false
+    for k,v in ipairs(SuikaLatro.balls) do
+        v.merges = 0
+    end
+    if SuikaLatro.lowball == true then
+        SuikaLatro.f.ball_scoring_message(nil, nil, { 
+            sound_key = 'chips1', per = math.random()*0.2 + 0.9, vol = 1
+        }, true)
+        SuikaLatro.f.score_poker_combo('suika_lowball')
+    end
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            for k,v in ipairs(SuikaLatro.balls) do
+                local x_pos, y_pos = v.body:getX(), v.body:getY()
+                v.pos = {
+                    x = x_pos,
+                    y = y_pos,
+                }
+            end
+            SMODS.calculate_context({suika_before_jokers = true})
+            return true
+        end
+    }))
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            SuikaLatro.f.balls_after_merging()
+            return true
+        end
+    }))
+    delay(2)
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            --G.GAME.current_round.current_hand.chip_total = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+            --G.GAME.current_round.current_hand.chip_total_text = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+            return true
+        end
+    }))
+    delay(1)
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            --play_sound('chips2')
+            --G.GAME.chips = G.GAME.chips + G.GAME.current_round.current_hand.chip_total
+            return true
+        end
+    }))
+    G.E_MANAGER:add_event(Event({
+        trigger = 'immediate',
+        func = (function()
+
+            G.E_MANAGER:add_event(Event({
+                trigger = 'immediate',
+                func = function()
+                    SuikaLatro.retrig = {}
+                    update_hand_text({immediate = true, nopulse = true, delay = 0}, {mult = 0, chips = 0, level = '', handname = ''})
+                    SuikaLatro.f.evaluate_play_jokers()
+                    return true
+                end
+            }))
+
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.1,
+                func = function()
+                    G.GAME.hands_played = G.GAME.hands_played + 1
+                    G.GAME.current_round.hands_played = G.GAME.current_round.hands_played + 1
+                    return true
+                end
+            }))
+            G.E_MANAGER:add_event(Event({
+                trigger = 'immediate',
+                func = function()
+                    G.STATE_COMPLETE = false
+                    SuikaLatro.show_flushes = true
+                    return true
+                end
+            }))
+            return true
+        end)
+    }))
+
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- EVALUATE JOKERS
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
 SuikaLatro.f.evaluate_play_jokers = function(e)
     percent = 0.3
     percent_delta = 0.08
