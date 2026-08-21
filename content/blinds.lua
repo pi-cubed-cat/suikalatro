@@ -3,7 +3,7 @@ SMODS.Blind:take_ownership('arm',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('ox',
@@ -11,7 +11,7 @@ SMODS.Blind:take_ownership('ox',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('psychic',
@@ -19,7 +19,7 @@ SMODS.Blind:take_ownership('psychic',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 
@@ -28,7 +28,7 @@ SMODS.Blind:take_ownership('eye',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('mouth',
@@ -36,7 +36,7 @@ SMODS.Blind:take_ownership('mouth',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 --[[SMODS.Blind:take_ownership('club',
@@ -44,7 +44,7 @@ SMODS.Blind:take_ownership('mouth',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('goad',
@@ -52,7 +52,7 @@ SMODS.Blind:take_ownership('goad',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('window',
@@ -60,7 +60,7 @@ SMODS.Blind:take_ownership('window',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('head',
@@ -68,7 +68,7 @@ SMODS.Blind:take_ownership('head',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('final_leaf',
@@ -76,14 +76,14 @@ SMODS.Blind:take_ownership('final_leaf',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )]]
 
 SMODS.Blind:take_ownership('pillar',
     {
     boss = { min = 2 },
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('serpent', 
@@ -101,7 +101,7 @@ SMODS.Blind:take_ownership('serpent',
             end
         end
     },
-    true
+    false
 )
 
 
@@ -126,7 +126,7 @@ SMODS.Blind:take_ownership('tooth',
             end
         end
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('fish',
@@ -159,7 +159,7 @@ SMODS.Blind:take_ownership('fish',
             end
         end
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('flint',
@@ -169,7 +169,7 @@ SMODS.Blind:take_ownership('flint',
             if blind.disabled then return end
         end
     },
-    true
+    false
 )
 
 function SuikaLatro.is_flint_active()
@@ -196,7 +196,7 @@ SMODS.Blind:take_ownership('plant',
             end
         end
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('final_bell',
@@ -228,14 +228,14 @@ SMODS.Blind:take_ownership('final_bell',
             end
         end
     },
-    true
+    false
 )
 
 SMODS.Blind:take_ownership('mark',
     {
     boss = { min = 6 },
     },
-    true
+    false
 )
 
 SMODS.Atlas({
@@ -293,7 +293,7 @@ SMODS.Blind {
     discovered = true,
     calculate = function(self, blind, context)
         if context.after and not blind.disabled then
-            table.insert(SuikaLatro.balls, Ball(pseudorandom('persimmon')*10, -400, {id = 5}))
+            table.insert(SuikaLatro.balls, Ball(pseudorandom('persimmon')*10, -400, {id = 6}))
         end
     end,
 }

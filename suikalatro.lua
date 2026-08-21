@@ -94,5 +94,8 @@ assert(SMODS.load_file("init/rewrite_evaluate_play.lua"))()
 if next(SMODS.find_mod("Multiplayer")) then
     assert(SMODS.load_file("compat/multiplayer.lua"))()
 end
+if JokerDisplay then
+    assert(SMODS.load_file("compat/jokerdisplay.lua"))()
+end
 
 SuikaLatro.world:setCallbacks(beginContact, endContact)

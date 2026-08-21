@@ -12,5 +12,5 @@ SMODS.Voucher:take_ownership('observatory',
                 }
             end
         end,
-    }, true
+    }, false
 )

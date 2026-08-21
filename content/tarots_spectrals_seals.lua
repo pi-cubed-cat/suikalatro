@@ -3,7 +3,7 @@
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('talisman',
@@ -11,7 +11,7 @@ SMODS.Consumable:take_ownership('talisman',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('deja_vu',
@@ -19,7 +19,7 @@ SMODS.Consumable:take_ownership('deja_vu',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )]]
 
 --[[SMODS.Consumable:take_ownership('trance',
@@ -27,7 +27,7 @@ SMODS.Consumable:take_ownership('deja_vu',
     in_pool = function(self, args) return false end,
     no_collection = true
     },
-    true
+    false
 )]]
 
 SMODS.Consumable:take_ownership('ouija', { -- Ouija
@@ -91,7 +91,9 @@ SMODS.Consumable:take_ownership('ouija', { -- Ouija
         }))
         delay(0.5)
     end,
-}, true)
+    }, 
+    false
+)
 
 SMODS.Consumable:take_ownership('sigil', { -- Sigil
     config = { extra = { draw_cards = 6 }},
@@ -154,7 +156,13 @@ SMODS.Consumable:take_ownership('sigil', { -- Sigil
         }))
         delay(0.5)
     end,
-}, true)
+    }, 
+    false
+)
+
+SMODS.Consumable:take_ownership('black_hole',
+    {}, false
+)
 
 SMODS.Seal:take_ownership('Red',
     {
@@ -166,7 +174,7 @@ SMODS.Seal:take_ownership('Red',
 
         end,
     },
-    true
+    false
 )
 
 SMODS.Seal:take_ownership('Blue',
@@ -179,7 +187,7 @@ SMODS.Seal:take_ownership('Blue',
 
         end,
     },
-    true
+    false
 )
 
 SMODS.Seal:take_ownership('Gold',
@@ -189,7 +197,7 @@ SMODS.Seal:take_ownership('Gold',
             return { vars = { self.config.extra.money } }
         end,
     },
-    true
+    false
 )
 
 SMODS.Seal:take_ownership('Purple',
@@ -214,35 +222,35 @@ SMODS.Seal:take_ownership('Purple',
             end
         end
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('magician',
     {
     config = {mod_conv = 'm_lucky', max_highlighted = 3}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('empress',
     {
     config = {mod_conv = 'm_mult', max_highlighted = 3}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('heirophant',
     {
     config = {mod_conv = 'm_bonus', max_highlighted = 3}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('lovers',
     {
     config = {mod_conv = 'm_wild', max_highlighted = 2}
     },
-    true
+    false
 )
 
 local game_update_ref = Game.update
@@ -266,25 +274,33 @@ function Blind:debuff_card(card, from_blind)
     end
 end
 
+local enhancement_list = {'mult', 'bonus', 'glass', 'steel', 'gold', 'lucky', 'stone', 'wild'}
+for i = 1,8 do
+    SMODS.Enhancement:take_ownership(enhancement_list[i],
+        {},
+        false
+    )
+end
+
 SMODS.Consumable:take_ownership('chariot',
     {
     config = {mod_conv = 'm_steel', max_highlighted = 2}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('justice',
     {
     config = {mod_conv = 'm_glass', max_highlighted = 2}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('devil',
     {
     config = {mod_conv = 'm_gold', max_highlighted = 2}
     },
-    true
+    false
 )
 
 -- fix gold cards held in hand giving money
@@ -296,19 +312,19 @@ SMODS.Consumable:take_ownership('hanged_man',
     {
     config = {remove_card = true, max_highlighted = 3}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('strength',
     {
     config = {mod_conv = 'up_rank', max_highlighted = 3}
     },
-    true
+    false
 )
 
 SMODS.Consumable:take_ownership('tower',
     {
     config = {mod_conv = 'm_stone', max_highlighted = 2}
     },
-    true
+    false
 )

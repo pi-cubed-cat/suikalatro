@@ -1,12 +1,18 @@
 return {
     descriptions = {
         Back={
-            b_abandoned = {
-                name = "Abandoned Deck",
+            b_abandoned = { -- Abandoned Deck
                 text = {
                     "Start run with",
                     "no {C:attention}6{} cards",
                     "in your deck",
+                },
+            },
+            b_checkered = { -- Checkered Deck
+                text = {
+                    "Start run with",
+                    "{C:attention}30{C:spades} Spades{} and",
+                    "{C:attention}30{C:hearts} Hearts{} in deck",
                 },
             },
         },
@@ -27,7 +33,7 @@ return {
                 name = 'The Persimmon',
                 text = {
                     "After Play, drop a",
-                    "random 5 ball into box",
+                    "random 6 ball into box",
                 }
             },
             bl_plant = {
@@ -464,14 +470,14 @@ return {
                 name = "DNA",
                 text = {
                     "Add a copy of {C:attention}first card{}",
-                    "dropped this round to deck,",
+                    "played this round to deck,",
                     "and draw it to {C:attention}hand",
                 },
             },
             j_sixth_sense = {
                 name = "Sixth Sense",
                 text = {
-                    "If {C:attention}first card{} dropped this",
+                    "If {C:attention}first card{} played this",
                     "round is a {C:attention}6{}, destroy it and",
                     "create a {C:spectral}Spectral{} card",
                     "{C:inactive}(Must have room)",
@@ -482,7 +488,7 @@ return {
                 text = {
                     "{C:attention}Playing cards{}",
                     "permanently gain",
-                    "{C:chips}+#1#{} Chips when dropped",
+                    "{C:chips}+#1#{} Chips when played",
                 },
             },
             j_square = {
@@ -497,7 +503,7 @@ return {
             j_vampire = {
                 name = "Vampire",
                 text = {
-                    "After an {C:attention}Enhanced card{} is dropped,",
+                    "After an {C:attention}Enhanced card{} is played,",
                     "remove its {C:attention}Enhancement{} and",
                     "this Joker gains {X:mult,C:white} X#1# {} Mult",
                     "{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)",
@@ -515,7 +521,7 @@ return {
                 name = "Midas Mask",
                 text = {
                     "After a {C:attention}face{} card",
-                    "is dropped, it becomes",
+                    "is played, it becomes",
                     "a {C:attention}Gold Card{}",
                 },
             },
@@ -809,6 +815,14 @@ return {
                     "then convert all cards",
                     "in hand to a single",
                     "random {C:attention}rank",
+                },
+            },
+            c_black_hole = {
+                name = "Black Hole",
+                text = {
+                    "Upgrade every",
+                    "{C:legendary,E:1}poker combo",
+                    "by {C:attention}1{} level",
                 },
             },
         },

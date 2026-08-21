@@ -111,7 +111,7 @@ SMODS.Joker:take_ownership('greedy_joker',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('lusty_joker',
@@ -129,7 +129,7 @@ SMODS.Joker:take_ownership('lusty_joker',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('wrathful_joker',
@@ -147,7 +147,7 @@ SMODS.Joker:take_ownership('wrathful_joker',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('gluttenous_joker',
@@ -165,7 +165,7 @@ SMODS.Joker:take_ownership('gluttenous_joker',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('jolly',
@@ -182,7 +182,7 @@ SMODS.Joker:take_ownership('jolly',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('zany',
@@ -199,7 +199,7 @@ SMODS.Joker:take_ownership('zany',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('mad',
@@ -216,7 +216,7 @@ SMODS.Joker:take_ownership('mad',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('crazy',
@@ -233,7 +233,7 @@ SMODS.Joker:take_ownership('crazy',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('droll',
@@ -250,7 +250,7 @@ SMODS.Joker:take_ownership('droll',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('sly',
@@ -267,7 +267,7 @@ SMODS.Joker:take_ownership('sly',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('wily',
@@ -284,7 +284,7 @@ SMODS.Joker:take_ownership('wily',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('clever',
@@ -301,7 +301,7 @@ SMODS.Joker:take_ownership('clever',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('devious',
@@ -318,7 +318,7 @@ SMODS.Joker:take_ownership('devious',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('crafty',
@@ -335,7 +335,7 @@ SMODS.Joker:take_ownership('crafty',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('half',
@@ -360,14 +360,12 @@ SMODS.Joker:take_ownership('half',
                 end
             end
         end
-    }, true
+    }, false
 )
 
---[[SMODS.Joker:take_ownership('four_fingers',
-    {
-        rarity = 3,
-    }, true
-)]]
+SMODS.Joker:take_ownership('four_fingers',
+    {}, false
+)
 
 SMODS.Joker:take_ownership('8_ball',
     {
@@ -399,7 +397,7 @@ SMODS.Joker:take_ownership('8_ball',
                 }))
             end
         end
-    }, true
+    }, false
 )
 
 
@@ -427,7 +425,7 @@ SMODS.Joker:take_ownership('raised_fist',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('fibonacci',
@@ -451,7 +449,7 @@ SMODS.Joker:take_ownership('fibonacci',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('scary_face',
@@ -470,10 +468,12 @@ SMODS.Joker:take_ownership('scary_face',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
-
+SMODS.Joker:take_ownership('pareidolia',
+    {}, false
+)
 
 SMODS.Joker:take_ownership('even_steven',
     {
@@ -496,7 +496,7 @@ SMODS.Joker:take_ownership('even_steven',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('odd_todd',
@@ -520,7 +520,7 @@ SMODS.Joker:take_ownership('odd_todd',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('scholar',
@@ -551,7 +551,7 @@ SMODS.Joker:take_ownership('scholar',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('business',
@@ -572,7 +572,7 @@ SMODS.Joker:take_ownership('business',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('supernova',
@@ -601,7 +601,7 @@ SMODS.Joker:take_ownership('supernova',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('superposition',
@@ -640,7 +640,7 @@ SMODS.Joker:take_ownership('superposition',
                 }))
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('ride_the_bus',
@@ -668,14 +668,14 @@ SMODS.Joker:take_ownership('ride_the_bus',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('space',
     {
         in_pool = function(self, args) return false end,
         --no_collection = true
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('runner',
@@ -702,7 +702,7 @@ SMODS.Joker:take_ownership('runner',
             end
         end
         
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('dna',
@@ -746,14 +746,14 @@ SMODS.Joker:take_ownership('dna',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('splash',
     {
         in_pool = function(self, args) return false end,
         --no_collection = true
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('sixth_sense',
@@ -804,7 +804,7 @@ SMODS.Joker:take_ownership('sixth_sense',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('hiker',
@@ -819,7 +819,7 @@ SMODS.Joker:take_ownership('hiker',
                     card.ability.extra.chips
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('faceless',
@@ -827,7 +827,7 @@ SMODS.Joker:take_ownership('faceless',
         rarity = 2,
         cost = 7,
         config = { extra = { dollars = 5, faces = 1 } },
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('green_joker',
@@ -859,7 +859,7 @@ SMODS.Joker:take_ownership('green_joker',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('todo_list',
@@ -906,14 +906,14 @@ SMODS.Joker:take_ownership('todo_list',
             end
             card.ability.extra.poker_hand = pseudorandom_element(_poker_hands, 'to_do')
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('card_sharp',
     {
         in_pool = function(self, args) return false end,
         --no_collection = true
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('square',
@@ -936,7 +936,7 @@ SMODS.Joker:take_ownership('square',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('seance',
@@ -965,7 +965,7 @@ SMODS.Joker:take_ownership('seance',
                 }
             end
         end,]]
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('vampire',
@@ -1001,13 +1001,13 @@ SMODS.Joker:take_ownership('vampire',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('shortcut',
     {
         rarity = 3,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('baron',
@@ -1042,7 +1042,7 @@ SMODS.Joker:take_ownership('baron',
                 end
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('cloud_9',
@@ -1072,14 +1072,14 @@ SMODS.Joker:take_ownership('cloud_9',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('obelisk',
     {
         in_pool = function(self, args) return false end,
         --no_collection = true
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('midas_mask',
@@ -1103,7 +1103,7 @@ SMODS.Joker:take_ownership('midas_mask',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('photograph',
@@ -1134,7 +1134,7 @@ SMODS.Joker:take_ownership('photograph',
                 card.ability.extra.ball_count = 0
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('reserved_parking',
@@ -1162,7 +1162,7 @@ SMODS.Joker:take_ownership('reserved_parking',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('lucky_cat',
@@ -1188,7 +1188,7 @@ SMODS.Joker:take_ownership('lucky_cat',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('trousers',
@@ -1214,7 +1214,7 @@ SMODS.Joker:take_ownership('trousers',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('ancient',
@@ -1233,7 +1233,7 @@ SMODS.Joker:take_ownership('ancient',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('walkie_talkie',
@@ -1256,14 +1256,14 @@ SMODS.Joker:take_ownership('walkie_talkie',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 
 SMODS.Joker:take_ownership('castle',
     {
         config = { extra = { chips = 0, chip_mod = 10 } },
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('smiley',
@@ -1283,7 +1283,7 @@ SMODS.Joker:take_ownership('smiley',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('ticket',
@@ -1302,7 +1302,7 @@ SMODS.Joker:take_ownership('ticket',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('rough_gem',
@@ -1320,7 +1320,7 @@ SMODS.Joker:take_ownership('rough_gem',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('bloodstone',
@@ -1340,7 +1340,7 @@ SMODS.Joker:take_ownership('bloodstone',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('arrowhead',
@@ -1358,7 +1358,7 @@ SMODS.Joker:take_ownership('arrowhead',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('onyx_agate',
@@ -1376,7 +1376,7 @@ SMODS.Joker:take_ownership('onyx_agate',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('glass',
@@ -1409,7 +1409,7 @@ SMODS.Joker:take_ownership('glass',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('flower_pot',
@@ -1430,7 +1430,7 @@ SMODS.Joker:take_ownership('flower_pot',
                 end
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('wee',
@@ -1457,7 +1457,7 @@ SMODS.Joker:take_ownership('wee',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('idol',
@@ -1478,7 +1478,7 @@ SMODS.Joker:take_ownership('idol',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('seeing_double',
@@ -1507,7 +1507,7 @@ SMODS.Joker:take_ownership('seeing_double',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('matador',
@@ -1526,7 +1526,7 @@ SMODS.Joker:take_ownership('matador',
                 })
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('hit_the_road',
@@ -1542,7 +1542,7 @@ SMODS.Joker:take_ownership('hit_the_road',
             end
             return false
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('duo',
@@ -1559,7 +1559,7 @@ SMODS.Joker:take_ownership('duo',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('trio',
@@ -1576,7 +1576,7 @@ SMODS.Joker:take_ownership('trio',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('family',
@@ -1593,7 +1593,7 @@ SMODS.Joker:take_ownership('family',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('order',
@@ -1610,7 +1610,7 @@ SMODS.Joker:take_ownership('order',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('tribe',
@@ -1627,7 +1627,7 @@ SMODS.Joker:take_ownership('tribe',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('stuntman',
@@ -1644,7 +1644,7 @@ SMODS.Joker:take_ownership('stuntman',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('shoot_the_moon',
@@ -1688,7 +1688,7 @@ SMODS.Joker:take_ownership('shoot_the_moon',
                 end
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('burnt',
@@ -1710,7 +1710,7 @@ SMODS.Joker:take_ownership('burnt',
                 }
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('caino',
@@ -1754,7 +1754,7 @@ SMODS.Joker:take_ownership('caino',
                 }
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('triboulet',
@@ -1772,13 +1772,13 @@ SMODS.Joker:take_ownership('triboulet',
                 })
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('yorick',
     {
         config = {extra = {xmult = 1, discards = 12}}
-    }, true
+    }, false
 )
 
 function SuikaLatro.f.return_retriggers(amt, source, ball)
@@ -1794,7 +1794,7 @@ SMODS.Joker:take_ownership('mime',
                 SuikaLatro.f.return_retriggers(1, card, context.other_ball)
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('dusk',
@@ -1804,7 +1804,7 @@ SMODS.Joker:take_ownership('dusk',
                 SuikaLatro.f.return_retriggers(1, card, context.other_ball)
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('hack',
@@ -1816,7 +1816,7 @@ SMODS.Joker:take_ownership('hack',
                 SuikaLatro.f.return_retriggers(1, card, context.other_ball)
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('selzer',
@@ -1845,7 +1845,7 @@ SMODS.Joker:take_ownership('selzer',
                 end
             end
         end
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('sock_and_buskin',
@@ -1861,7 +1861,7 @@ SMODS.Joker:take_ownership('sock_and_buskin',
                 SuikaLatro.f.return_retriggers(card.ability.extra.repetitions, card, context.other_ball)
             end
         end,
-    }, true
+    }, false
 )
 
 SMODS.Joker:take_ownership('hanging_chad',
@@ -1883,5 +1883,5 @@ SMODS.Joker:take_ownership('hanging_chad',
                 card.ability.extra.ball_count = 0
             end
         end,
-    }, true
+    }, false
 )

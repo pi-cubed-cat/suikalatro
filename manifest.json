@@ -1,0 +1,10 @@
+{
+  "name": "Suikalatro",
+  "version_number": "0.8.4",
+  "website_url": "https://github.com/pi-cubed-cat/suikalatro",
+  "description": "Suika Game x Balatro! A complete game overhaul mod that adds physics to Balatro",
+  "dependencies": [
+    "Thunderstore-lovely-0.8.0",
+    "Steamodded-Steamodded-1.1620.0"
+  ]
+}

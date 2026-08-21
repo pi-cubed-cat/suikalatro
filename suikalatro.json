@@ -5,15 +5,14 @@
     "description": "suika",
     "prefix": "suika",
     "main_file": "suikalatro.lua",
-    "badge_colour": "00AA00",
+    "badge_colour": "50BF7C",
     "display_name": "Suikalatro",
     "dependencies": [
         "Steamodded (>=1.0.0~BETA-1620a)"
     ],
     "conflicts": [
-		"JokerDisplay",
         "cartomancer"
 	],
-    "version": "0.8.3",
+    "version": "0.8.4",
     "allow_redistribution": true
 }
