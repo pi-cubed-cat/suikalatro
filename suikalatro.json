@@ -13,6 +13,6 @@
     "conflicts": [
         "cartomancer"
 	],
-    "version": "0.8.4",
+    "version": "0.8.5",
     "allow_redistribution": true
 }

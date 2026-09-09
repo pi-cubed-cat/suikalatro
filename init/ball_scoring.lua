@@ -102,14 +102,16 @@ function SuikaLatro.f.enhancement_message(x_, y_, mtype, amt)
         SuikaLatro.f.score('xmult', amt)
     elseif mtype == 'm_lucky' then
         if pseudorandom('suika_lucky_mult') < G.GAME.probabilities.normal / 5 then
+            if not amt then amt = 20 end
             SMODS.calculate_context({suika_lucky_trigger = true})
             SuikaLatro.f.ball_scoring_message({x = x_, y = y_}, {text = "+"..amt, colour = G.C.MULT}, {sound_key = 'multhit1'})
             SuikaLatro.f.score('+mult', amt)
         end
         if pseudorandom('suika_lucky_money') < G.GAME.probabilities.normal / 15 then
+            if not amt then amt = 20 end
             SMODS.calculate_context({suika_lucky_trigger = true})
             SuikaLatro.f.ball_scoring_message({x = x_, y = y_}, {text = "$"..amt, colour = G.C.MONEY}, {sound_key = 'coin3'})
-            ease_dollars(20, true)
+            ease_dollars(amt, true)
         end
     elseif mtype == 'm_steel' then
         if not amt then amt = 1.5 end

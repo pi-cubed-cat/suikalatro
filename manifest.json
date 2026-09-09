@@ -1,6 +1,6 @@
 {
   "name": "Suikalatro",
-  "version_number": "0.8.4",
+  "version_number": "0.8.5",
   "website_url": "https://github.com/pi-cubed-cat/suikalatro",
   "description": "Suika Game x Balatro! A complete game overhaul mod that adds physics to Balatro",
   "dependencies": [
