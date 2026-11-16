@@ -707,6 +707,7 @@ SMODS.Joker:take_ownership('runner',
 
 SMODS.Joker:take_ownership('dna',
     {
+        name = "DNA 2",
         config = { extra = { copy = 1, active = true } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.copy } }
@@ -714,7 +715,7 @@ SMODS.Joker:take_ownership('dna',
         calculate = function(self, card, context)
             if context.first_hand_drawn and not context.blueprint then
                 card.ability.extra.active = true
-                local eval = function() return G.GAME.current_round.hands_played == 0 and #SuikaLatro.balls == 0 and not G.RESET_JIGGLES end
+                local eval = function() return G.GAME.current_round.hands_played == 0 and card.ability.extra.active and not G.RESET_JIGGLES end
                 juice_card_until(card, eval, true)
             end
             if context.suika_drop_card and card.ability.extra.active then
@@ -758,27 +759,46 @@ SMODS.Joker:take_ownership('splash',
 
 SMODS.Joker:take_ownership('sixth_sense',
     {
+        config = { extra = { active = true } },
         calculate = function(self, card, context)
+            if context.first_hand_drawn and not context.blueprint then
+                card.ability.extra.active = true
+            end
             if context.suika_drop_card and not context.blueprint then
-                if context.other_card:get_id() == 6 and G.GAME.current_round.hands_played == 0 and #SuikaLatro.balls == 1 then
-                    context.other_card:start_dissolve()
-                    context.other_card.being_destroyed = true
-                    if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                        G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
-                        G.E_MANAGER:add_event(Event({
-                            func = (function()
-                                SMODS.add_card {
-                                    set = 'Spectral',
-                                    key_append = 'sixth_sense'
-                                }
-                                G.GAME.consumeable_buffer = 0
-                                return true
-                            end)
-                        }))
-                        
+                if G.GAME.current_round.hands_played == 0 and card.ability.extra.active then
+                    card.ability.extra.active = false
+                    if context.other_card:get_id() == 6 then
+                        context.other_card:start_dissolve()
+                        context.other_card.being_destroyed = true
+                        if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                            G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                            G.E_MANAGER:add_event(Event({
+                                func = (function()
+                                    SMODS.add_card {
+                                        set = 'Spectral',
+                                        key_append = 'sixth_sense'
+                                    }
+                                    G.GAME.consumeable_buffer = 0
+                                    return true
+                                end)
+                            }))
+                            
+                            return {
+                                message = localize('k_plus_spectral'),
+                                colour = G.C.SECONDARY_SET.Spectral,
+                                func = function()
+                                    G.E_MANAGER:add_event(Event({
+                                        func = function()
+                                            SMODS.destroy_cards(context.other_card)
+                                            return true
+                                        end
+                                    }))
+                                end
+                            }
+                        end
+                        --SMODS.destroy_cards(context.other_card)
+
                         return {
-                            message = localize('k_plus_spectral'),
-                            colour = G.C.SECONDARY_SET.Spectral,
                             func = function()
                                 G.E_MANAGER:add_event(Event({
                                     func = function()
@@ -786,21 +806,9 @@ SMODS.Joker:take_ownership('sixth_sense',
                                         return true
                                     end
                                 }))
-                            end
+                            end,
                         }
                     end
-                    --SMODS.destroy_cards(context.other_card)
-
-                    return {
-                        func = function()
-                            G.E_MANAGER:add_event(Event({
-                                func = function()
-                                    SMODS.destroy_cards(context.other_card)
-                                    return true
-                                end
-                            }))
-                        end,
-                    }
                 end
             end
         end
