@@ -8,11 +8,12 @@
     "badge_colour": "50BF7C",
     "display_name": "Suikalatro",
     "dependencies": [
-        "Steamodded (>=1.0.0~BETA-1620a)"
+        "Steamodded (>=26.1002.0)"
     ],
     "conflicts": [
         "cartomancer"
 	],
-    "version": "0.8.6",
-    "allow_redistribution": true
+    "version": "0.8.7",
+    "allow_redistribution": true,
+    "icon_path": "modicon.png"
 }

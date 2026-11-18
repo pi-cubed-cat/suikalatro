@@ -63,6 +63,8 @@ function get_blind_amount(ante)
     return get_blind_amount_ref(ante) * 10
 end
 
+assert(SMODS.load_file("utils/nested_folder_fix.lua"))()
+
 assert(SMODS.load_file("content/pokercombos.lua"))()
 assert(SMODS.load_file("content/jokers.lua"))()
 assert(SMODS.load_file("content/tarots_spectrals_seals.lua"))()
@@ -99,3 +101,14 @@ if JokerDisplay then
 end
 
 SuikaLatro.world:setCallbacks(beginContact, endContact)
+
+-- fixes an issue with playing duplicate hands of the same score, and no 'post-merging' effects trigger
+--[[SMODS.current_mod.calculate = function(self, context) 
+    if context.main_scoring then
+        return {
+            mult = 1,
+            hand_chip = 1,
+            no_message = true,
+        }
+    end
+end]]

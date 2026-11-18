@@ -1,7 +1,7 @@
 WIP!! THIS PROJECT IS STILL IN DEVELOPMENT. There may be crashes or issues, apologies!
 VOLUME WARNING! Especially when many events happen at the same time! This is planned to be fixed in the future. For the best experience, please play on a fully unlocked profile.
 
-This mod requires Steamodded. I'd recommend using release version [1.0.0-beta-1620a](https://github.com/Steamodded/smods/releases/tag/1.0.0-beta-1620a) or later.
+This mod requires Steamodded (SMODS). I'd recommend using release version [v26.1002.0](https://github.com/Steamodded/smods/releases/tag/26.1002.0) or later.
 
 Use WASD or the arrow keys to move the indicator and drop balls. These controls can be changed in the config. For more information on gameplay features, check out the wiki: https://balatromods.miraheze.org/wiki/Suikalatro
 

@@ -89,6 +89,21 @@ function SuikaLatro.f.score_message_joker(args)
     
 end
 
+-- card juicing (DNA, Trading Card, Sixth Sense, Loyalty Card, Invisible Joker )
+-- added to update patch
+local update_ref = G.update
+function G:update(dt)
+    update_ref(self, dt)
+    SuikaLatro = SuikaLatro or {}
+    SuikaLatro.juicing_timer = (SuikaLatro.juicing_timer or 0) + dt
+    if SuikaLatro.juicing_timer > 0.8 then
+        SuikaLatro.juicing_timer = 0
+        if G.GAME and G.GAME.blind and G.GAME.blind.in_blind then
+            SMODS.calculate_context({suika_juicing = true})
+        end
+    end
+end
+
 SMODS.Atlas {
     key = "suika_jokers",
     path = "suika_jokers.png",
@@ -367,6 +382,38 @@ SMODS.Joker:take_ownership('four_fingers',
     {}, false
 )
 
+SMODS.Joker:take_ownership('loyalty_card',
+    {
+        name = "Loyalty Card 2",
+        config = { extra = { Xmult = 4, every = 5, loyalty_remaining = 5 } },
+        loc_vars = function(self, info_queue, card)
+            return {
+                vars = {
+                    card.ability.extra.Xmult,
+                    card.ability.extra.every + 1,
+                    localize { type = 'variable', key = (card.ability.extra.loyalty_remaining == 0 and 'loyalty_active' or 'loyalty_inactive'), vars = { card.ability.extra.loyalty_remaining } }
+                }
+            }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_juicing then
+                if card.ability.extra.loyalty_remaining == 0 then
+                    card:juice_up(0.1, 0.1)
+                end
+            end
+            if context.joker_main then
+                card.ability.extra.loyalty_remaining = (card.ability.extra.every - 1 - (G.GAME.hands_played - card.ability.hands_played_at_create)) %
+                    (card.ability.extra.every + 1)
+                if card.ability.extra.loyalty_remaining == card.ability.extra.every then
+                    return {
+                        xmult = card.ability.extra.Xmult
+                    }
+                end
+            end
+        end
+    }, false
+)
+
 SMODS.Joker:take_ownership('8_ball',
     {
         config = { extra = { odds = 2 } },
@@ -399,8 +446,6 @@ SMODS.Joker:take_ownership('8_ball',
         end
     }, false
 )
-
-
 
 SMODS.Joker:take_ownership('raised_fist',
     {
@@ -713,10 +758,13 @@ SMODS.Joker:take_ownership('dna',
             return { vars = { card.ability.extra.copy } }
         end,
         calculate = function(self, card, context)
+            if context.suika_juicing then
+                if card.ability.extra.active then
+                    card:juice_up(0.1, 0.1)
+                end
+            end
             if context.first_hand_drawn and not context.blueprint then
                 card.ability.extra.active = true
-                local eval = function() return G.GAME.current_round.hands_played == 0 and card.ability.extra.active and not G.RESET_JIGGLES end
-                juice_card_until(card, eval, true)
             end
             if context.suika_drop_card and card.ability.extra.active then
                 card.ability.extra.active = false
@@ -759,8 +807,14 @@ SMODS.Joker:take_ownership('splash',
 
 SMODS.Joker:take_ownership('sixth_sense',
     {
+        name = "Sixth Sense 2",
         config = { extra = { active = true } },
         calculate = function(self, card, context)
+            if context.suika_juicing then
+                if card.ability.extra.active then
+                    card:juice_up(0.1, 0.1)
+                end
+            end
             if context.first_hand_drawn and not context.blueprint then
                 card.ability.extra.active = true
             end
@@ -1196,6 +1250,30 @@ SMODS.Joker:take_ownership('lucky_cat',
                 }
             end
         end,
+    }, false
+)
+
+SMODS.Joker:take_ownership('trading',
+    {
+        name = "Trading Card 2",
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_juicing then
+                if G.GAME.current_round.discards_used == 0 then
+                    card:juice_up(0.1, 0.1)
+                end
+            end
+            if context.discard and not context.blueprint and
+                G.GAME.current_round.discards_used <= 0 and #context.full_hand == 1 then
+                return {
+                    dollars = card.ability.extra,
+                    remove = true,
+                    delay = 0.45
+                }
+            end
+        end
     }, false
 )
 
@@ -1649,6 +1727,63 @@ SMODS.Joker:take_ownership('stuntman',
             if context.joker_main then
                 return {
                     chips = card.ability.extra.chip_mod
+                }
+            end
+        end,
+    }, false
+)
+
+SMODS.Joker:take_ownership('invisible',
+    {
+        name = "Invisible Joker 2",
+        config = { extra = { invis_rounds = 0, total_rounds = 2 } },
+        loc_vars = function(self, info_queue, card)
+            local main_end = {}
+            if G.jokers and G.jokers.cards then
+                for _, joker in ipairs(G.jokers.cards) do
+                    if joker.edition and joker.edition.negative then
+                        localize { type = 'other', key = 'remove_negative', nodes = main_end, vars = {} }
+                        break
+                    end
+                end
+            end
+            return { vars = { card.ability.extra.total_rounds, card.ability.extra.invis_rounds }, main_end = main_end[1] }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_juicing then
+                if card.ability.extra.invis_rounds >= card.ability.extra.total_rounds then
+                    card:juice_up(0.1, 0.1)
+                end
+            end
+            if context.selling_self and (card.ability.extra.invis_rounds >= card.ability.extra.total_rounds) and not context.blueprint then
+                local jokers = {}
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i] ~= card then
+                        jokers[#jokers + 1] = G.jokers.cards[i]
+                    end
+                end
+                if #jokers > 0 then
+                    if #G.jokers.cards <= G.jokers.config.card_limit then
+                        local chosen_joker = pseudorandom_element(jokers, 'invisible')
+                        local copied_joker = SMODS.copy_card(chosen_joker,
+                            { strip_edition = chosen_joker.edition and chosen_joker.edition.negative })
+                        if copied_joker.ability.invis_rounds then copied_joker.ability.invis_rounds = 0 end
+                        if type(copied_joker.ability.extra) == "table" and copied_joker.ability.extra.invis_rounds then copied_joker.ability.extra.invis_rounds = 0 end
+                        return { message = localize('k_duplicated_ex') }
+                    else
+                        return { message = localize('k_no_room_ex') }
+                    end
+                else
+                    return { message = localize('k_no_other_jokers') }
+                end
+            end
+            if context.end_of_round and context.game_over == false and context.main_eval and not context.blueprint then
+                card.ability.extra.invis_rounds = card.ability.extra.invis_rounds + 1
+                return {
+                    message = (card.ability.extra.invis_rounds < card.ability.extra.total_rounds) and
+                        (card.ability.extra.invis_rounds .. '/' .. card.ability.extra.total_rounds) or
+                        localize('k_active_ex'),
+                    colour = G.C.FILTER
                 }
             end
         end,

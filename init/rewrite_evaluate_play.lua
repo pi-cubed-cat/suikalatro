@@ -249,9 +249,10 @@ SuikaLatro.f.evaluate_play_jokers = function(e)
     percent_delta = 0.08
 
     if not G.GAME.blind:debuff_hand(G.play.cards, poker_hands, text) then
-    
-            mult = mod_mult(G.GAME.current_round.current_hand.mult)
-            hand_chips = mod_chips(G.GAME.current_round.current_hand.chips)
+
+            -- added random part is for preventing a fuckass bug where *duplicate* scoring chips/mult return 0????
+            mult = mod_mult(G.GAME.current_round.current_hand.mult + 0.0001*math.random())
+            hand_chips = mod_chips(G.GAME.current_round.current_hand.chips + 0.0001*math.random())
             
             SMODS.calculate_context({suika_before = true})
 
@@ -266,6 +267,7 @@ SuikaLatro.f.evaluate_play_jokers = function(e)
         --Joker Effects
         --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
         percent = percent + percent_delta
+        
         for _, area in ipairs(SMODS.get_card_areas('jokers')) do for _, _card in ipairs(area.cards) do
             local effects = {}
             -- remove base game joker edition calc
@@ -417,7 +419,7 @@ SuikaLatro.f.evaluate_play_jokers = function(e)
         G.E_MANAGER:add_event(Event({
             func = function()
                 G.GAME.current_round.current_hand.chip_total = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
-                G.GAME.current_round.current_hand.chip_total_text = G.GAME.current_round.current_hand.mult * G.GAME.current_round.current_hand.chips
+                G.GAME.current_round.current_hand.chip_total_text = G.GAME.current_round.current_hand.chip_total
                 return true
             end
         }))
