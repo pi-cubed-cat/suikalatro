@@ -1,0 +1,15 @@
+# disable poker hand info
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''
+G.achievement_notification.alignment.offset.x = G.ROOM.T.x - G.achievement_notification.UIRoot.children[1].children[1].T.w - 0.8
+'''
+position = "at"
+payload = '''
+if G.achievement_notification then
+    G.achievement_notification.alignment.offset.x = G.ROOM.T.x - G.achievement_notification.UIRoot.children[1].children[1].T.w - 0.8
+end
+'''
+match_indent = true
+
