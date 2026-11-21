@@ -81,3 +81,7 @@ jd_def["j_hack"] = {}
 jd_def["j_selzer"] = {}
 jd_def["j_sock_and_buskin"] = {}
 jd_def["j_hanging_chad"] = {}
+jd_def["j_obelisk"] = {}
+jd_def["j_space"] = {}
+jd_def["j_card_sharp"] = {}
+jd_def["j_splash"] = {}

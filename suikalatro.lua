@@ -57,12 +57,6 @@ SuikaLatro = {
     play_wait_time = 0,
 }
 
--- 10X blind ante
-local get_blind_amount_ref = get_blind_amount
-function get_blind_amount(ante)
-    return get_blind_amount_ref(ante) * 10
-end
-
 assert(SMODS.load_file("utils/nested_folder_fix.lua"))()
 
 assert(SMODS.load_file("content/pokercombos.lua"))()
@@ -81,6 +75,7 @@ assert(SMODS.load_file("utils/rankoverrides.lua"))()
 assert(SMODS.load_file("utils/particles.lua"))()
 assert(SMODS.load_file("utils/poker_combo_utils.lua"))()
 assert(SMODS.load_file("utils/ball_utils.lua"))()
+assert(SMODS.load_file("utils/ball_hovering.lua"))()
 
 assert(SMODS.load_file("init/ball_front_loading.lua"))()
 assert(SMODS.load_file("init/static_objects_definitions.lua"))()

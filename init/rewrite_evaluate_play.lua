@@ -3,15 +3,70 @@
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
 G.FUNCS.suika_can_play = function(e)
-    if SuikaLatro.balls and #SuikaLatro.balls > 0 
-    and (G.SETTINGS.suikalatro_tutorial_complete 
-    or G.SETTINGS.suikalatro_tutorial_progress.completed_parts['drop5']) then 
-        e.config.colour = G.C.BLUE
-        e.config.button = 'suika_play'
-    else
+    if #G.deck.cards == 0 and #SuikaLatro.balls == 0 then
+        e.config.colour = G.C.DARK_EDITION
+        e.config.button = 'suika_die'
+    elseif G.GAME.blind.config.blind.key == 'bl_psychic' 
+    and #SuikaLatro.balls % 5 ~= 0 then
         e.config.colour = G.C.UI.BACKGROUND_INACTIVE
         e.config.button = nil
+    else
+        if SuikaLatro.balls and #SuikaLatro.balls > 0 
+        and (G.SETTINGS.suikalatro_tutorial_complete or G.SETTINGS.suikalatro_tutorial_progress.completed_parts['drop5']) then 
+            e.config.colour = G.C.BLUE
+            e.config.button = 'suika_play'
+        else
+            e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+            e.config.button = nil
+        end
     end
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- SPLASH SCORING BALLS IN FLUSHES
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+function SuikaLatro.f.score_ball_splash_flush(ball_list)
+    if next(SMODS.find_card('j_splash')) then
+        for k,v in pairs(ball_list) do
+            SuikaLatro.f.eval_merge_ball_scoring_effects(0, v, nil, false, nil, nil, true)
+                                
+            SuikaLatro.retrig[v] = {}
+            if v.seal and v.seal == 'Red' then
+                SuikaLatro.retrig[v][#SuikaLatro.retrig[v]+1] = 'Red'
+            end
+            SMODS.calculate_context({suika_ball_merge_repetition = true, other_ball = v})
+
+            if v.debuff then SuikaLatro.retrig[v] = {} end
+
+            for i = 1, #SuikaLatro.retrig[v] do
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        if SuikaLatro.retrig[v][i] == "Red" then
+                            SuikaLatro.f.seal_message(v.x, v.y, "Red")
+                        elseif SuikaLatro.retrig[v][i] then
+                            SuikaLatro.f.score_message_joker({
+                                retriggers = 1,
+                                obj = SuikaLatro.retrig[v][i],
+                                obj_type = 'card',
+                                juice_card = SuikaLatro.retrig[v][i],
+                            })
+                        end
+                        SuikaLatro.f.eval_merge_ball_scoring_effects(0, v, nil, true, #SuikaLatro.retrig[v] > 0, nil, true)
+                    return true
+                    end
+                }))
+            end
+        end
+    end
+end
+
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+-- DIE (from running out of balls and cards in deck)
+--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+
+G.FUNCS.suika_die = function(e)
+    SuikaLatro.f.try_game_over()
 end
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
@@ -89,6 +144,7 @@ G.FUNCS.suika_play = function(e)
                     for i=1,#v do
                         v[i].flush_size = 0
                     end
+                    SuikaLatro.f.score_ball_splash_flush(v)
                     return true
                 end
             }))
@@ -107,6 +163,7 @@ G.FUNCS.suika_play = function(e)
                     for i=1,#v do
                         v[i].flush_size = 0
                     end
+                    SuikaLatro.f.score_ball_splash_flush(v)
                     return true
                 end
             }))
@@ -126,6 +183,7 @@ G.FUNCS.suika_play = function(e)
                     for i=1,#v do
                         v[i].flush_size = 0
                     end
+                    SuikaLatro.f.score_ball_splash_flush(v)
                     return true
                 end
             }))
@@ -213,6 +271,7 @@ G.FUNCS.suika_play_pt2 = function(e)
                     SuikaLatro.retrig = {}
                     update_hand_text({immediate = true, nopulse = true, delay = 0}, {mult = 0, chips = 0, level = '', handname = ''})
                     SuikaLatro.f.evaluate_play_jokers()
+                    G.GAME.hands[G.GAME.last_scoring_combo].been_last_this_round = true
                     return true
                 end
             }))

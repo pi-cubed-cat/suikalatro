@@ -36,6 +36,68 @@ return {
                     "random 6 ball into box",
                 }
             },
+            bl_suika_grape = {
+                name = 'The Grapes',
+                text = {
+                    "After Play, increase",
+                    "rank of all balls in box"
+                }
+            },
+            bl_suika_pear = {
+                name = 'The Pear',
+                text = {
+                    "After Play, destroy all",
+                    "balls touching box's floor"
+                }
+            },
+            bl_suika_peach = {
+                name = 'The Peach',
+                text = {
+                    "Shuffle the Box",
+                    "after each Discard"
+                }
+            },
+            bl_suika_dekopon = {
+                name = 'The Dekopon',
+                text = {
+                    "Box is hidden until",
+                    "#1# cards played",
+                }
+            },
+            bl_suika_apple = {
+                name = 'The Apple',
+                text = {
+                    "After Play, remove all",
+                    "enhancements from balls"
+                }
+            },
+            bl_suika_pineapple = {
+                name = 'The Pineapple',
+                text = {
+                    "Discard a random card",
+                    "after each played card",
+                }
+            },
+            bl_suika_strawberry = {
+                name = 'The Strawberry',
+                text = {
+                    "Box is hidden until",
+                    "a hand is played"
+                }
+            },
+            bl_suika_notwatermelon = {
+                name = 'The Melon',
+                text = {
+                    "#1# in #2# chance to force",
+                    "Play Hand after card played",
+                }
+            },
+            bl_suika_final_suika = {
+                name = 'Sublime Suika',
+                text = {
+                    "Very big balls",
+                }
+            },
             bl_plant = {
                 text = {
                     "All 2, 3, and 4 cards",
@@ -71,6 +133,28 @@ return {
                 text = {
                     "After Play or Discard,",
                     "always draw 1 card",
+                },
+            },
+            bl_arm = {
+                name = "The Arm",
+                text = {
+                    "Downgrade final scoring",
+                    "poker combo each hand"
+                },
+            },
+            bl_psychic = {
+                name = "The Psychic",
+                text = {
+                    "Must Play Hand with a",
+                    "multiple of 5 balls in box"
+                },
+            },
+            bl_ox = {
+                name = "The Ox",
+                text = {
+                    "Set money to 0 if hand's",
+                    "final scoring poker combo",
+                    "is a #1#"
                 },
             },
         },
@@ -751,23 +835,34 @@ return {
             },
             j_splash = {
                 text = {
-                    "{E:1,s:1.3}?????",
+                    "All balls in {C:attention}Flush-type{}",
+                    "poker combos trigger",
+                    "their {C:attention}merge effects{}"
                 },
             },
             j_card_sharp = {
                 name = "Card Sharp",
                 text = {
-                    "{E:1,s:1.3}?????",
+                    "{X:mult,C:white} X#1# {} Mult if final scoring",
+                    "poker combo {C:attention}this hand{} has also",
+                    "been a final scoring poker combo",
+                    "during {C:attention}previous hands this round{}",
                 },
             },
             j_obelisk = {
                 text = {
-                    "{E:1,s:1.3}?????",
+                    "This Joker gains {X:mult,C:white} X#1# {} Mult",
+                    "per hand, {C:red}resets{} if its {C:attention}final",
+                    "scoring{} poker combo is your",
+                    "most played {C:attention}poker combo",
+                    "{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)",
                 },
             },
             j_space = {
                 text = {
-                    "{E:1,s:1.3}?????",
+                    "After hand, {C:green}#1# in #2#{} chance",
+                    "to upgrade each unique",
+                    "{C:attention}poker combo{} scored",
                 },
             },
         },
@@ -897,6 +992,8 @@ return {
         collabs={},
         dictionary={
             b_poker_hands = "Poker Combos",
+            ph_most_played="(most played poker combo)",
+            suika_no_peeking = "No Peeking!"
         },
         high_scores={},
         labels={},

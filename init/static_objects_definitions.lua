@@ -38,6 +38,10 @@ half_boundary = {}
 half_boundary.body = love.physics.newBody(SuikaLatro.world, 0, 0 + boundary_width/2, "static")
 half_boundary.shape = love.physics.newRectangleShape(SuikaLatro.box.width, boundary_width)
 
+suika_hide_box_thingy = {}
+suika_hide_box_thingy.body = love.physics.newBody(SuikaLatro.world, 0, 0, "static")
+suika_hide_box_thingy.shape = love.physics.newRectangleShape(SuikaLatro.box.width, SuikaLatro.box.height)
+
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 -- BOX BACKDROP
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--

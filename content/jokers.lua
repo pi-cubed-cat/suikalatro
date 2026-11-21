@@ -716,13 +716,6 @@ SMODS.Joker:take_ownership('ride_the_bus',
     }, false
 )
 
-SMODS.Joker:take_ownership('space',
-    {
-        in_pool = function(self, args) return false end,
-        --no_collection = true
-    }, false
-)
-
 SMODS.Joker:take_ownership('runner',
     {
         atlas = "suika_jokers",
@@ -1354,9 +1347,9 @@ SMODS.Joker:take_ownership('castle',
 
 SMODS.Joker:take_ownership('smiley',
     {
-        rarity = 3,
-        cost = 7,
-        config = { extra = { mult = 25 } },
+        rarity = 2,
+        cost = 5,
+        config = { extra = { mult = 18 } },
         loc_vars = function(self, info_queue, card)
             return { vars = { card.ability.extra.mult } }
         end,
@@ -2026,5 +2019,91 @@ SMODS.Joker:take_ownership('hanging_chad',
                 card.ability.extra.ball_count = 0
             end
         end,
+    }, false
+)
+
+SMODS.Joker:take_ownership('obelisk',
+    {
+        name = 'Obelisk 2',
+        config = { extra = { Xmult_gain = 0.25, Xmult = 1 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra.Xmult_gain, card.ability.extra.Xmult } }
+        end,
+        calculate = function(self, card, context)
+            if context.suika_before and not context.blueprint then
+                local reset = true
+                local play_more_than = (G.GAME.hands[G.GAME.last_scoring_combo].played or 0)
+                for handname, values in pairs(G.GAME.hands) do
+                    if handname ~= G.GAME.last_scoring_combo and values.played >= play_more_than and SMODS.is_poker_hand_visible(handname) then
+                        reset = false
+                        break
+                    end
+                end
+                if reset then
+                    if card.ability.extra.Xmult > 1 then
+                        card.ability.extra.Xmult = 1
+                        return {
+                            message = localize('k_reset')
+                        }
+                    end
+                else
+                    card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_gain
+                end
+            end
+            if context.joker_main then
+                return {
+                    xmult = card.ability.extra.Xmult
+                }
+            end
+        end,
+    }, false
+)
+
+SMODS.Joker:take_ownership('card_sharp',
+    {
+        name = 'Card Sharp 2',
+        config = { extra = { Xmult = 4 } },
+        loc_vars = function(self, info_queue, card)
+            return { vars = { card.ability.extra.Xmult } }
+        end,
+        calculate = function(self, card, context)
+            if context.joker_main and G.GAME.hands[G.GAME.last_scoring_combo] and G.GAME.hands[G.GAME.last_scoring_combo].been_last_this_round then
+                return {
+                    xmult = card.ability.extra.Xmult
+                }
+            end
+        end,
+    }, false
+)
+
+SMODS.Joker:take_ownership('space',
+    {
+        name = 'Space Joker 2',
+        config = { extra = { odds = 4 } },
+        loc_vars = function(self, info_queue, card)
+            local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'space')
+            return { vars = { numerator, denominator } }
+        end,
+        calculate = function(self, card, context)
+            if context.after then
+                for k,v in pairs(G.GAME.hands) do
+                    if SuikaLatro.triggered_combos[k] and SMODS.pseudorandom_probability(card, 'space', 1, card.ability.extra.odds) then
+                        G.E_MANAGER:add_event(Event({
+                            func = function()
+                                level_up_hand(card, k)
+                                return true
+                            end
+                        }))
+                    end
+                end
+            end
+        end
+    }, false
+)
+
+SMODS.Joker:take_ownership('splash',
+    {
+        name = 'Splash 2',
+        
     }, false
 )

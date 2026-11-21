@@ -7,6 +7,7 @@ Ball = Object:extend()
 function Ball:init(x,y,fixed_properties, rank_delta, combo, fix_enhancement, fix_edition, fix_seal, fix_size, perma_bonuses, debuffed)
     self.body = love.physics.newBody(SuikaLatro.world, x, y, "dynamic")
     self.flush_size = 0
+    self.hovered = { is = false }
     if not fixed_properties then -- next ball
         --self.rank = SuikaLatro.next_ball.base.value
         self.id = SuikaLatro.next_ball.base.id

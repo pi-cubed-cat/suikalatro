@@ -1,3 +1,23 @@
+--[[function to_game_units(val)
+    return val / (G.TILESCALE*G.TILESIZE)
+end
+
+function to_pixels(val)
+    return val * (G.TILESCALE*G.TILESIZE)
+end]]
+
+local function t_x(x)
+    return to_pixels(
+        -- offset 0,0 to be relative to the center of the screen, then transform x from pixels to screen units
+        to_game_units(SuikaLatro.screen_w/2) + SuikaLatro.world_T.x + x / SuikaLatro.world_width * SuikaLatro.world_T.w
+    )
+end
+
+local function t_y(y)
+    -- same as above
+    return to_pixels(to_game_units(SuikaLatro.screen_h/2) + SuikaLatro.world_T.y + y / SuikaLatro.world_height * SuikaLatro.world_T.h)
+end
+
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 -- UPDATE HOOK (merging, timers, indicator movement, flush calcs, physics, ball removing)
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
@@ -39,6 +59,8 @@ function SuikaLatro.f.update(dt)
     else
         SuikaLatro.next_ball = nil
     end
+
+    SuikaLatro.f.eval_ball_hovering()
 
     if not SuikaLatro.do_merging then
         SuikaLatro.play_wait_time = 0
@@ -220,7 +242,7 @@ function SuikaLatro.f.update(dt)
     end
 
     for i = #SuikaLatro.balls, 1, -1 do
-        if SuikaLatro.balls[i].remove then
+        if SuikaLatro.balls[i].remove or SuikaLatro.balls[i].body:getY() > 1000 then
             SuikaLatro.balls[i].body:destroy()
             table.remove(SuikaLatro.balls, i)
         end

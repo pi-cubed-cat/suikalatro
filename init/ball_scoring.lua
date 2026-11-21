@@ -168,23 +168,22 @@ end
 -- INDIVIDUAL BALL MERGE SCORING (and Merge-# poker combos)
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
 
-function SuikaLatro.f.eval_merge_ball_scoring_effects(merge_count, ball1, ball2, is_retrigger, score_ball1, score_ball2)
-    local x_pos = ball1.x
-    local y_pos = ball1.y
+function SuikaLatro.f.eval_merge_ball_scoring_effects(merge_count, ball1, ball2, is_retrigger, score_ball1, score_ball2, is_splash)
+    local x_pos = ball1.x or ball1.body:getX()
+    local y_pos = ball1.y or ball1.body:getY()
     local id_ = ball1.enhancement == 'm_stone' and 2 or ball1.id
-    local id2_ = ball2.enhancement == 'm_stone' and 2 or ball2.id
-    
     local self_debuff = ball1.debuff
-    local other_debuff = ball2.debuff
     local self_enhancement = not self_debuff and ball1.enhancement or nil
     local self_edition = not self_debuff and ball1.edition or nil
     local self_seal = not self_debuff and ball1.seal or nil
-    local other_enhancement = not other_debuff and ball2.enhancement or nil
-    local other_edition = not other_debuff and ball2.edition or nil
-    local other_seal = not other_debuff and ball2.seal or nil
 
-    if not is_retrigger then
-        
+    local id2_ = ball2 and (ball2.enhancement == 'm_stone' and 2 or ball2.id) or nil
+    local other_debuff = ball2 and ball2.debuff or nil
+    local other_enhancement = not other_debuff and ball2 and ball2.enhancement or nil
+    local other_edition = not other_debuff and ball2 and ball2.edition or nil
+    local other_seal = not other_debuff and ball2 and ball2.seal or nil
+
+    if (not is_retrigger) and (not is_splash) then
         local poker_combo = nil
         if merge_count >= 1 and merge_count <= 4 then
             poker_combo = 'suika_merge_'..merge_count
@@ -215,10 +214,12 @@ function SuikaLatro.f.eval_merge_ball_scoring_effects(merge_count, ball1, ball2,
         }))
     else
         local amt = (self_debuff and 0 or SuikaLatro.f.get_base_chips(id_))
-        + (other_debuff and 0 or SuikaLatro.f.get_base_chips(id2_))
+        + (ball2 and (other_debuff and 0 or SuikaLatro.f.get_base_chips(id2_)) or 0)
         + (self_debuff and 0 or (ball1.perma_bonuses['perma_bonus'] or 0))
-        + (other_debuff and 0 or (ball2.perma_bonuses['perma_bonus'] or 0))
+        + (ball2 and (other_debuff and 0 or (ball2.perma_bonuses['perma_bonus'] or 0)) or 0)
+        print(amt)
         SuikaLatro.f.enhancement_message(x_pos, y_pos, 'm_chips', amt) -- chips of balls
+        SuikaLatro.f.score('+chips', amt)
     end
     
     delay(0.1)
@@ -336,7 +337,7 @@ function SuikaLatro.f.eval_merge_ball_scoring_effects(merge_count, ball1, ball2,
         trigger = 'immediate',
         blockable = false,
         func = function()
-            for i=1,2 do
+            for i=1,(is_splash and 1 or 2) do
                 scoring_list[i].ball.pos = {
                     x = x_pos,
                     y = y_pos,

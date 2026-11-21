@@ -13,7 +13,7 @@
     "conflicts": [
         "cartomancer"
 	],
-    "version": "0.8.7",
+    "version": "0.9.0",
     "allow_redistribution": true,
     "icon_path": "modicon.png"
 }

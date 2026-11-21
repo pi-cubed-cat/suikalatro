@@ -128,7 +128,7 @@ function SuikaLatro.f.draw()
         local i_x, i_y = p_to_pixels(SuikaLatro.indicator.x, SuikaLatro.indicator.y)
         next_is_stone = SuikaLatro.next_ball.config.center.key == 'm_stone'
         love.graphics.setColor(1, 1, 1, 0.5) --indicator
-        love.graphics.rectangle("fill", i_x-t_r((get_size(SuikaLatro.next_ball.base.id, next_is_stone))), i_y, 2*t_r((get_size(SuikaLatro.next_ball.base.id, next_is_stone))), t_y(SuikaLatro.box.height)+t_r((get_size(SuikaLatro.next_ball.base.id, next_is_stone))))
+        love.graphics.rectangle("fill", i_x-t_r((get_size(SuikaLatro.next_ball.base.id, next_is_stone))), i_y, 2*t_r((get_size(SuikaLatro.next_ball.base.id, next_is_stone))), t_y(-20))
     end
 
     love.graphics.setColor(G.C.RED) --boundary line
@@ -163,4 +163,10 @@ function SuikaLatro.f.draw()
         SuikaLatro.f.draw_ball(v, v.body:getX(), v.body:getY(), v.size, v.id, v.suit, v.enhancement, v.seal, v.edition, v.debuff)
     end
     
+    if G.GAME and G.GAME.suika_hide_box then
+        love.graphics.setColor(G.C.GREY, 1) -- hide box (for specific boss blinds)
+        love.graphics.polygon("fill", poly_to_pixels(suika_hide_box_thingy.body:getWorldPoints(suika_hide_box_thingy.shape:getPoints())))
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf(localize('suika_no_peeking'), t_x(0), t_y(0), 200, "center", 0, t_r(5), t_r(5), 99, 10.5)
+    end
 end

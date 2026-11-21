@@ -5,12 +5,28 @@
 function get_size(input, stone)
     if stone then
         return 2 * SuikaLatro.ball_sizefactor
-    elseif input <= 10 then --number ranked balls
-        return input * SuikaLatro.ball_sizefactor
-    elseif input > 10 and input < 14 then --face ranked balls
-        return 10 * SuikaLatro.ball_sizefactor
-    elseif input >= 14 then --aces+
-        return 11 * SuikaLatro.ball_sizefactor
+    elseif input == 2 then
+        return 2 * SuikaLatro.ball_sizefactor
+    elseif input == 3 then
+        return 3 * SuikaLatro.ball_sizefactor
+    elseif input == 4 then
+        return 4 * SuikaLatro.ball_sizefactor
+    elseif input == 5 then
+        return 5 * SuikaLatro.ball_sizefactor
+    elseif input == 6 then
+        return 6 * SuikaLatro.ball_sizefactor
+    elseif input == 7 then
+        return 6.5 * SuikaLatro.ball_sizefactor
+    elseif input == 8 then
+        return 7 * SuikaLatro.ball_sizefactor
+    elseif input == 9 then
+        return 7.5 * SuikaLatro.ball_sizefactor
+    elseif input == 10 then
+        return 8 * SuikaLatro.ball_sizefactor
+    elseif input >= 11 and input <= 13 then -- face ranked balls
+        return 8 * SuikaLatro.ball_sizefactor
+    elseif input >= 14 then -- aces+
+        return 8.5 * SuikaLatro.ball_sizefactor
     end
 end
 
@@ -23,6 +39,20 @@ function SuikaLatro.f.get_base_chips(input, stone)
         return 512
     elseif input >= 14 then
         return 1024
+    end
+end
+
+function SuikaLatro.f.get_value_from_id(input)
+    if input <= 10 then
+        return tostring(value)
+    elseif input == 11 then
+        return "Jack"
+    elseif input == 12 then
+        return "Queen"
+    elseif input == 13 then
+        return "King"
+    elseif input == 14 then
+        return "Ace"
     end
 end
 
@@ -154,5 +184,23 @@ function SuikaLatro.f.pick_carry_balls(num)
             end
         end
 
+    end
+end
+
+function SuikaLatro.f.get_enhancement_effect(ball)
+    if ball.enhancement == 'm_bonus' then
+        return { bonus_chips = 30 }
+    elseif ball.enhancement == 'm_mult' then
+        return { bonus_mult = 4 }
+    elseif ball.enhancement == 'm_glass' then
+        return { bonus_x_mult = 2 }
+    elseif ball.enhancement == 'm_stone' then
+        return {}
+    elseif ball.enhancement == 'm_steel' then
+        return { bonus_h_x_mult = 1.5 }
+    elseif ball.enhancement == 'm_gold' then
+        return { bonus_h_dollars = 3 }
+    elseif ball.enhancement == 'm_lucky' then
+        return {}
     end
 end

@@ -17,8 +17,18 @@ function SuikaLatro.f.score_poker_combo(poker_combo, contains_only)
         SuikaLatro.f.score('+mult', G.GAME.hands[poker_combo].mult * flint)
         SuikaLatro.set_hand_usage(poker_combo)
         G.GAME.hands[poker_combo].played = G.GAME.hands[poker_combo].played + 1  
+        G.GAME.last_scoring_combo = poker_combo
+        
         if poker_combo ~= 'suika_lowball' then
             SuikaLatro.lowball = false
         end
     end
+end
+
+local new_round_ref = new_round
+function new_round()
+    for k, v in pairs(G.GAME.hands) do 
+        v.been_last_this_round = nil
+    end
+    new_round_ref()
 end
