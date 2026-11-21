@@ -70,8 +70,20 @@ function SuikaLatro.f.create_dummy_card(ball)
     return dummy_card
 end
 
+local function t_x(x)
+    return to_pixels(
+        -- offset 0,0 to be relative to the center of the screen, then transform x from pixels to screen units
+        to_game_units(SuikaLatro.screen_w/2) + SuikaLatro.world_T.x + x / SuikaLatro.world_width * SuikaLatro.world_T.w
+    )
+end
+
+local function t_y(y)
+    -- same as above
+    return to_pixels(to_game_units(SuikaLatro.screen_h/2) + SuikaLatro.world_T.y + y / SuikaLatro.world_height * SuikaLatro.world_T.h)
+end
+
 function SuikaLatro.f.eval_ball_hovering()
-    if G.STATE == G.STATES.SELECTING_HAND then
+    if G.STATE == G.STATES.SELECTING_HAND and not G.GAME.suika_hide_box then
         for k, v in ipairs(SuikaLatro.balls) do
             local delta_x, delta_y = (t_x(v.body:getX()) - love.mouse.getX()), (t_y(v.body:getY()) - love.mouse.getY())
             local distance = math.sqrt( ( delta_x )^2 + ( delta_y )^2 )
